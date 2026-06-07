@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/API/">
+    <Project Path="SIGEBI.Api/SIGEBI.Api.csproj" Id="aec3fa92-35e2-4293-8179-fcaa413a662d" />
+  </Folder>
+  <Folder Name="/Application/">
+    <Project Path="SIGEBI.Application/SIGEBI.Application.csproj" Id="2688ba21-5f6b-407e-a314-ac8b445d9388" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="SIGEBI.Domain/SIGEBI.Domain.csproj" Id="c76c8e86-1f06-41b4-81ba-a9971f8d2fde" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="SIGEBI.Infrastructure/SIGEBI.Infrastructure.csproj" Id="4a26bf03-0868-493b-ae7b-27d57662a2db" />
+    <Project Path="SIGEBI.Persistence/SIGEBI.Persistence.csproj" Id="1671c791-a7a9-4ccf-b75f-4bbb59ccb096" />
+  </Folder>
+  <Folder Name="/IOC/">
+    <Project Path="SIGEBI.IOC/SIGEBI.IOC.csproj" Id="000802fd-b185-4819-a751-f129116ebcf8" />
+  </Folder>
+  <Folder Name="/Test/">
+    <Project Path="SIGEBI.Application.Test/SIGEBI.Application.Test.csproj" Id="eb2f46cf-6632-4a3f-95d4-37128287f4e1" />
+    <Project Path="SIGEBI.Persistence.Test/SIGEBI.Persistence.Test.csproj" Id="193b44e6-9509-4211-85ca-dbc96ae9c002" />
+  </Folder>
+  <Folder Name="/Web/">
+    <Project Path="SIGEBI.Web/SIGEBI.Web.csproj" Id="551d7da6-388d-4450-987d-ba0933b3d17f" />
+  </Folder>
+</Solution>
