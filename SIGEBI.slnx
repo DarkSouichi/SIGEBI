@@ -15,6 +15,9 @@
   <Folder Name="/IOC/">
     <Project Path="SIGEBI.IOC/SIGEBI.IOC.csproj" Id="000802fd-b185-4819-a751-f129116ebcf8" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
   <Folder Name="/Test/">
     <Project Path="SIGEBI.Application.Test/SIGEBI.Application.Test.csproj" Id="eb2f46cf-6632-4a3f-95d4-37128287f4e1" />
     <Project Path="SIGEBI.Persistence.Test/SIGEBI.Persistence.Test.csproj" Id="193b44e6-9509-4211-85ca-dbc96ae9c002" />
