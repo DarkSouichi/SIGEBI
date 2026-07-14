@@ -1,17 +1,18 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SIGEBI.IOC.Dependencies;
 
-namespace SIGEBI.IOC
+namespace SIGEBI.IOC.Dependencies
 {
     public static class DependencyContainer
     {
-        public static void RegisterDependencies(this IServiceCollection services)
+        public static IServiceCollection AddApplicationDependencies(this IServiceCollection services)
         {
             services.AddUsuarioDependency();
             services.AddRecursoDependency();
             services.AddPrestamoDependency();
             services.AddPenalizacionDependency();
             services.AddNotificacionDependency();
+
+            return services;
         }
     }
 }
