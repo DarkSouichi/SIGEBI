@@ -47,26 +47,6 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
-        [HttpPost("CrearRecurso")]
-        public async Task<IActionResult> Post([FromBody] SaveRecursoDto dto)
-        {
-            var result = await _recursoService.Save(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
-        [HttpPost("ActualizarRecurso")]
-        public async Task<IActionResult> Put([FromBody] UpdateRecursoDto dto)
-        {
-            var result = await _recursoService.Update(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
         [HttpGet("GetByCategoria/{categoria}")]
         public async Task<IActionResult> GetByCategoria(string categoria)
         {
@@ -110,6 +90,26 @@ namespace SIGEBI.Api.Controllers
                 _logger.LogError("Error obteniendo ejemplares: {ErrorMessage}", result.Message);
                 return BadRequest(result);
             }
+        }
+
+        [HttpPost("CrearRecurso")]
+        public async Task<IActionResult> Post([FromBody] SaveRecursoDto dto)
+        {
+            var result = await _recursoService.Save(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
+        }
+
+        [HttpPost("ActualizarRecurso")]
+        public async Task<IActionResult> Put([FromBody] UpdateRecursoDto dto)
+        {
+            var result = await _recursoService.Update(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
         }
 
     }

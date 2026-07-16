@@ -47,26 +47,6 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
-        [HttpPost("CrearPrestamo")]
-        public async Task<IActionResult> Post([FromBody] SavePrestamoDto dto)
-        {
-            var result = await _prestamoService.Save(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
-        [HttpPost("ActualizarPrestamo")]
-        public async Task<IActionResult> Put([FromBody] UpdatePrestamoDto dto)
-        {
-            var result = await _prestamoService.Update(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
         [HttpGet("GetByUsuario/{usuarioId}")]
         public async Task<IActionResult> GetByUsuario(int usuarioId)
         {
@@ -110,6 +90,26 @@ namespace SIGEBI.Api.Controllers
                 _logger.LogError("Error obteniendo prestamos del ejemplar: {ErrorMessage}", result.Message);
                 return BadRequest(result);
             }
+        }
+
+        [HttpPost("CrearPrestamo")]
+        public async Task<IActionResult> Post([FromBody] SavePrestamoDto dto)
+        {
+            var result = await _prestamoService.Save(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
+        }
+
+        [HttpPost("ActualizarPrestamo")]
+        public async Task<IActionResult> Put([FromBody] UpdatePrestamoDto dto)
+        {
+            var result = await _prestamoService.Update(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
         }
 
     }

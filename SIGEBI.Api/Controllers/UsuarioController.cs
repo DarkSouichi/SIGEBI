@@ -47,26 +47,6 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
-        [HttpPost("CrearUsuario")]
-        public async Task<IActionResult> Post([FromBody] SaveUsuarioDto dto)
-        {
-            var result = await _usuarioService.Save(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
-        [HttpPost("ActualizarUsuario")]
-        public async Task<IActionResult> Put([FromBody] UpdateUsuarioDto dto)
-        {
-            var result = await _usuarioService.Update(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
         [HttpGet("GetByEmail/{email}")]
         public async Task<IActionResult> GetByEmail(string email)
         {
@@ -110,6 +90,26 @@ namespace SIGEBI.Api.Controllers
                 _logger.LogError("Error verificando habilitacion: {ErrorMessage}", result.Message);
                 return BadRequest(result);
             }
+        }
+
+        [HttpPost("CrearUsuario")]
+        public async Task<IActionResult> Post([FromBody] SaveUsuarioDto dto)
+        {
+            var result = await _usuarioService.Save(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
+        }
+
+        [HttpPost("ActualizarUsuario")]
+        public async Task<IActionResult> Put([FromBody] UpdateUsuarioDto dto)
+        {
+            var result = await _usuarioService.Update(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
         }
 
     }

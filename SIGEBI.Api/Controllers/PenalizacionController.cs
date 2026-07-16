@@ -47,26 +47,6 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
-        [HttpPost("CrearPenalizacion")]
-        public async Task<IActionResult> Post([FromBody] SavePenalizacionDto dto)
-        {
-            var result = await _penalizacionService.Save(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
-        [HttpPost("ActualizarPenalizacion")]
-        public async Task<IActionResult> Put([FromBody] UpdatePenalizacionDto dto)
-        {
-            var result = await _penalizacionService.Update(dto);
-            if (result.IsSuccess)
-                return Ok(result);
-            else
-                return BadRequest(result);
-        }
-
         [HttpGet("GetActivaByUsuario/{usuarioId}")]
         public async Task<IActionResult> GetActivaByUsuario(int usuarioId)
         {
@@ -97,6 +77,26 @@ namespace SIGEBI.Api.Controllers
                 _logger.LogError("Error obteniendo penalizaciones del usuario: {ErrorMessage}", result.Message);
                 return BadRequest(result);
             }
+        }
+
+        [HttpPost("CrearPenalizacion")]
+        public async Task<IActionResult> Post([FromBody] SavePenalizacionDto dto)
+        {
+            var result = await _penalizacionService.Save(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
+        }
+
+        [HttpPost("ActualizarPenalizacion")]
+        public async Task<IActionResult> Put([FromBody] UpdatePenalizacionDto dto)
+        {
+            var result = await _penalizacionService.Update(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
         }
 
     }
