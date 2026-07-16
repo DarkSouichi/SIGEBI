@@ -127,5 +127,37 @@ namespace SIGEBI.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<OperationResult> GetPenalizacionActivaByUsuarioId(int usuarioId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _penalizacionRepository.GetPenalizacionActivaByUsuarioId(usuarioId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo la penalizacion activa del usuario";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetPenalizacionesByUsuarioId(int usuarioId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _penalizacionRepository.GetPenalizacionesByUsuarioId(usuarioId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo las penalizaciones del usuario";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
     }
 }

@@ -29,7 +29,43 @@ namespace SIGEBI.Persistence.Repositories.Catalog
             catch (Exception)
             {
                 result.Success = false;
-                result.Message = "Ocurrio un error obteniendo los ejemplares.";
+                result.Message = "Ocurrio un error obteniendo los ejemplares del recurso.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetRecursosByCategoria(string categoria)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var datos = await _context.Recursos
+                    .Where(r => r.Categoria == categoria)
+                    .ToListAsync();
+                result.Data = datos;
+            }
+            catch (Exception)
+            {
+                result.Success = false;
+                result.Message = "Ocurrio un error obteniendo los recursos por categoria.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetRecursosDisponibles()
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var datos = await _context.Recursos
+                    .Where(r => r.Ejemplares.Any(e => e.Estado == EstadoEjemplar.Disponible))
+                    .ToListAsync();
+                result.Data = datos;
+            }
+            catch (Exception)
+            {
+                result.Success = false;
+                result.Message = "Ocurrio un error obteniendo los recursos disponibles.";
             }
             return result;
         }

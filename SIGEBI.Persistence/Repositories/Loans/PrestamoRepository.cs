@@ -29,7 +29,43 @@ namespace SIGEBI.Persistence.Repositories.Loans
             catch (Exception)
             {
                 result.Success = false;
-                result.Message = "Ocurrio un error obteniendo los prestamos.";
+                result.Message = "Ocurrio un error obteniendo los prestamos del usuario.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetPrestamosActivos()
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var datos = await _context.Prestamos
+                    .Where(p => p.Estado == EstadoPrestamo.Activo)
+                    .ToListAsync();
+                result.Data = datos;
+            }
+            catch (Exception)
+            {
+                result.Success = false;
+                result.Message = "Ocurrio un error obteniendo los prestamos activos.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetPrestamosByEjemplarId(int ejemplarId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var datos = await _context.Prestamos
+                    .Where(p => p.EjemplarId == ejemplarId)
+                    .ToListAsync();
+                result.Data = datos;
+            }
+            catch (Exception)
+            {
+                result.Success = false;
+                result.Message = "Ocurrio un error obteniendo los prestamos del ejemplar.";
             }
             return result;
         }
