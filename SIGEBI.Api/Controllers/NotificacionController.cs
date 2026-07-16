@@ -47,6 +47,22 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [HttpGet("GetByUsuario/{usuarioId}")]
+        public async Task<IActionResult> GetByUsuario(int usuarioId)
+        {
+            if (usuarioId <= 0)
+                return BadRequest("El ID debe ser mayor a cero.");
+
+            var result = await _notificacionService.GetNotificacionesByUsuarioId(usuarioId);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo notificaciones del usuario: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
         [HttpPost("CrearNotificacion")]
         public async Task<IActionResult> Post([FromBody] SaveNotificacionDto dto)
         {

@@ -127,5 +127,53 @@ namespace SIGEBI.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<OperationResult> GetUsuarioByEmail(string email)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _usuarioRepository.GetUsuarioByEmail(email);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo el usuario por email";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetUsuariosActivos()
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _usuarioRepository.GetUsuariosActivos();
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los usuarios activos";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> VerificarHabilitacion(int usuarioId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _usuarioRepository.VerificarHabilitacion(usuarioId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error verificando la habilitacion del usuario";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
     }
 }

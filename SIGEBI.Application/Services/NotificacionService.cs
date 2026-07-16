@@ -129,5 +129,21 @@ namespace SIGEBI.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<OperationResult> GetNotificacionesByUsuarioId(int usuarioId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _notificacionRepository.GetNotificacionesByUsuarioId(usuarioId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo las notificaciones del usuario";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
     }
 }
