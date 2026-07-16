@@ -47,6 +47,51 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [HttpGet("GetByUsuario/{usuarioId}")]
+        public async Task<IActionResult> GetByUsuario(int usuarioId)
+        {
+            if (usuarioId <= 0)
+                return BadRequest("El ID debe ser mayor a cero.");
+
+            var result = await _prestamoService.GetPrestamosByUsuarioId(usuarioId);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo prestamos del usuario: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
+        [HttpGet("GetActivos")]
+        public async Task<IActionResult> GetActivos()
+        {
+            var result = await _prestamoService.GetPrestamosActivos();
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo prestamos activos: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
+        [HttpGet("GetByEjemplar/{ejemplarId}")]
+        public async Task<IActionResult> GetByEjemplar(int ejemplarId)
+        {
+            if (ejemplarId <= 0)
+                return BadRequest("El ID debe ser mayor a cero.");
+
+            var result = await _prestamoService.GetPrestamosByEjemplarId(ejemplarId);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo prestamos del ejemplar: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
         [HttpPost("CrearPrestamo")]
         public async Task<IActionResult> Post([FromBody] SavePrestamoDto dto)
         {

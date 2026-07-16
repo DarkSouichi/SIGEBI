@@ -1,11 +1,13 @@
-﻿using SIGEBI.Domain.Entities.Loans;
+﻿using SIGEBI.Domain.Base;
+using SIGEBI.Domain.Entities.Loans;
 using SIGEBI.Domain.Repository;
-using SIGEBI.Domain.Base;
 
 namespace SIGEBI.Persistence.Interfaces
 {
     public interface IPrestamoRepository : IBaseRepository<Prestamo>
     {
         Task<OperationResult> GetPrestamosByUsuarioId(int usuarioId);
+        Task<OperationResult> GetPrestamosActivos();
+        Task<OperationResult> GetPrestamosByEjemplarId(int ejemplarId);
     }
 }

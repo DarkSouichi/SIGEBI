@@ -47,6 +47,51 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [HttpGet("GetByEmail/{email}")]
+        public async Task<IActionResult> GetByEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return BadRequest("El email no puede estar vacio.");
+
+            var result = await _usuarioService.GetUsuarioByEmail(email);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo usuario por email: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
+        [HttpGet("GetActivos")]
+        public async Task<IActionResult> GetActivos()
+        {
+            var result = await _usuarioService.GetUsuariosActivos();
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo usuarios activos: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
+        [HttpGet("VerificarHabilitacion/{id}")]
+        public async Task<IActionResult> VerificarHabilitacion(int id)
+        {
+            if (id <= 0)
+                return BadRequest("El ID debe ser mayor a cero.");
+
+            var result = await _usuarioService.VerificarHabilitacion(id);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error verificando habilitacion: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
         [HttpPost("CrearUsuario")]
         public async Task<IActionResult> Post([FromBody] SaveUsuarioDto dto)
         {
