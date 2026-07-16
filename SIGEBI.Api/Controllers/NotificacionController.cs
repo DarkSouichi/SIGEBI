@@ -67,5 +67,21 @@ namespace SIGEBI.Api.Controllers
                 return BadRequest(result);
         }
 
+        [HttpGet("GetByUsuario/{usuarioId}")]
+        public async Task<IActionResult> GetByUsuario(int usuarioId)
+        {
+            if (usuarioId <= 0)
+                return BadRequest("El ID debe ser mayor a cero.");
+
+            var result = await _notificacionService.GetNotificacionesByUsuarioId(usuarioId);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo notificaciones del usuario: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
     }
 }
