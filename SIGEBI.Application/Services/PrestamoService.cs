@@ -164,5 +164,53 @@ namespace SIGEBI.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<OperationResult> GetPrestamosByUsuarioId(int usuarioId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _prestamoRepository.GetPrestamosByUsuarioId(usuarioId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los prestamos del usuario";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetPrestamosActivos()
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _prestamoRepository.GetPrestamosActivos();
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los prestamos activos";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetPrestamosByEjemplarId(int ejemplarId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _prestamoRepository.GetPrestamosByEjemplarId(ejemplarId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los prestamos del ejemplar";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
     }
 }

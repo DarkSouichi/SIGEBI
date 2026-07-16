@@ -47,6 +47,51 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [HttpGet("GetByCategoria/{categoria}")]
+        public async Task<IActionResult> GetByCategoria(string categoria)
+        {
+            if (string.IsNullOrEmpty(categoria))
+                return BadRequest("La categoria no puede estar vacia.");
+
+            var result = await _recursoService.GetRecursosByCategoria(categoria);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo recursos por categoria: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
+        [HttpGet("GetDisponibles")]
+        public async Task<IActionResult> GetDisponibles()
+        {
+            var result = await _recursoService.GetRecursosDisponibles();
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo recursos disponibles: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
+        [HttpGet("GetEjemplares/{recursoId}")]
+        public async Task<IActionResult> GetEjemplares(int recursoId)
+        {
+            if (recursoId <= 0)
+                return BadRequest("El ID debe ser mayor a cero.");
+
+            var result = await _recursoService.GetEjemplaresByRecursoId(recursoId);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+            {
+                _logger.LogError("Error obteniendo ejemplares: {ErrorMessage}", result.Message);
+                return BadRequest(result);
+            }
+        }
+
         [HttpPost("CrearRecurso")]
         public async Task<IActionResult> Post([FromBody] SaveRecursoDto dto)
         {

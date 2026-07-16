@@ -28,7 +28,25 @@ namespace SIGEBI.Persistence.Repositories.Penalties
             catch (Exception)
             {
                 result.Success = false;
-                result.Message = "Ocurrio un error obteniendo la penalizacion.";
+                result.Message = "Ocurrio un error obteniendo la penalizacion activa del usuario.";
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetPenalizacionesByUsuarioId(int usuarioId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var datos = await _context.Penalizaciones
+                    .Where(p => p.UsuarioId == usuarioId)
+                    .ToListAsync();
+                result.Data = datos;
+            }
+            catch (Exception)
+            {
+                result.Success = false;
+                result.Message = "Ocurrio un error obteniendo las penalizaciones del usuario.";
             }
             return result;
         }
