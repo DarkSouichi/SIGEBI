@@ -126,5 +126,53 @@ namespace SIGEBI.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<OperationResult> GetEjemplaresByRecursoId(int recursoId)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _recursoRepository.GetEjemplaresByRecursoId(recursoId);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los ejemplares del recurso";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetRecursosByCategoria(string categoria)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _recursoRepository.GetRecursosByCategoria(categoria);
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los recursos por categoria";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> GetRecursosDisponibles()
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                result = await _recursoRepository.GetRecursosDisponibles();
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error obteniendo los recursos disponibles";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
     }
 }
