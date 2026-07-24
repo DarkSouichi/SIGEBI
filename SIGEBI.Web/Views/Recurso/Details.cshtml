@@ -1,0 +1,19 @@
+﻿@model SIGEBI.Web.Models.Recurso.RecursoModel
+@{
+    ViewData["Title"] = "Detalles del Recurso";
+}
+
+<h1>Detalles del Recurso</h1>
+<dl class="row">
+    <dt class="col-sm-2">ID</dt>
+    <dd class="col-sm-10">@Model.recursoId</dd>
+    <dt class="col-sm-2">Título</dt>
+    <dd class="col-sm-10">@Model.titulo</dd>
+    <dt class="col-sm-2">Autor</dt>
+    <dd class="col-sm-10">@Model.autor</dd>
+    <dt class="col-sm-2">ISBN</dt>
+    <dd class="col-sm-10">@Model.isbn</dd>
+    <dt class="col-sm-2">Categoría</dt>
+    <dd class="col-sm-10">@Model.categoria</dd>
+</dl>
+<a asp-action="Index">Volver al listado</a>

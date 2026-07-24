@@ -1,0 +1,38 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Notificacion.NotificacionModel>
+@{
+    ViewData["Title"] = "Notificaciones";
+}
+
+<h1>Listado de Notificaciones</h1>
+<p>
+    <a asp-action="Create">Agregar Nueva Notificación</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
+            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
+            <th>@Html.DisplayNameFor(m => m.tipo)</th>
+            <th>@Html.DisplayNameFor(m => m.mensaje)</th>
+            <th>@Html.DisplayNameFor(m => m.enviadoEn)</th>
+            <th>@Html.DisplayNameFor(m => m.canal)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(x => item.notificacionId)</td>
+                <td>@Html.DisplayFor(x => item.usuarioId)</td>
+                <td>@Html.DisplayFor(x => item.tipo)</td>
+                <td>@Html.DisplayFor(x => item.mensaje)</td>
+                <td>@Html.DisplayFor(x => item.enviadoEn)</td>
+                <td>@Html.DisplayFor(x => item.canal)</td>
+                <td>
+                    @Html.ActionLink("Detalles", "Details", new { id = item.notificacionId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
