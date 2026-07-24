@@ -1,0 +1,30 @@
+﻿@model SIGEBI.Web.Models.Usuario.UsuarioEditModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<h1>Editar Usuario</h1>
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="usuarioId" />
+    <div class="form-group">
+        <label asp-for="nombreCompleto">Nombre Completo</label>
+        <input asp-for="nombreCompleto" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="email">Email</label>
+        <input asp-for="email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="estaActivo">Activo</label>
+        <input asp-for="estaActivo" type="checkbox" />
+    </div>
+    <div class="form-group">
+        <label asp-for="rolId">Rol ID</label>
+        <input asp-for="rolId" class="form-control" />
+    </div>
+    <div class="form-group mt-2">
+        <input type="submit" value="Guardar" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>

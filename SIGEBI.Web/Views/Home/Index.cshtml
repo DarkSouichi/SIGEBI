@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "SIGEBI - Sistema de Gestión de Bibliotecas";
+}
+
+<div class="text-center">
+    <h1>Bienvenido al SIGEBI</h1>
+    <p>Sistema de Gestión de Bibliotecas Institucional</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <a asp-controller="Usuario" asp-action="Index" class="btn btn-primary w-100 mb-2">
+            Usuarios
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Recurso" asp-action="Index" class="btn btn-primary w-100 mb-2">
+            Catálogo
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Prestamo" asp-action="Index" class="btn btn-primary w-100 mb-2">
+            Préstamos
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Penalizacion" asp-action="Index" class="btn btn-primary w-100 mb-2">
+            Penalizaciones
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Notificacion" asp-action="Index" class="btn btn-primary w-100 mb-2">
+            Notificaciones
+        </a>
+    </div>
+</div>
