@@ -1,0 +1,30 @@
+﻿@model SIGEBI.Web.Models.Prestamo.PrestamoEditModel
+@{
+    ViewData["Title"] = "Editar Préstamo";
+}
+
+<h1>Editar Préstamo</h1>
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="prestamoId" />
+    <div class="form-group">
+        <label asp-for="usuarioId">Usuario ID</label>
+        <input asp-for="usuarioId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ejemplarId">Ejemplar ID</label>
+        <input asp-for="ejemplarId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="fechaDevolucionEsperada">Fecha Devolución Esperada</label>
+        <input asp-for="fechaDevolucionEsperada" type="datetime-local" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="estado">Estado</label>
+        <input asp-for="estado" class="form-control" />
+    </div>
+    <div class="form-group mt-2">
+        <input type="submit" value="Guardar" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>

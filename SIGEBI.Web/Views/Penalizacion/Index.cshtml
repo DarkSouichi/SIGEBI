@@ -1,0 +1,39 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Penalizacion.PenalizacionModel>
+@{
+    ViewData["Title"] = "Penalizaciones";
+}
+
+<h1>Listado de Penalizaciones</h1>
+<p>
+    <a asp-action="Create">Agregar Nueva Penalización</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
+            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
+            <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+            <th>@Html.DisplayNameFor(m => m.monto)</th>
+            <th>@Html.DisplayNameFor(m => m.estado)</th>
+            <th>@Html.DisplayNameFor(m => m.fechaEmision)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(x => item.penalizacionId)</td>
+                <td>@Html.DisplayFor(x => item.usuarioId)</td>
+                <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                <td>@Html.DisplayFor(x => item.monto)</td>
+                <td>@Html.DisplayFor(x => item.estado)</td>
+                <td>@Html.DisplayFor(x => item.fechaEmision)</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.penalizacionId }) |
+                    @Html.ActionLink("Detalles", "Details", new { id = item.penalizacionId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

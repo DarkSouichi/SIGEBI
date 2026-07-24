@@ -1,0 +1,21 @@
+﻿@model SIGEBI.Web.Models.Notificacion.NotificacionModel
+@{
+    ViewData["Title"] = "Detalles de la Notificación";
+}
+
+<h1>Detalles de la Notificación</h1>
+<dl class="row">
+    <dt class="col-sm-2">ID</dt>
+    <dd class="col-sm-10">@Model.notificacionId</dd>
+    <dt class="col-sm-2">Usuario</dt>
+    <dd class="col-sm-10">@Model.usuarioId</dd>
+    <dt class="col-sm-2">Tipo</dt>
+    <dd class="col-sm-10">@Model.tipo</dd>
+    <dt class="col-sm-2">Mensaje</dt>
+    <dd class="col-sm-10">@Model.mensaje</dd>
+    <dt class="col-sm-2">Enviado En</dt>
+    <dd class="col-sm-10">@Model.enviadoEn</dd>
+    <dt class="col-sm-2">Canal</dt>
+    <dd class="col-sm-10">@Model.canal</dd>
+</dl>
+<a asp-action="Index">Volver al listado</a>

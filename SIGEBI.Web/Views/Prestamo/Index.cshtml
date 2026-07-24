@@ -1,0 +1,39 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Prestamo.PrestamoModel>
+@{
+    ViewData["Title"] = "Préstamos";
+}
+
+<h1>Listado de Préstamos</h1>
+<p>
+    <a asp-action="Create">Agregar Nuevo Préstamo</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
+            <th>@Html.DisplayNameFor(m => m.ejemplarId)</th>
+            <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
+            <th>@Html.DisplayNameFor(m => m.fechaDevolucionEsperada)</th>
+            <th>@Html.DisplayNameFor(m => m.estado)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                <td>@Html.DisplayFor(x => item.usuarioId)</td>
+                <td>@Html.DisplayFor(x => item.ejemplarId)</td>
+                <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
+                <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>
+                <td>@Html.DisplayFor(x => item.estado)</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.prestamoId }) |
+                    @Html.ActionLink("Detalles", "Details", new { id = item.prestamoId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

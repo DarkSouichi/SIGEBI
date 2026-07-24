@@ -1,0 +1,21 @@
+﻿@model SIGEBI.Web.Models.Penalizacion.PenalizacionModel
+@{
+    ViewData["Title"] = "Detalles de la Penalización";
+}
+
+<h1>Detalles de la Penalización</h1>
+<dl class="row">
+    <dt class="col-sm-2">ID</dt>
+    <dd class="col-sm-10">@Model.penalizacionId</dd>
+    <dt class="col-sm-2">Usuario</dt>
+    <dd class="col-sm-10">@Model.usuarioId</dd>
+    <dt class="col-sm-2">Préstamo</dt>
+    <dd class="col-sm-10">@Model.prestamoId</dd>
+    <dt class="col-sm-2">Monto</dt>
+    <dd class="col-sm-10">@Model.monto</dd>
+    <dt class="col-sm-2">Estado</dt>
+    <dd class="col-sm-10">@Model.estado</dd>
+    <dt class="col-sm-2">Fecha Emisión</dt>
+    <dd class="col-sm-10">@Model.fechaEmision</dd>
+</dl>
+<a asp-action="Index">Volver al listado</a>
