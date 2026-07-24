@@ -1,0 +1,33 @@
+﻿@model SIGEBI.Web.Models.Prestamo.PrestamoCreateModel
+@{
+    ViewData["Title"] = "Crear Préstamo";
+}
+
+<h1>Crear Préstamo</h1>
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="usuarioId">Usuario ID</label>
+        <input asp-for="usuarioId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ejemplarId">Ejemplar ID</label>
+        <input asp-for="ejemplarId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="fechaPrestamo">Fecha Préstamo</label>
+        <input asp-for="fechaPrestamo" type="datetime-local" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="fechaDevolucionEsperada">Fecha Devolución Esperada</label>
+        <input asp-for="fechaDevolucionEsperada" type="datetime-local" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="estado">Estado</label>
+        <input asp-for="estado" class="form-control" />
+    </div>
+    <div class="form-group mt-2">
+        <input type="submit" value="Crear" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>

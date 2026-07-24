@@ -1,0 +1,29 @@
+﻿@model SIGEBI.Web.Models.Recurso.RecursoCreateModel
+@{
+    ViewData["Title"] = "Crear Recurso";
+}
+
+<h1>Crear Recurso</h1>
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="titulo">Título</label>
+        <input asp-for="titulo" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="autor">Autor</label>
+        <input asp-for="autor" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="isbn">ISBN</label>
+        <input asp-for="isbn" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="categoria">Categoría</label>
+        <input asp-for="categoria" class="form-control" />
+    </div>
+    <div class="form-group mt-2">
+        <input type="submit" value="Crear" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>

@@ -1,0 +1,21 @@
+﻿@model SIGEBI.Web.Models.Prestamo.PrestamoModel
+@{
+    ViewData["Title"] = "Detalles del Préstamo";
+}
+
+<h1>Detalles del Préstamo</h1>
+<dl class="row">
+    <dt class="col-sm-2">ID</dt>
+    <dd class="col-sm-10">@Model.prestamoId</dd>
+    <dt class="col-sm-2">Usuario</dt>
+    <dd class="col-sm-10">@Model.usuarioId</dd>
+    <dt class="col-sm-2">Ejemplar</dt>
+    <dd class="col-sm-10">@Model.ejemplarId</dd>
+    <dt class="col-sm-2">Fecha Préstamo</dt>
+    <dd class="col-sm-10">@Model.fechaPrestamo</dd>
+    <dt class="col-sm-2">Fecha Devolución Esperada</dt>
+    <dd class="col-sm-10">@Model.fechaDevolucionEsperada</dd>
+    <dt class="col-sm-2">Estado</dt>
+    <dd class="col-sm-10">@Model.estado</dd>
+</dl>
+<a asp-action="Index">Volver al listado</a>

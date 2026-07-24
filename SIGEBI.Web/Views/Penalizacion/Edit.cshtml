@@ -1,0 +1,30 @@
+﻿@model SIGEBI.Web.Models.Penalizacion.PenalizacionEditModel
+@{
+    ViewData["Title"] = "Editar Penalización";
+}
+
+<h1>Editar Penalización</h1>
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="penalizacionId" />
+    <div class="form-group">
+        <label asp-for="usuarioId">Usuario ID</label>
+        <input asp-for="usuarioId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="prestamoId">Préstamo ID</label>
+        <input asp-for="prestamoId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="monto">Monto</label>
+        <input asp-for="monto" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="estado">Estado</label>
+        <input asp-for="estado" class="form-control" />
+    </div>
+    <div class="form-group mt-2">
+        <input type="submit" value="Guardar" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
