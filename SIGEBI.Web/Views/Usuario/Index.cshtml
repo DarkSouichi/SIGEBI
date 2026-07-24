@@ -1,0 +1,37 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Usuario.UsuarioModel>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<h1>Listado de Usuarios</h1>
+<p>
+    <a asp-action="Create">Agregar Nuevo</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
+            <th>@Html.DisplayNameFor(m => m.nombreCompleto)</th>
+            <th>@Html.DisplayNameFor(m => m.email)</th>
+            <th>@Html.DisplayNameFor(m => m.estaActivo)</th>
+            <th>@Html.DisplayNameFor(m => m.rolId)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(x => item.usuarioId)</td>
+                <td>@Html.DisplayFor(x => item.nombreCompleto)</td>
+                <td>@Html.DisplayFor(x => item.email)</td>
+                <td>@Html.DisplayFor(x => item.estaActivo)</td>
+                <td>@Html.DisplayFor(x => item.rolId)</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.usuarioId }) |
+                    @Html.ActionLink("Detalles", "Details", new { id = item.usuarioId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

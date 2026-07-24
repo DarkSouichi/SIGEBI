@@ -1,0 +1,37 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Recurso.RecursoModel>
+@{
+    ViewData["Title"] = "Catálogo de Recursos";
+}
+
+<h1>Catálogo de Recursos</h1>
+<p>
+    <a asp-action="Create">Agregar Nuevo Recurso</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.recursoId)</th>
+            <th>@Html.DisplayNameFor(m => m.titulo)</th>
+            <th>@Html.DisplayNameFor(m => m.autor)</th>
+            <th>@Html.DisplayNameFor(m => m.isbn)</th>
+            <th>@Html.DisplayNameFor(m => m.categoria)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(x => item.recursoId)</td>
+                <td>@Html.DisplayFor(x => item.titulo)</td>
+                <td>@Html.DisplayFor(x => item.autor)</td>
+                <td>@Html.DisplayFor(x => item.isbn)</td>
+                <td>@Html.DisplayFor(x => item.categoria)</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.recursoId }) |
+                    @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
