@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Loans;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Loans;
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,11 +11,11 @@ namespace SIGEBI.Application.Services
     public class PrestamoService : IPrestamoService
     {
         private readonly IPrestamoRepository _prestamoRepository;
-        private readonly ILogger<PrestamoService> _logger;
+        private readonly ILoggerService<PrestamoService> _logger;
         private readonly IConfiguration _configuration;
 
         public PrestamoService(IPrestamoRepository prestamoRepository,
-                               ILogger<PrestamoService> logger,
+                               ILoggerService<PrestamoService> logger,
                                IConfiguration configuration)
         {
             _prestamoRepository = prestamoRepository;
@@ -33,11 +33,11 @@ namespace SIGEBI.Application.Services
                     {
                         PrestamoId = p.Id,
                         UsuarioId = p.UsuarioId,
-                        EjemplarId = p.EjemplarId,         
+                        EjemplarId = p.EjemplarId,
                         FechaPrestamo = p.FechaPrestamo,
                         FechaDevolucionEsperada = p.FechaDevolucionEsperada,
-                        FechaDevolucionReal = p.FechaDevolucionReal, 
-                        Estado = p.Estado.ToString(), 
+                        FechaDevolucionReal = p.FechaDevolucionReal,
+                        Estado = p.Estado.ToString(),
                         ChangeDate = p.CreadoEn,
                         ChangeUser = p.Id
                     }).OrderByDescending(p => p.ChangeDate).ToList();
@@ -105,8 +105,8 @@ namespace SIGEBI.Application.Services
                     EjemplarId = dto.EjemplarId,
                     FechaPrestamo = dto.FechaPrestamo,
                     FechaDevolucionEsperada = dto.FechaDevolucionEsperada,
-                    FechaDevolucionReal = dto.FechaDevolucionReal, 
-                    Estado = estadoEnum,             
+                    FechaDevolucionReal = dto.FechaDevolucionReal,
+                    Estado = estadoEnum,
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 };

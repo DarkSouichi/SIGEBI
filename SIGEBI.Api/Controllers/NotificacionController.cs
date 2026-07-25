@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SIGEBI.Application.Dtos.Notifications;
 using SIGEBI.Application.Interfaces;
+using SIGEBI.Infrastructure.Logger; 
 
 namespace SIGEBI.Api.Controllers
 {
@@ -9,10 +10,10 @@ namespace SIGEBI.Api.Controllers
     public class NotificacionController : ControllerBase
     {
         private readonly INotificacionService _notificacionService;
-        private readonly ILogger<NotificacionController> _logger;
+        private readonly ILoggerService<NotificacionController> _logger; 
 
         public NotificacionController(INotificacionService notificacionService,
-                                       ILogger<NotificacionController> logger)
+                                       ILoggerService<NotificacionController> logger) 
         {
             _notificacionService = notificacionService;
             _logger = logger;
@@ -26,7 +27,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo notificaciones: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo notificaciones: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -42,7 +43,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo notificacion: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo notificacion: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -58,7 +59,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo notificaciones del usuario: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo notificaciones del usuario: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -82,6 +83,5 @@ namespace SIGEBI.Api.Controllers
             else
                 return BadRequest(result);
         }
-
     }
 }

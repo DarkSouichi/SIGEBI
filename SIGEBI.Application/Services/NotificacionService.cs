@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Notifications;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Notifications;
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,11 +11,11 @@ namespace SIGEBI.Application.Services
     public class NotificacionService : INotificacionService
     {
         private readonly INotificacionRepository _notificacionRepository;
-        private readonly ILogger<NotificacionService> _logger;
+        private readonly ILoggerService<NotificacionService> _logger;
         private readonly IConfiguration _configuration;
 
         public NotificacionService(INotificacionRepository notificacionRepository,
-                                   ILogger<NotificacionService> logger,
+                                   ILoggerService<NotificacionService> logger,
                                    IConfiguration configuration)
         {
             _notificacionRepository = notificacionRepository;

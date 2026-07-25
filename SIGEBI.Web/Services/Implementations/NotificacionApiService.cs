@@ -77,5 +77,21 @@ namespace SIGEBI.Web.Services
             return response;
         }
 
+        public async Task<ApiResponse> Update(NotificacionEditModel model)
+        {
+            ApiResponse response = null;
+            try
+            {
+                var httpResponse = await _httpClient.PostAsJsonAsync("Notificacion/ActualizarNotificacion", model);
+                var json = await httpResponse.Content.ReadAsStringAsync();
+                response = JsonSerializer.Deserialize<ApiResponse>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                response = new ApiResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+            }
+            return response;
+        }
     }
 }

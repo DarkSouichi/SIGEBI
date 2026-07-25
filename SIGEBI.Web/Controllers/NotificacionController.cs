@@ -61,5 +61,48 @@ namespace SIGEBI.Web.Controllers
                 return View();
             }
         }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var result = await _notificacionApiService.GetById(id);
+            if (result.isSuccess)
+            {
+                var editModel = new NotificacionEditModel
+                {
+                    id = result.data.notificacionId, 
+                    usuarioId = result.data.usuarioId,
+                    tipo = result.data.tipo,
+                    mensaje = result.data.mensaje,
+                    canal = result.data.canal,
+                    enviadoEn = result.data.enviadoEn
+                };
+                return View(editModel);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new NotificacionEditModel());
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(NotificacionEditModel model)
+        {
+            try
+            {
+                var result = await _notificacionApiService.Update(model);
+                if (!result.isSuccess)
+                {
+                    ModelState.AddModelError(string.Empty, result.message);
+                    return View(model);
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
     }
 }

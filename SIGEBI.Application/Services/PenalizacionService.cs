@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Penalties;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Penalties;
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,11 +11,11 @@ namespace SIGEBI.Application.Services
     public class PenalizacionService : IPenalizacionService
     {
         private readonly IPenalizacionRepository _penalizacionRepository;
-        private readonly ILogger<PenalizacionService> _logger;
+        private readonly ILoggerService<PenalizacionService> _logger;
         private readonly IConfiguration _configuration;
 
         public PenalizacionService(IPenalizacionRepository penalizacionRepository,
-                                   ILogger<PenalizacionService> logger,
+                                   ILoggerService<PenalizacionService> logger,
                                    IConfiguration configuration)
         {
             _penalizacionRepository = penalizacionRepository;

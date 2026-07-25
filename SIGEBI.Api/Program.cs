@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SIGEBI.IOC.Dependencies;
+using SIGEBI.IOC.Dependencias;
 using SIGEBI.Persistence.Context;
 
 namespace SIGEBI.Api

@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Catalog;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Catalog;
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,11 +11,11 @@ namespace SIGEBI.Application.Services
     public class RecursoService : IRecursoService
     {
         private readonly IRecursoRepository _recursoRepository;
-        private readonly ILogger<RecursoService> _logger;
+        private readonly ILoggerService<RecursoService> _logger;
         private readonly IConfiguration _configuration;
 
         public RecursoService(IRecursoRepository recursoRepository,
-                              ILogger<RecursoService> logger,
+                              ILoggerService<RecursoService> logger,
                               IConfiguration configuration)
         {
             _recursoRepository = recursoRepository;

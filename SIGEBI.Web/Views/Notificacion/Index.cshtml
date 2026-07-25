@@ -30,6 +30,7 @@
                 <td>@Html.DisplayFor(x => item.enviadoEn)</td>
                 <td>@Html.DisplayFor(x => item.canal)</td>
                 <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.notificacionId }) |
                     @Html.ActionLink("Detalles", "Details", new { id = item.notificacionId })
                 </td>
             </tr>

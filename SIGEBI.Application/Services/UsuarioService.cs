@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Users;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Users;
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,11 +11,11 @@ namespace SIGEBI.Application.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
-        private readonly ILogger<UsuarioService> _logger;
+        private readonly ILoggerService<UsuarioService> _logger;
         private readonly IConfiguration _configuration;
 
         public UsuarioService(IUsuarioRepository usuarioRepository,
-                              ILogger<UsuarioService> logger,
+                              ILoggerService<UsuarioService> logger,
                               IConfiguration configuration)
         {
             _usuarioRepository = usuarioRepository;
