@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SIGEBI.Application.Dtos.Notifications;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Infrastructure.Logger; 
 
 namespace SIGEBI.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NotificacionController : ControllerBase

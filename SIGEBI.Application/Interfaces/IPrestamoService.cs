@@ -4,7 +4,7 @@ using SIGEBI.Domain.Base;
 
 namespace SIGEBI.Application.Interfaces
 {
-    public interface IPrestamoService : IBaseService<SavePrestamoDto, UpdatePrestamoDto, RemovePrestamoDto>
+    public interface IPrestamoService : IBaseService<SavePrestamoDto, UpdatePrestamoDto>
     {
         Task<OperationResult> GetPrestamosByUsuarioId(int usuarioId);
         Task<OperationResult> GetPrestamosActivos();

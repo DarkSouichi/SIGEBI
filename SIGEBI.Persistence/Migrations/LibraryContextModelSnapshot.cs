@@ -22,6 +22,41 @@ namespace SIGEBI.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SIGEBI.Domain.Entities.Audit.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Detalles")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Modulo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Resultado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("SIGEBI.Domain.Entities.Catalog.Ejemplar", b =>
                 {
                     b.Property<int>("Id")
@@ -254,6 +289,20 @@ namespace SIGEBI.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nombre = "Admin",
+                            Permisos = "Todos"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Nombre = "Usuario",
+                            Permisos = "Lectura"
+                        });
                 });
 
             modelBuilder.Entity("SIGEBI.Domain.Entities.Users.Usuario", b =>
@@ -301,6 +350,20 @@ namespace SIGEBI.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreadoEn = new DateTime(2026, 8, 2, 16, 1, 4, 618, DateTimeKind.Local).AddTicks(7937),
+                            CreadoPor = "Sistema",
+                            Email = "admin@test.com",
+                            EstaActivo = true,
+                            IntentosFallidos = 0,
+                            NombreCompleto = "Administrador",
+                            PasswordHash = "$2a$11$0lfkdEbYY6U0CTbs84nuFOalyk3Eoqsi7xQNVul6FLTTdP8StK8P.",
+                            RolId = 1
+                        });
                 });
 
             modelBuilder.Entity("SIGEBI.Domain.Entities.Catalog.Ejemplar", b =>

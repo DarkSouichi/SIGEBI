@@ -6,25 +6,45 @@
 <h1>Editar Recurso</h1>
 <form asp-action="Edit">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input type="hidden" asp-for="recursoId" />
+    <input type="hidden" asp-for="id" />
     <div class="form-group">
         <label asp-for="titulo">Título</label>
         <input asp-for="titulo" class="form-control" />
+        <span asp-validation-for="titulo" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="autor">Autor</label>
         <input asp-for="autor" class="form-control" />
+        <span asp-validation-for="autor" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="isbn">ISBN</label>
         <input asp-for="isbn" class="form-control" />
+        <span asp-validation-for="isbn" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="categoria">Categoría</label>
-        <input asp-for="categoria" class="form-control" />
+        <select asp-for="categoria" class="form-control">
+            <option value="">-- Seleccione una categoría --</option>
+            <option value="Ciencia Ficción">Ciencia Ficción</option>
+            <option value="Ficción">Ficción</option>
+            <option value="No Ficción">No Ficción</option>
+            <option value="Tecnología">Tecnología</option>
+            <option value="Historia">Historia</option>
+            <option value="Biografía">Biografía</option>
+            <option value="Infantil">Infantil</option>
+            <option value="Otros">Otros</option>
+        </select>
+        <span asp-validation-for="categoria" class="text-danger"></span>
     </div>
     <div class="form-group mt-2">
         <input type="submit" value="Guardar" class="btn btn-primary" />
         <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
     </div>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

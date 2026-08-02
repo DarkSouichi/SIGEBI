@@ -1,12 +1,17 @@
 ﻿@model IEnumerable<SIGEBI.Web.Models.Recurso.RecursoModel>
 @{
     ViewData["Title"] = "Catálogo de Recursos";
+    var rol = Context.Session.GetString("Rol");
+    var esAdmin = rol == "Admin";
 }
 
 <h1>Catálogo de Recursos</h1>
-<p>
-    <a asp-action="Create">Agregar Nuevo Recurso</a>
-</p>
+
+@if (esAdmin)
+{
+    <p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Recurso</a></p>
+}
+
 <table class="table">
     <thead>
         <tr>
@@ -15,7 +20,10 @@
             <th>@Html.DisplayNameFor(m => m.autor)</th>
             <th>@Html.DisplayNameFor(m => m.isbn)</th>
             <th>@Html.DisplayNameFor(m => m.categoria)</th>
-            <th></th>
+            @if (esAdmin)
+            {
+                <th>Acciones</th>
+            }
         </tr>
     </thead>
     <tbody>
@@ -27,10 +35,13 @@
                 <td>@Html.DisplayFor(x => item.autor)</td>
                 <td>@Html.DisplayFor(x => item.isbn)</td>
                 <td>@Html.DisplayFor(x => item.categoria)</td>
-                <td>
-                    @Html.ActionLink("Editar", "Edit", new { id = item.recursoId }) |
-                    @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
-                </td>
+                @if (esAdmin)
+                {
+                    <td>
+                        @Html.ActionLink("Editar", "Edit", new { id = item.recursoId }) |
+                        @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
+                    </td>
+                }
             </tr>
         }
     </tbody>

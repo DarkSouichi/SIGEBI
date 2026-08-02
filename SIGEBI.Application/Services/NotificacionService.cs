@@ -3,6 +3,7 @@ using SIGEBI.Application.Dtos.Notifications;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Notifications;
+using SIGEBI.Infrastructure.Audit;  
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
@@ -13,14 +14,17 @@ namespace SIGEBI.Application.Services
         private readonly INotificacionRepository _notificacionRepository;
         private readonly ILoggerService<NotificacionService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAuditLogger _auditLogger;
 
         public NotificacionService(INotificacionRepository notificacionRepository,
                                    ILoggerService<NotificacionService> logger,
-                                   IConfiguration configuration)
+                                   IConfiguration configuration,
+                                   IAuditLogger auditLogger) 
         {
             _notificacionRepository = notificacionRepository;
             _logger = logger;
             _configuration = configuration;
+            _auditLogger = auditLogger;
         }
 
         public async Task<OperationResult> GetAll()
@@ -92,6 +96,14 @@ namespace SIGEBI.Application.Services
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "CrearNotificacion",
+                    modulo: "Notificaciones",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"UsuarioId: {dto.UsuarioId}, Tipo: {dto.Tipo}, Canal: {dto.Canal}"
+                );
             }
             catch (Exception ex)
             {
@@ -115,6 +127,16 @@ namespace SIGEBI.Application.Services
                 notificacion.ModificadoEn = dto.ChangeDate;
                 notificacion.ModificadoPor = dto.ChangeUser.ToString();
                 await _notificacionRepository.UpdateEntityAsync(notificacion);
+
+                result.Message = "Notificación actualizada correctamente";
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "ActualizarNotificacion",
+                    modulo: "Notificaciones",
+                    resultado: "Exitoso",
+                    detalles: $"Id: {dto.Id}, Tipo: {dto.Tipo}, Canal: {dto.Canal}"
+                );
             }
             catch (Exception ex)
             {
@@ -123,11 +145,6 @@ namespace SIGEBI.Application.Services
                 _logger.LogError(result.Message, ex);
             }
             return result;
-        }
-
-        public Task<OperationResult> Remove(RemoveNotificacionDto dto)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<OperationResult> GetNotificacionesByUsuarioId(int usuarioId)

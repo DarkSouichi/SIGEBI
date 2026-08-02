@@ -3,6 +3,7 @@ using SIGEBI.Application.Dtos.Loans;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Loans;
+using SIGEBI.Infrastructure.Audit; 
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
@@ -13,14 +14,17 @@ namespace SIGEBI.Application.Services
         private readonly IPrestamoRepository _prestamoRepository;
         private readonly ILoggerService<PrestamoService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAuditLogger _auditLogger;
 
         public PrestamoService(IPrestamoRepository prestamoRepository,
                                ILoggerService<PrestamoService> logger,
-                               IConfiguration configuration)
+                               IConfiguration configuration,
+                               IAuditLogger auditLogger) 
         {
             _prestamoRepository = prestamoRepository;
             _logger = logger;
             _configuration = configuration;
+            _auditLogger = auditLogger;
         }
 
         public async Task<OperationResult> GetAll()
@@ -112,6 +116,14 @@ namespace SIGEBI.Application.Services
                 };
 
                 result = await _prestamoRepository.SaveEntityAsync(prestamo);
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "CrearPrestamo",
+                    modulo: "Préstamos",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"UsuarioId: {dto.UsuarioId}, EjemplarId: {dto.EjemplarId}, Estado: {dto.Estado}"
+                );
             }
             catch (Exception ex)
             {
@@ -150,6 +162,14 @@ namespace SIGEBI.Application.Services
 
                 await _prestamoRepository.UpdateEntityAsync(prestamo);
                 result.Message = "Préstamo actualizado correctamente";
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "ActualizarPrestamo",
+                    modulo: "Préstamos",
+                    resultado: "Exitoso",
+                    detalles: $"Id: {dto.Id}, Estado: {dto.Estado}"
+                );
             }
             catch (Exception ex)
             {
@@ -158,11 +178,6 @@ namespace SIGEBI.Application.Services
                 _logger.LogError(result.Message, ex);
             }
             return result;
-        }
-
-        public Task<OperationResult> Remove(RemovePrestamoDto dto)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<OperationResult> GetPrestamosByUsuarioId(int usuarioId)

@@ -1,4 +1,15 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var isLoggedIn = !string.IsNullOrEmpty(
+        HttpContextAccessor.HttpContext?.Session?.GetString("Token")
+    );
+    var rol = HttpContextAccessor.HttpContext?.Session?.GetString("Rol");
+    var esAdmin = rol == "Admin";
+}
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -11,12 +22,34 @@
         <nav class="navbar">
             <div class="container">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">SIGEBI</a>
+
                 <ul class="navbar-menu">
-                    <li><a class="nav-link" asp-controller="Usuario" asp-action="Index">Usuarios</a></li>
-                    <li><a class="nav-link" asp-controller="Recurso" asp-action="Index">Catálogo</a></li>
-                    <li><a class="nav-link" asp-controller="Prestamo" asp-action="Index">Préstamos</a></li>
-                    <li><a class="nav-link" asp-controller="Penalizacion" asp-action="Index">Penalizaciones</a></li>
-                    <li><a class="nav-link" asp-controller="Notificacion" asp-action="Index">Notificaciones</a></li>
+                    <li><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
+
+                    @if (esAdmin)
+                    {
+                        <!-- Módulos exclusivoss para los Admin -->
+                        <li><a class="nav-link" asp-controller="Usuario" asp-action="Index">Usuarios</a></li>
+                        <li><a class="nav-link" asp-controller="Recurso" asp-action="Index">Catálogo</a></li>
+                        <li><a class="nav-link" asp-controller="Ejemplar" asp-action="Index">Ejemplares</a></li>
+                        <li><a class="nav-link" asp-controller="Prestamo" asp-action="Index">Préstamos</a></li>
+                        <li><a class="nav-link" asp-controller="Penalizacion" asp-action="Index">Penalizaciones</a></li>
+                        <li><a class="nav-link" asp-controller="Notificacion" asp-action="Index">Notificaciones</a></li>
+                    }
+                    else
+                    {
+                        <!-- Un Usuario normal solo puede ver el Catalogo -->
+                        <li><a class="nav-link" asp-controller="Recurso" asp-action="Index">Catálogo</a></li>
+                    }
+
+                    @if (isLoggedIn)
+                    {
+                        <li><a class="nav-link" asp-controller="Auth" asp-action="Logout">Cerrar Sesión</a></li>
+                    }
+                    else
+                    {
+                        <li><a class="nav-link" asp-controller="Auth" asp-action="Login">Iniciar Sesión</a></li>
+                    }
                 </ul>
             </div>
         </nav>
