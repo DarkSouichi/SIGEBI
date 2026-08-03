@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Loans;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Loans;
+using SIGEBI.Infrastructure.Audit; 
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,16 +12,19 @@ namespace SIGEBI.Application.Services
     public class PrestamoService : IPrestamoService
     {
         private readonly IPrestamoRepository _prestamoRepository;
-        private readonly ILogger<PrestamoService> _logger;
+        private readonly ILoggerService<PrestamoService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAuditLogger _auditLogger;
 
         public PrestamoService(IPrestamoRepository prestamoRepository,
-                               ILogger<PrestamoService> logger,
-                               IConfiguration configuration)
+                               ILoggerService<PrestamoService> logger,
+                               IConfiguration configuration,
+                               IAuditLogger auditLogger) 
         {
             _prestamoRepository = prestamoRepository;
             _logger = logger;
             _configuration = configuration;
+            _auditLogger = auditLogger;
         }
 
         public async Task<OperationResult> GetAll()
@@ -33,11 +37,11 @@ namespace SIGEBI.Application.Services
                     {
                         PrestamoId = p.Id,
                         UsuarioId = p.UsuarioId,
-                        EjemplarId = p.EjemplarId,         
+                        EjemplarId = p.EjemplarId,
                         FechaPrestamo = p.FechaPrestamo,
                         FechaDevolucionEsperada = p.FechaDevolucionEsperada,
-                        FechaDevolucionReal = p.FechaDevolucionReal, 
-                        Estado = p.Estado.ToString(), 
+                        FechaDevolucionReal = p.FechaDevolucionReal,
+                        Estado = p.Estado.ToString(),
                         ChangeDate = p.CreadoEn,
                         ChangeUser = p.Id
                     }).OrderByDescending(p => p.ChangeDate).ToList();
@@ -105,13 +109,21 @@ namespace SIGEBI.Application.Services
                     EjemplarId = dto.EjemplarId,
                     FechaPrestamo = dto.FechaPrestamo,
                     FechaDevolucionEsperada = dto.FechaDevolucionEsperada,
-                    FechaDevolucionReal = dto.FechaDevolucionReal, 
-                    Estado = estadoEnum,             
+                    FechaDevolucionReal = dto.FechaDevolucionReal,
+                    Estado = estadoEnum,
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 };
 
                 result = await _prestamoRepository.SaveEntityAsync(prestamo);
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "CrearPrestamo",
+                    modulo: "Préstamos",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"UsuarioId: {dto.UsuarioId}, EjemplarId: {dto.EjemplarId}, Estado: {dto.Estado}"
+                );
             }
             catch (Exception ex)
             {
@@ -150,6 +162,14 @@ namespace SIGEBI.Application.Services
 
                 await _prestamoRepository.UpdateEntityAsync(prestamo);
                 result.Message = "Préstamo actualizado correctamente";
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "ActualizarPrestamo",
+                    modulo: "Préstamos",
+                    resultado: "Exitoso",
+                    detalles: $"Id: {dto.Id}, Estado: {dto.Estado}"
+                );
             }
             catch (Exception ex)
             {
@@ -158,11 +178,6 @@ namespace SIGEBI.Application.Services
                 _logger.LogError(result.Message, ex);
             }
             return result;
-        }
-
-        public Task<OperationResult> Remove(RemovePrestamoDto dto)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<OperationResult> GetPrestamosByUsuarioId(int usuarioId)

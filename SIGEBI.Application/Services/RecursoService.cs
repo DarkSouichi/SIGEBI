@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Catalog;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Catalog;
+using SIGEBI.Infrastructure.Audit; 
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,16 +12,19 @@ namespace SIGEBI.Application.Services
     public class RecursoService : IRecursoService
     {
         private readonly IRecursoRepository _recursoRepository;
-        private readonly ILogger<RecursoService> _logger;
+        private readonly ILoggerService<RecursoService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAuditLogger _auditLogger; 
 
         public RecursoService(IRecursoRepository recursoRepository,
-                              ILogger<RecursoService> logger,
-                              IConfiguration configuration)
+                              ILoggerService<RecursoService> logger,
+                              IConfiguration configuration,
+                              IAuditLogger auditLogger) 
         {
             _recursoRepository = recursoRepository;
             _logger = logger;
             _configuration = configuration;
+            _auditLogger = auditLogger;
         }
 
         public async Task<OperationResult> GetAll()
@@ -89,6 +93,14 @@ namespace SIGEBI.Application.Services
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "CrearRecurso",
+                    modulo: "Recursos",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"Titulo: {dto.Titulo}, Autor: {dto.Autor}, ISBN: {dto.ISBN}"
+                );
             }
             catch (Exception ex)
             {
@@ -112,6 +124,16 @@ namespace SIGEBI.Application.Services
                 recurso.ModificadoEn = dto.ChangeDate;
                 recurso.ModificadoPor = dto.ChangeUser.ToString();
                 await _recursoRepository.UpdateEntityAsync(recurso);
+
+                result.Message = "Recurso actualizado correctamente";
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "ActualizarRecurso",
+                    modulo: "Recursos",
+                    resultado: "Exitoso",
+                    detalles: $"Id: {dto.Id}, Titulo: {dto.Titulo}"
+                );
             }
             catch (Exception ex)
             {
@@ -120,11 +142,6 @@ namespace SIGEBI.Application.Services
                 _logger.LogError(result.Message, ex);
             }
             return result;
-        }
-
-        public Task<OperationResult> Remove(RemoveRecursoDto dto)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<OperationResult> GetEjemplaresByRecursoId(int recursoId)

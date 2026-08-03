@@ -1,18 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SIGEBI.Application.Dtos.Catalog;
 using SIGEBI.Application.Interfaces;
+using SIGEBI.Infrastructure.Logger;
 
 namespace SIGEBI.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RecursoController : ControllerBase
     {
         private readonly IRecursoService _recursoService;
-        private readonly ILogger<RecursoController> _logger;
+        private readonly ILoggerService<RecursoController> _logger;
 
         public RecursoController(IRecursoService recursoService,
-                                  ILogger<RecursoController> logger)
+                                  ILoggerService<RecursoController> logger) 
         {
             _recursoService = recursoService;
             _logger = logger;
@@ -26,7 +29,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo recursos: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo recursos: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -42,7 +45,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo recurso: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo recurso: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -58,7 +61,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo recursos por categoria: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo recursos por categoria: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -71,7 +74,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo recursos disponibles: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo recursos disponibles: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -87,7 +90,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo ejemplares: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo ejemplares: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -111,6 +114,5 @@ namespace SIGEBI.Api.Controllers
             else
                 return BadRequest(result);
         }
-
     }
 }

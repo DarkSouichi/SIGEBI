@@ -1,18 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SIGEBI.Application.Dtos.Penalties;
 using SIGEBI.Application.Interfaces;
+using SIGEBI.Infrastructure.Logger; 
 
 namespace SIGEBI.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PenalizacionController : ControllerBase
     {
         private readonly IPenalizacionService _penalizacionService;
-        private readonly ILogger<PenalizacionController> _logger;
+        private readonly ILoggerService<PenalizacionController> _logger; 
 
         public PenalizacionController(IPenalizacionService penalizacionService,
-                                       ILogger<PenalizacionController> logger)
+                                       ILoggerService<PenalizacionController> logger) 
         {
             _penalizacionService = penalizacionService;
             _logger = logger;
@@ -26,7 +29,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo penalizaciones: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo penalizaciones: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -42,7 +45,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo penalizacion: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo penalizacion: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -58,7 +61,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo penalizacion activa: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo penalizacion activa: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -74,7 +77,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo penalizaciones del usuario: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo penalizaciones del usuario: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -98,6 +101,5 @@ namespace SIGEBI.Api.Controllers
             else
                 return BadRequest(result);
         }
-
     }
 }

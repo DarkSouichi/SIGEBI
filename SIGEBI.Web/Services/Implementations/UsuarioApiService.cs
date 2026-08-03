@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models.Usuario;
 
 namespace SIGEBI.Web.Services
@@ -6,14 +7,28 @@ namespace SIGEBI.Web.Services
     public class UsuarioApiService : IUsuarioApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsuarioApiService(IHttpClientFactory httpClientFactory)
+        public UsuarioApiService(IHttpClientFactory httpClientFactory,
+                                 IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private void AddAuthorizationHeader()
+        {
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task<GetAllUsuariosResponse> GetAll()
         {
+            AddAuthorizationHeader();
             GetAllUsuariosResponse response = null;
             try
             {
@@ -38,6 +53,7 @@ namespace SIGEBI.Web.Services
 
         public async Task<GetUsuarioResponse> GetById(int id)
         {
+            AddAuthorizationHeader();
             GetUsuarioResponse response = null;
             try
             {
@@ -62,6 +78,7 @@ namespace SIGEBI.Web.Services
 
         public async Task<ApiResponse> Create(UsuarioCreateModel model)
         {
+            AddAuthorizationHeader();
             ApiResponse response = null;
             try
             {
@@ -79,6 +96,7 @@ namespace SIGEBI.Web.Services
 
         public async Task<ApiResponse> Update(UsuarioEditModel model)
         {
+            AddAuthorizationHeader();
             ApiResponse response = null;
             try
             {

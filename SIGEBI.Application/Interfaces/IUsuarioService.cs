@@ -4,7 +4,7 @@ using SIGEBI.Domain.Base;
 
 namespace SIGEBI.Application.Interfaces
 {
-    public interface IUsuarioService : IBaseService<SaveUsuarioDto, UpdateUsuarioDto, RemoveUsuarioDto>
+    public interface IUsuarioService : IBaseService<SaveUsuarioDto, UpdateUsuarioDto>
     {
         Task<OperationResult> GetUsuarioByEmail(string email);
         Task<OperationResult> GetUsuariosActivos();

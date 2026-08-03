@@ -7,5 +7,6 @@ namespace SIGEBI.Web.Services
         Task<GetAllNotificacionesResponse> GetAll();
         Task<GetNotificacionResponse> GetById(int id);
         Task<ApiResponse> Create(NotificacionCreateModel model);
+        Task<ApiResponse> Update(NotificacionEditModel model); 
     }
 }

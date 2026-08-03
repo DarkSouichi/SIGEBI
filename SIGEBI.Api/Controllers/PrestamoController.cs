@@ -1,18 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SIGEBI.Application.Dtos.Loans;
 using SIGEBI.Application.Interfaces;
+using SIGEBI.Infrastructure.Logger; 
 
 namespace SIGEBI.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PrestamoController : ControllerBase
     {
         private readonly IPrestamoService _prestamoService;
-        private readonly ILogger<PrestamoController> _logger;
+        private readonly ILoggerService<PrestamoController> _logger; 
 
         public PrestamoController(IPrestamoService prestamoService,
-                                   ILogger<PrestamoController> logger)
+                                   ILoggerService<PrestamoController> logger) 
         {
             _prestamoService = prestamoService;
             _logger = logger;
@@ -26,7 +29,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo prestamos: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo prestamos: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -42,7 +45,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo prestamo: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo prestamo: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -58,7 +61,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo prestamos del usuario: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo prestamos del usuario: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -71,7 +74,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo prestamos activos: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo prestamos activos: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -87,7 +90,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo prestamos del ejemplar: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo prestamos del ejemplar: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -111,6 +114,5 @@ namespace SIGEBI.Api.Controllers
             else
                 return BadRequest(result);
         }
-
     }
 }
