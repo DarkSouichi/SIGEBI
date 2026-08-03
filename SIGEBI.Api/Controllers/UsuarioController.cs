@@ -1,18 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SIGEBI.Application.Dtos.Users;
 using SIGEBI.Application.Interfaces;
+using SIGEBI.Infrastructure.Logger; 
 
 namespace SIGEBI.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
-        private readonly ILogger<UsuarioController> _logger;
+        private readonly ILoggerService<UsuarioController> _logger; 
 
         public UsuarioController(IUsuarioService usuarioService,
-                                  ILogger<UsuarioController> logger)
+                                  ILoggerService<UsuarioController> logger) 
         {
             _usuarioService = usuarioService;
             _logger = logger;
@@ -26,7 +29,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo usuarios: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo usuarios: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -42,7 +45,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo usuario: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo usuario: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -58,7 +61,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo usuario por email: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo usuarios por email: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -71,7 +74,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error obteniendo usuarios activos: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error obteniendo usuarios activos: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -87,7 +90,7 @@ namespace SIGEBI.Api.Controllers
                 return Ok(result);
             else
             {
-                _logger.LogError("Error verificando habilitacion: {ErrorMessage}", result.Message);
+                _logger.LogError($"Error verificando habilitacion: {result.Message}", new Exception(result.Message));
                 return BadRequest(result);
             }
         }
@@ -111,6 +114,5 @@ namespace SIGEBI.Api.Controllers
             else
                 return BadRequest(result);
         }
-
     }
 }

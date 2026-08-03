@@ -1,0 +1,34 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Ejemplar.EjemplarModel>
+@{
+    ViewData["Title"] = "Ejemplares";
+}
+
+<h1>Listado de Ejemplares</h1>
+<p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Ejemplar</a></p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Código de Barras</th>
+            <th>Estado</th>
+            <th>Recurso ID</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ejemplarId</td>
+                <td>@item.codigoBarras</td>
+                <td>@item.EstadoTexto</td>
+                <td>@item.recursoId</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.ejemplarId }) |
+                    @Html.ActionLink("Detalles", "Details", new { id = item.ejemplarId }) |
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

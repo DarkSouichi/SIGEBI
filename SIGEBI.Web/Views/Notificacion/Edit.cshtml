@@ -1,0 +1,67 @@
+﻿@model SIGEBI.Web.Models.Notificacion.NotificacionEditModel
+
+@{
+    ViewData["Title"] = "Editar Notificación";
+}
+
+<h1>Editar Notificación</h1>
+
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input asp-for="id" type="hidden" />
+
+    <div class="form-group">
+        <label asp-for="usuarioId">Usuario</label>
+        <select asp-for="usuarioId" asp-items="Model.UsuariosList" class="form-control">
+            <option value="">-- Seleccione un usuario --</option>
+        </select>
+        <span asp-validation-for="usuarioId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="tipo">Tipo</label>
+        <select asp-for="tipo" class="form-control">
+            <option value="">-- Seleccione un tipo --</option>
+            <option value="Recordatorio">Recordatorio</option>
+            <option value="Alerta">Alerta</option>
+            <option value="Información">Información</option>
+            <option value="Confirmación">Confirmación</option>
+        </select>
+        <span asp-validation-for="tipo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="mensaje">Mensaje</label>
+        <textarea asp-for="mensaje" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="mensaje" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="canal">Canal</label>
+        <select asp-for="canal" class="form-control">
+            <option value="">-- Seleccione un canal --</option>
+            <option value="Correo Electrónico">Correo Electrónico</option>
+            <option value="Notificación en App">Notificación en App</option>
+            <option value="Mensaje de Texto">Mensaje de Texto</option>
+        </select>
+        <span asp-validation-for="canal" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="enviadoEn">Fecha de Envío</label>
+        <input asp-for="enviadoEn" type="datetime-local" class="form-control" />
+        <span asp-validation-for="enviadoEn" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-2">
+        <input type="submit" value="Guardar" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

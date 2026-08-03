@@ -1,26 +1,31 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Users;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Users;
+using SIGEBI.Infrastructure.Audit; 
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
+using BCrypt.Net;
 
 namespace SIGEBI.Application.Services
 {
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
-        private readonly ILogger<UsuarioService> _logger;
+        private readonly ILoggerService<UsuarioService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAuditLogger _auditLogger; 
 
         public UsuarioService(IUsuarioRepository usuarioRepository,
-                              ILogger<UsuarioService> logger,
-                              IConfiguration configuration)
+                              ILoggerService<UsuarioService> logger,
+                              IConfiguration configuration,
+                              IAuditLogger auditLogger) 
         {
             _usuarioRepository = usuarioRepository;
             _logger = logger;
             _configuration = configuration;
+            _auditLogger = auditLogger;
         }
 
         public async Task<OperationResult> GetAll()
@@ -55,6 +60,13 @@ namespace SIGEBI.Application.Services
             try
             {
                 var usuario = await _usuarioRepository.GetEntityByIdAsync(Id);
+                if (usuario == null)
+                {
+                    result.Success = false;
+                    result.Message = "Usuario no encontrado";
+                    return result;
+                }
+
                 result.Data = new UsuarioDto()
                 {
                     UsuarioId = usuario.Id,
@@ -80,16 +92,26 @@ namespace SIGEBI.Application.Services
             OperationResult result = new OperationResult();
             try
             {
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
                 result = await _usuarioRepository.SaveEntityAsync(new Usuario()
                 {
                     NombreCompleto = dto.NombreCompleto,
                     Email = dto.Email,
-                    PasswordHash = dto.Password,
+                    PasswordHash = passwordHash,
                     EstaActivo = dto.EstaActivo,
                     RolId = dto.RolId,
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "CrearUsuario",
+                    modulo: "Usuarios",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"Email: {dto.Email}, Nombre: {dto.NombreCompleto}"
+                );
             }
             catch (Exception ex)
             {
@@ -106,13 +128,32 @@ namespace SIGEBI.Application.Services
             try
             {
                 var usuario = await _usuarioRepository.GetEntityByIdAsync(dto.Id);
+
+                if (usuario == null)
+                {
+                    result.Success = false;
+                    result.Message = "Usuario no encontrado.";
+                    return result;
+                }
+
                 usuario.NombreCompleto = dto.NombreCompleto;
                 usuario.Email = dto.Email;
                 usuario.EstaActivo = dto.EstaActivo;
                 usuario.RolId = dto.RolId;
                 usuario.ModificadoEn = dto.ChangeDate;
                 usuario.ModificadoPor = dto.ChangeUser.ToString();
+
                 await _usuarioRepository.UpdateEntityAsync(usuario);
+
+                result.Message = "Usuario actualizado correctamente";
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "ActualizarUsuario",
+                    modulo: "Usuarios",
+                    resultado: "Exitoso",
+                    detalles: $"Id: {dto.Id}, Email: {dto.Email}"
+                );
             }
             catch (Exception ex)
             {
@@ -121,11 +162,6 @@ namespace SIGEBI.Application.Services
                 _logger.LogError(result.Message, ex);
             }
             return result;
-        }
-
-        public Task<OperationResult> Remove(RemoveUsuarioDto dto)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<OperationResult> GetUsuarioByEmail(string email)

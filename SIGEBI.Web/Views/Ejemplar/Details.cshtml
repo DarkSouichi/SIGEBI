@@ -1,0 +1,35 @@
+﻿@model SIGEBI.Web.Models.Ejemplar.EjemplarModel
+@{
+    ViewData["Title"] = "Detalles del Ejemplar";
+}
+
+<h1>Detalles del Ejemplar</h1>
+
+<div class="card" style="max-width: 600px;">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">ID</dt>
+            <dd class="col-sm-8">@Model.ejemplarId</dd>
+
+            <dt class="col-sm-4">Código de Barras</dt>
+            <dd class="col-sm-8">@Model.codigoBarras</dd>
+
+            <dt class="col-sm-4">Estado</dt>
+            <dd class="col-sm-8">
+                <span class="badge @(Model.estado == 0 ? "badge-success" :
+                                                        Model.estado == 1 ? "badge-warning" :
+                                                        Model.estado == 2 ? "badge-info" : "badge-danger")">
+                    @Model.EstadoTexto
+                </span>
+            </dd>
+
+            <dt class="col-sm-4">Recurso (Libro) ID</dt>
+            <dd class="col-sm-8">@Model.recursoId</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.ejemplarId" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+</div>

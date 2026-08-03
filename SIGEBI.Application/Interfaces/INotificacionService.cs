@@ -4,7 +4,7 @@ using SIGEBI.Domain.Base;
 
 namespace SIGEBI.Application.Interfaces
 {
-    public interface INotificacionService : IBaseService<SaveNotificacionDto, UpdateNotificacionDto, RemoveNotificacionDto>
+    public interface INotificacionService : IBaseService<SaveNotificacionDto, UpdateNotificacionDto>
     {
         Task<OperationResult> GetNotificacionesByUsuarioId(int usuarioId);
     }

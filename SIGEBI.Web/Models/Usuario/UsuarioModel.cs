@@ -1,4 +1,7 @@
-﻿namespace SIGEBI.Web.Models.Usuario
+﻿using System.Text.Json.Serialization;
+
+namespace SIGEBI.Web.Models.Usuario
+
 {
     public class UsuarioModel
     {
@@ -25,23 +28,49 @@
 
     public class UsuarioEditModel
     {
-        public int usuarioId { get; set; }
-        public string nombreCompleto { get; set; } = string.Empty;
-        public string email { get; set; } = string.Empty;
+        [JsonPropertyName("Id")]
+        public int usuarioId { get; set; } 
+
+        [JsonPropertyName("NombreCompleto")]
+        public string nombreCompleto { get; set; }
+
+        [JsonPropertyName("Email")]
+        public string email { get; set; }
+
+        [JsonPropertyName("EstaActivo")]
         public bool estaActivo { get; set; }
+
+        [JsonPropertyName("RolId")]
         public int rolId { get; set; }
+
+        [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }
+
+        [JsonPropertyName("ChangeUser")]
         public int changeUser { get; set; }
     }
 
     public class UsuarioCreateModel
     {
+        [JsonPropertyName("NombreCompleto")]
         public string nombreCompleto { get; set; } = string.Empty;
+
+        [JsonPropertyName("Email")]
         public string email { get; set; } = string.Empty;
+
+        [JsonPropertyName("Password")]
         public string password { get; set; } = string.Empty;
+
+        [JsonPropertyName("EstaActivo")]
         public bool estaActivo { get; set; }
+
+        [JsonPropertyName("RolId")]
         public int rolId { get; set; }
+
+        [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }
+
+        [JsonPropertyName("ChangeUser")]
         public int changeUser { get; set; }
     }
 
