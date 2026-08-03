@@ -4,7 +4,7 @@ using SIGEBI.Domain.Base;
 
 namespace SIGEBI.Application.Interfaces
 {
-    public interface IRecursoService : IBaseService<SaveRecursoDto, UpdateRecursoDto, RemoveRecursoDto>
+    public interface IRecursoService : IBaseService<SaveRecursoDto, UpdateRecursoDto>
     {
         Task<OperationResult> GetEjemplaresByRecursoId(int recursoId);
         Task<OperationResult> GetRecursosByCategoria(string categoria);

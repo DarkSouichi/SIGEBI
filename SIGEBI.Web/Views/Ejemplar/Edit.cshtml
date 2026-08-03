@@ -1,0 +1,49 @@
+﻿@model SIGEBI.Web.Models.Ejemplar.EjemplarEditModel
+
+@{
+    ViewData["Title"] = "Editar Ejemplar";
+}
+
+<h1>Editar Ejemplar</h1>
+
+<form asp-action="Edit">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input asp-for="id" type="hidden" />
+
+    <div class="form-group">
+        <label asp-for="codigoBarras">Código de Barras</label>
+        <input asp-for="codigoBarras" class="form-control" />
+        <span asp-validation-for="codigoBarras" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="estado">Estado</label>
+        <select asp-for="estado" class="form-control">
+            <option value="0">Disponible</option>
+            <option value="1">Prestado</option>
+            <option value="2">Reservado</option>
+            <option value="3">No Disponible</option>
+        </select>
+        <span asp-validation-for="estado" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="recursoId">Recurso (Libro)</label>
+        <select asp-for="recursoId" asp-items="Model.RecursosList" class="form-control">
+            <option value="">-- Seleccione un recurso --</option>
+        </select>
+        <span asp-validation-for="recursoId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-2">
+        <input type="submit" value="Guardar Cambios" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

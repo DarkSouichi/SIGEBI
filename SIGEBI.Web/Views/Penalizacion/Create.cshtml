@@ -6,24 +6,54 @@
 <h1>Crear Penalización</h1>
 <form asp-action="Create">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="form-group">
-        <label asp-for="usuarioId">Usuario ID</label>
-        <input asp-for="usuarioId" class="form-control" />
+        <label asp-for="usuarioId">Usuario</label>
+        <select asp-for="usuarioId" asp-items="Model.UsuariosList" class="form-control">
+            <option value="">-- Seleccione un usuario --</option>
+        </select>
+        <span asp-validation-for="usuarioId" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label asp-for="prestamoId">Préstamo ID</label>
-        <input asp-for="prestamoId" class="form-control" />
+        <label asp-for="prestamoId">Préstamo</label>
+        <select asp-for="prestamoId" asp-items="Model.PrestamosList" class="form-control">
+            <option value="">-- Seleccione un préstamo --</option>
+        </select>
+        <span asp-validation-for="prestamoId" class="text-danger"></span>
     </div>
+
     <div class="form-group">
         <label asp-for="monto">Monto</label>
         <input asp-for="monto" class="form-control" />
+        <span asp-validation-for="monto" class="text-danger"></span>
     </div>
+
     <div class="form-group">
         <label asp-for="estado">Estado</label>
-        <input asp-for="estado" class="form-control" />
+        <select asp-for="estado" class="form-control">
+            <option value="">-- Seleccione un estado --</option>
+            <option value="Activa">Activa</option>
+            <option value="Resuelta">Resuelta</option>
+            <option value="Cancelada">Cancelada</option>
+        </select>
+        <span asp-validation-for="estado" class="text-danger"></span>
     </div>
+
+    <div class="form-group">
+        <label asp-for="fechaEmision">Fecha de Emisión</label>
+        <input asp-for="fechaEmision" type="datetime-local" class="form-control" />
+        <span asp-validation-for="fechaEmision" class="text-danger"></span>
+    </div>
+
     <div class="form-group mt-2">
         <input type="submit" value="Crear" class="btn btn-primary" />
         <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
     </div>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -4,7 +4,7 @@ using SIGEBI.Domain.Base;
 
 namespace SIGEBI.Application.Interfaces
 {
-    public interface IPenalizacionService : IBaseService<SavePenalizacionDto, UpdatePenalizacionDto, RemovePenalizacionDto>
+    public interface IPenalizacionService : IBaseService<SavePenalizacionDto, UpdatePenalizacionDto>
     {
         Task<OperationResult> GetPenalizacionActivaByUsuarioId(int usuarioId);
         Task<OperationResult> GetPenalizacionesByUsuarioId(int usuarioId);

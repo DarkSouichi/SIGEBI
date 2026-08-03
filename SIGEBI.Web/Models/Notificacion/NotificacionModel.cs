@@ -1,4 +1,7 @@
-﻿namespace SIGEBI.Web.Models.Notificacion
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace SIGEBI.Web.Models.Notificacion
 {
     public class NotificacionModel
     {
@@ -26,12 +29,57 @@
 
     public class NotificacionCreateModel
     {
+        [JsonPropertyName("UsuarioId")]
         public int usuarioId { get; set; }
+
+        [JsonPropertyName("Tipo")]
         public string tipo { get; set; } = string.Empty;
+
+        [JsonPropertyName("Mensaje")]
         public string mensaje { get; set; } = string.Empty;
+
+        [JsonPropertyName("Canal")]
         public string canal { get; set; } = string.Empty;
+
+        [JsonPropertyName("EnviadoEn")]
+        public DateTime enviadoEn { get; set; }
+
+        [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }
+
+        [JsonPropertyName("ChangeUser")]
         public int changeUser { get; set; }
+
+        public List<SelectListItem> UsuariosList { get; set; } = new();
+    }
+
+    public class NotificacionEditModel
+    {
+        [JsonPropertyName("Id")]
+        public int id { get; set; }
+
+        [JsonPropertyName("UsuarioId")]
+        public int usuarioId { get; set; }
+
+        [JsonPropertyName("Tipo")]
+        public string tipo { get; set; } = string.Empty;
+
+        [JsonPropertyName("Mensaje")]
+        public string mensaje { get; set; } = string.Empty;
+
+        [JsonPropertyName("Canal")]
+        public string canal { get; set; } = string.Empty;
+
+        [JsonPropertyName("EnviadoEn")]
+        public DateTime enviadoEn { get; set; }
+
+        [JsonPropertyName("ChangeDate")]
+        public DateTime changeDate { get; set; }
+
+        [JsonPropertyName("ChangeUser")]
+        public int changeUser { get; set; }
+
+        public List<SelectListItem> UsuariosList { get; set; } = new();
     }
 
     public class ApiResponse

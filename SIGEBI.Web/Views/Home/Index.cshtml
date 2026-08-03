@@ -1,36 +1,43 @@
 ﻿@{
     ViewData["Title"] = "SIGEBI - Sistema de Gestión de Bibliotecas";
+    var rol = Context.Session.GetString("Rol");
+    var esAdmin = rol == "Admin";
 }
 
-<div class="text-center">
+<div class="hero">
     <h1>Bienvenido al SIGEBI</h1>
     <p>Sistema de Gestión de Bibliotecas Institucional</p>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <a asp-controller="Usuario" asp-action="Index" class="btn btn-primary w-100 mb-2">
-            Usuarios
+<div class="card-grid">
+    @if (esAdmin)
+    {
+        <!-- Catalogo completo solo para Administradores -->
+        <a asp-controller="Usuario" asp-action="Index" class="card-item">
+            <h3>Usuarios</h3>
+            <p>Gestión de usuarios</p>
         </a>
-    </div>
-    <div class="col-md-4">
-        <a asp-controller="Recurso" asp-action="Index" class="btn btn-primary w-100 mb-2">
-            Catálogo
+        <a asp-controller="Prestamo" asp-action="Index" class="card-item">
+            <h3>Préstamos</h3>
+            <p>Gestión de préstamos</p>
         </a>
-    </div>
-    <div class="col-md-4">
-        <a asp-controller="Prestamo" asp-action="Index" class="btn btn-primary w-100 mb-2">
-            Préstamos
+        <a asp-controller="Penalizacion" asp-action="Index" class="card-item">
+            <h3>Penalizaciones</h3>
+            <p>Gestión de penalizaciones</p>
         </a>
-    </div>
-    <div class="col-md-4">
-        <a asp-controller="Penalizacion" asp-action="Index" class="btn btn-primary w-100 mb-2">
-            Penalizaciones
+        <a asp-controller="Notificacion" asp-action="Index" class="card-item">
+            <h3>Notificaciones</h3>
+            <p>Gestión de notificaciones</p>
         </a>
-    </div>
-    <div class="col-md-4">
-        <a asp-controller="Notificacion" asp-action="Index" class="btn btn-primary w-100 mb-2">
-            Notificaciones
-        </a>
-    </div>
+    }
+
+    <!-- Catalogo que es visible para todos -->
+    <a asp-controller="Recurso" asp-action="Index" class="card-item">
+        <h3>Catálogo</h3>
+        <p>Gestión de recursos</p>
+    </a>
+
+    @if (!esAdmin)
+    {
+    }
 </div>

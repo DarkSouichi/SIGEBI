@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models.Notificacion;
 
 namespace SIGEBI.Web.Services
@@ -6,14 +7,28 @@ namespace SIGEBI.Web.Services
     public class NotificacionApiService : INotificacionApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public NotificacionApiService(IHttpClientFactory httpClientFactory)
+        public NotificacionApiService(IHttpClientFactory httpClientFactory,
+                                      IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private void AddAuthorizationHeader()
+        {
+            var token = _httpContextAccessor.HttpContext?.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task<GetAllNotificacionesResponse> GetAll()
         {
+            AddAuthorizationHeader();
             GetAllNotificacionesResponse response = null;
             try
             {
@@ -38,6 +53,7 @@ namespace SIGEBI.Web.Services
 
         public async Task<GetNotificacionResponse> GetById(int id)
         {
+            AddAuthorizationHeader();
             GetNotificacionResponse response = null;
             try
             {
@@ -62,6 +78,7 @@ namespace SIGEBI.Web.Services
 
         public async Task<ApiResponse> Create(NotificacionCreateModel model)
         {
+            AddAuthorizationHeader();
             ApiResponse response = null;
             try
             {
@@ -77,5 +94,22 @@ namespace SIGEBI.Web.Services
             return response;
         }
 
+        public async Task<ApiResponse> Update(NotificacionEditModel model)
+        {
+            AddAuthorizationHeader();
+            ApiResponse response = null;
+            try
+            {
+                var httpResponse = await _httpClient.PostAsJsonAsync("Notificacion/ActualizarNotificacion", model);
+                var json = await httpResponse.Content.ReadAsStringAsync();
+                response = JsonSerializer.Deserialize<ApiResponse>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                response = new ApiResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+            }
+            return response;
+        }
     }
 }
