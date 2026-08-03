@@ -10,7 +10,6 @@ namespace SIGEBI.Web
 
             builder.Services.AddControllersWithViews();
 
-            // Registrar HttpClient con la URL base de la API
             builder.Services.AddHttpClient("SIGEBIApi", client =>
             {
                 client.BaseAddress = new Uri(
@@ -18,12 +17,26 @@ namespace SIGEBI.Web
                     "http://localhost:5148/api/");
             });
 
-            // Registrar los servicios de consumo de API
             builder.Services.AddScoped<IUsuarioApiService, UsuarioApiService>();
             builder.Services.AddScoped<IRecursoApiService, RecursoApiService>();
+            builder.Services.AddScoped<IEjemplarApiService, EjemplarApiService>();
             builder.Services.AddScoped<IPrestamoApiService, PrestamoApiService>();
             builder.Services.AddScoped<IPenalizacionApiService, PenalizacionApiService>();
             builder.Services.AddScoped<INotificacionApiService, NotificacionApiService>();
+            builder.Services.AddScoped<IAuthApiService, AuthApiService>();
+            builder.Services.AddHttpContextAccessor();
+
+
+            builder.Services.AddDistributedMemoryCache(); 
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            builder.Services.AddHttpContextAccessor();
 
             var app = builder.Build();
 
@@ -34,6 +47,7 @@ namespace SIGEBI.Web
 
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseSession();
             app.UseAuthorization();
 
             app.MapControllerRoute(

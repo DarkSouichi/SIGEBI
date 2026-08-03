@@ -49,7 +49,9 @@ namespace SIGEBI.Web.Controllers
             try
             {
                 model.changeDate = DateTime.Now;
-                model.changeUser = 1;
+                model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+                model.estaActivo = true;
+
                 var result = await _usuarioApiService.Create(model);
                 if (!result.isSuccess)
                 {
@@ -93,7 +95,8 @@ namespace SIGEBI.Web.Controllers
             try
             {
                 model.changeDate = DateTime.Now;
-                model.changeUser = 1;
+                model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+
                 var result = await _usuarioApiService.Update(model);
                 if (!result.isSuccess)
                 {

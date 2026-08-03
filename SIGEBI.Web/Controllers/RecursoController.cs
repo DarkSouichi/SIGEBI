@@ -48,6 +48,9 @@ namespace SIGEBI.Web.Controllers
         {
             try
             {
+                model.changeDate = DateTime.Now;
+                model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+
                 var result = await _recursoApiService.Create(model);
                 if (!result.isSuccess)
                 {
@@ -69,7 +72,7 @@ namespace SIGEBI.Web.Controllers
             {
                 var editModel = new RecursoEditModel
                 {
-                    recursoId = result.data.recursoId,
+                    id = result.data.recursoId,
                     titulo = result.data.titulo,
                     autor = result.data.autor,
                     isbn = result.data.isbn,
@@ -90,6 +93,9 @@ namespace SIGEBI.Web.Controllers
         {
             try
             {
+                model.changeDate = DateTime.Now;
+                model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+
                 var result = await _recursoApiService.Update(model);
                 if (!result.isSuccess)
                 {
@@ -98,9 +104,10 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
+                return View(model);
             }
         }
     }

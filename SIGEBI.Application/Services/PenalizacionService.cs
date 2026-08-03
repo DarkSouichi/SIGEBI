@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SIGEBI.Application.Dtos.Penalties;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Penalties;
+using SIGEBI.Infrastructure.Audit;   
+using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
 namespace SIGEBI.Application.Services
@@ -11,16 +12,18 @@ namespace SIGEBI.Application.Services
     public class PenalizacionService : IPenalizacionService
     {
         private readonly IPenalizacionRepository _penalizacionRepository;
-        private readonly ILogger<PenalizacionService> _logger;
+        private readonly ILoggerService<PenalizacionService> _logger;
         private readonly IConfiguration _configuration;
-
+        private readonly IAuditLogger _auditLogger; 
         public PenalizacionService(IPenalizacionRepository penalizacionRepository,
-                                   ILogger<PenalizacionService> logger,
-                                   IConfiguration configuration)
+                                   ILoggerService<PenalizacionService> logger,
+                                   IConfiguration configuration,
+                                   IAuditLogger auditLogger) 
         {
             _penalizacionRepository = penalizacionRepository;
             _logger = logger;
             _configuration = configuration;
+            _auditLogger = auditLogger;
         }
 
         public async Task<OperationResult> GetAll()
@@ -92,6 +95,14 @@ namespace SIGEBI.Application.Services
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "CrearPenalizacion",
+                    modulo: "Penalizaciones",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"UsuarioId: {dto.UsuarioId}, Monto: {dto.Monto}, Estado: {dto.Estado}"
+                );
             }
             catch (Exception ex)
             {
@@ -113,6 +124,16 @@ namespace SIGEBI.Application.Services
                 penalizacion.ModificadoEn = dto.ChangeDate;
                 penalizacion.ModificadoPor = dto.ChangeUser.ToString();
                 await _penalizacionRepository.UpdateEntityAsync(penalizacion);
+
+                result.Message = "Penalización actualizada correctamente";
+
+                await _auditLogger.LogAsync(
+                    actor: dto.ChangeUser.ToString(),
+                    accion: "ActualizarPenalizacion",
+                    modulo: "Penalizaciones",
+                    resultado: "Exitoso",
+                    detalles: $"Id: {dto.Id}, Estado: {dto.Estado}, Monto: {dto.Monto}"
+                );
             }
             catch (Exception ex)
             {
@@ -121,11 +142,6 @@ namespace SIGEBI.Application.Services
                 _logger.LogError(result.Message, ex);
             }
             return result;
-        }
-
-        public Task<OperationResult> Remove(RemovePenalizacionDto dto)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<OperationResult> GetPenalizacionActivaByUsuarioId(int usuarioId)
