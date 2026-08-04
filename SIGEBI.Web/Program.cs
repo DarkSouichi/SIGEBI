@@ -13,8 +13,9 @@ namespace SIGEBI.Web
             builder.Services.AddHttpClient("SIGEBIApi", client =>
             {
                 client.BaseAddress = new Uri(
-                    builder.Configuration["ApiSettings:BaseUrl"] ??
-                    "http://localhost:5148/api/");
+                    builder.Configuration["ApiSettings:BaseUrl"]
+                    ?? "http://localhost:5148/api/");
+                client.Timeout = TimeSpan.FromSeconds(30);
             });
 
             builder.Services.AddScoped<IUsuarioApiService, UsuarioApiService>();

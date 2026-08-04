@@ -26,24 +26,20 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _penalizacionApiService.GetAll();
             if (result.isSuccess)
-                return View(result.data);
-            else
-            {
-                ModelState.AddModelError(string.Empty, result.message);
-                return View(new List<PenalizacionModel>());
-            }
+                return View(result.data ?? new List<PenalizacionModel>());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new List<PenalizacionModel>());
         }
 
         public async Task<IActionResult> Details(int id)
         {
             var result = await _penalizacionApiService.GetById(id);
             if (result.isSuccess)
-                return View(result.data);
-            else
-            {
-                ModelState.AddModelError(string.Empty, result.message);
-                return View(new PenalizacionModel());
-            }
+                return View(result.data ?? new PenalizacionModel());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new PenalizacionModel());
         }
 
         public async Task<IActionResult> Create()
@@ -61,6 +57,12 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PenalizacionCreateModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarListas(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -75,8 +77,21 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (HttpRequestException)
             {
+                ModelState.AddModelError(string.Empty, "No se pudo conectar con el servidor. Verifique que la API esté disponible.");
+                await CargarListas(model);
+                return View(model);
+            }
+            catch (TaskCanceledException)
+            {
+                ModelState.AddModelError(string.Empty, "La solicitud tardó demasiado. Verifique su conexión.");
+                await CargarListas(model);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarListas(model);
                 return View(model);
             }
@@ -113,6 +128,12 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PenalizacionEditModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarListas(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -122,16 +143,26 @@ namespace SIGEBI.Web.Controllers
                 if (!result.isSuccess)
                 {
                     ModelState.AddModelError(string.Empty, result.message);
-                    Console.WriteLine($"Error al actualizar penalización: {result.message}");
                     await CargarListas(model);
                     return View(model);
                 }
                 return RedirectToAction(nameof(Index));
             }
+            catch (HttpRequestException)
+            {
+                ModelState.AddModelError(string.Empty, "No se pudo conectar con el servidor. Verifique que la API esté disponible.");
+                await CargarListas(model);
+                return View(model);
+            }
+            catch (TaskCanceledException)
+            {
+                ModelState.AddModelError(string.Empty, "La solicitud tardó demasiado. Verifique su conexión.");
+                await CargarListas(model);
+                return View(model);
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Excepción en Edit POST: {ex.Message}");
-                ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarListas(model);
                 return View(model);
             }
@@ -139,39 +170,45 @@ namespace SIGEBI.Web.Controllers
 
         private async Task CargarListas(object model)
         {
-            var usuariosResponse = await _usuarioApiService.GetAll();
-            var usuarios = usuariosResponse.data ?? new List<UsuarioModel>();
-
-            var prestamosResponse = await _prestamoApiService.GetAll();
-            var prestamos = prestamosResponse.data ?? new List<PrestamoModel>();
-
-            if (model is PenalizacionCreateModel createModel)
+            try
             {
-                createModel.UsuariosList = usuarios.Select(u => new SelectListItem
-                {
-                    Value = u.usuarioId.ToString(),
-                    Text = $"{u.nombreCompleto} ({u.email})"
-                }).ToList();
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarios = usuariosResponse.data ?? new List<UsuarioModel>();
 
-                createModel.PrestamosList = prestamos.Select(p => new SelectListItem
+                var prestamosResponse = await _prestamoApiService.GetAll();
+                var prestamos = prestamosResponse.data ?? new List<PrestamoModel>();
+
+                if (model is PenalizacionCreateModel createModel)
                 {
-                    Value = p.prestamoId.ToString(),
-                    Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
-                }).ToList();
+                    createModel.UsuariosList = usuarios.Select(u => new SelectListItem
+                    {
+                        Value = u.usuarioId.ToString(),
+                        Text = $"{u.nombreCompleto} ({u.email})"
+                    }).ToList();
+
+                    createModel.PrestamosList = prestamos.Select(p => new SelectListItem
+                    {
+                        Value = p.prestamoId.ToString(),
+                        Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
+                    }).ToList();
+                }
+                else if (model is PenalizacionEditModel editModel)
+                {
+                    editModel.UsuariosList = usuarios.Select(u => new SelectListItem
+                    {
+                        Value = u.usuarioId.ToString(),
+                        Text = $"{u.nombreCompleto} ({u.email})"
+                    }).ToList();
+
+                    editModel.PrestamosList = prestamos.Select(p => new SelectListItem
+                    {
+                        Value = p.prestamoId.ToString(),
+                        Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
+                    }).ToList();
+                }
             }
-            else if (model is PenalizacionEditModel editModel)
+            catch
             {
-                editModel.UsuariosList = usuarios.Select(u => new SelectListItem
-                {
-                    Value = u.usuarioId.ToString(),
-                    Text = $"{u.nombreCompleto} ({u.email})"
-                }).ToList();
-
-                editModel.PrestamosList = prestamos.Select(p => new SelectListItem
-                {
-                    Value = p.prestamoId.ToString(),
-                    Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
-                }).ToList();
             }
         }
     }
