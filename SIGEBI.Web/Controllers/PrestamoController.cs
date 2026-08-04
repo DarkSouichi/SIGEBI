@@ -49,7 +49,11 @@ namespace SIGEBI.Web.Controllers
             if (rol != "Admin")
                 return RedirectToAction("Index", "Home");
 
-            var model = new PrestamoCreateModel();
+            var model = new PrestamoCreateModel
+            {
+                fechaPrestamo = DateTime.Now
+            };
+
             await CargarListas(model);
             return View(model);
         }

@@ -4,16 +4,36 @@
 }
 
 <h1>Detalles del Usuario</h1>
-<dl class="row">
-    <dt class="col-sm-2">ID</dt>
-    <dd class="col-sm-10">@Model.usuarioId</dd>
-    <dt class="col-sm-2">Nombre</dt>
-    <dd class="col-sm-10">@Model.nombreCompleto</dd>
-    <dt class="col-sm-2">Email</dt>
-    <dd class="col-sm-10">@Model.email</dd>
-    <dt class="col-sm-2">Activo</dt>
-    <dd class="col-sm-10">@Model.estaActivo</dd>
-    <dt class="col-sm-2">Rol</dt>
-    <dd class="col-sm-10">@Model.rolId</dd>
-</dl>
-<a asp-action="Index">Volver al listado</a>
+
+<div class="details-card">
+    <div class="detail-row">
+        <span class="detail-label">ID</span>
+        <span class="detail-value">@Model.usuarioId</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Nombre</span>
+        <span class="detail-value">@Model.nombreCompleto</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">@Model.email</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Activo</span>
+        <span class="detail-value">
+            <span class="badge @(Model.estaActivo ? "badge-success" : "badge-danger")">
+                @(Model.estaActivo ? "Sí" : "No")
+            </span>
+        </span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Rol</span>
+        <span class="detail-value">@Model.rolId</span>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Volver al listado</a>

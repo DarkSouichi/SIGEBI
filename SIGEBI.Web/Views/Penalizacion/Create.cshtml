@@ -5,7 +5,7 @@
 
 <h1>Crear Penalización</h1>
 <form asp-action="Create">
-    <div asp-validation-summary="All" class="text-danger"></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="form-group">
         <label asp-for="usuarioId">Usuario</label>
@@ -42,7 +42,7 @@
 
     <div class="form-group">
         <label asp-for="fechaEmision">Fecha de Emisión</label>
-        <input asp-for="fechaEmision" type="datetime-local" class="form-control" />
+        <input asp-for="fechaEmision" class="form-control flatpickr-penalizacion" />
         <span asp-validation-for="fechaEmision" class="text-danger"></span>
     </div>
 
@@ -56,4 +56,17 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr('.flatpickr-datetime', {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                defaultDate: new Date(),
+                yearSelectorType: "dropdown",
+                minDate: "today",
+                locale: 'es'
+            });
+        });
+    </script>
 }
