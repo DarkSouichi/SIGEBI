@@ -92,8 +92,7 @@ namespace SIGEBI.Web.Controllers
                 usuarioId = result.data.usuarioId,
                 tipo = result.data.tipo,
                 mensaje = result.data.mensaje,
-                canal = result.data.canal,
-                enviadoEn = result.data.enviadoEn
+                canal = result.data.canal
             };
             await CargarUsuarios(model);
             return View(model);

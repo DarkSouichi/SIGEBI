@@ -48,7 +48,11 @@ namespace SIGEBI.Web.Controllers
             if (rol != "Admin")
                 return RedirectToAction("Index", "Home");
 
-            var model = new PenalizacionCreateModel();
+            var model = new PenalizacionCreateModel
+            {
+                fechaEmision = DateTime.Now
+            };
+
             await CargarListas(model);
             return View(model);
         }

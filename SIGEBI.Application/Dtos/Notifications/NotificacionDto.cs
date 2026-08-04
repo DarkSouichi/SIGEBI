@@ -32,7 +32,6 @@ namespace SIGEBI.Application.Dtos.Notifications
         [StringLength(50, ErrorMessage = "El canal no puede tener más de 50 caracteres.")]
         public string Canal { get; set; } = string.Empty;
 
-        public DateTime EnviadoEn { get; set; }
 
         public DateTime ChangeDate { get; set; }
         public int ChangeUser { get; set; }
