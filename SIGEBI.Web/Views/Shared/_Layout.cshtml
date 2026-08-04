@@ -7,6 +7,12 @@
     );
     var rol = HttpContextAccessor.HttpContext?.Session?.GetString("Rol");
     var esAdmin = rol == "Admin";
+    var nombreCompleto = HttpContextAccessor.HttpContext?.Session?.GetString("NombreCompleto") ?? "Usuario";
+
+    var isHomePage = 
+                 ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
+                 ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+    var containerClass = isHomePage ? "container-home" : "container-content";
 }
 
 <!DOCTYPE html>
@@ -15,11 +21,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SIGEBI</title>
-    <link rel="stylesheet" href="~/css/site.css?v=2" />
+    <link rel="stylesheet" href="~/css/site.css?v=5" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="icon" type="image/x-icon" href="~/images/favicon.ico" />
 </head>
 <body>
+
+    <div id="fondo"></div>
+
     <header>
         <nav class="navbar">
             <div class="container">
@@ -29,38 +39,79 @@
                 </a>
 
                 <ul class="navbar-menu">
-                    <li><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                    <li>
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-house"></i> Inicio
+                        </a>
+                    </li>
 
                     @if (esAdmin)
                     {
-                        <!-- Módulos exclusivoss para los Admin -->
-                        <li><a class="nav-link" asp-controller="Usuario" asp-action="Index">Usuarios</a></li>
-                        <li><a class="nav-link" asp-controller="Recurso" asp-action="Index">Catálogo</a></li>
-                        <li><a class="nav-link" asp-controller="Ejemplar" asp-action="Index">Ejemplares</a></li>
-                        <li><a class="nav-link" asp-controller="Prestamo" asp-action="Index">Préstamos</a></li>
-                        <li><a class="nav-link" asp-controller="Penalizacion" asp-action="Index">Penalizaciones</a></li>
-                        <li><a class="nav-link" asp-controller="Notificacion" asp-action="Index">Notificaciones</a></li>
+                        <!-- Módulos exclusivos para Admin -->
+                        <li>
+                            <a class="nav-link" asp-controller="Usuario" asp-action="Index">
+                                <i class="fas fa-users"></i> Usuarios
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Recurso" asp-action="Index">
+                                <i class="fas fa-book"></i> Catálogo
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Ejemplar" asp-action="Index">
+                                <i class="fas fa-copy"></i> Ejemplares
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Prestamo" asp-action="Index">
+                                <i class="fas fa-handshake"></i> Préstamos
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Penalizacion" asp-action="Index">
+                                <i class="fas fa-triangle-exclamation"></i> Penalizaciones
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Notificacion" asp-action="Index">
+                                <i class="fas fa-bell"></i> Notificaciones
+                            </a>
+                        </li>
                     }
                     else
                     {
-                        <!-- Un Usuario normal registrado solo puede ver el Catalogo -->
-                        <li><a class="nav-link" asp-controller="Recurso" asp-action="Index">Catálogo</a></li>
+                        <!-- Usuario normal -->
+                        <li>
+                            <a class="nav-link" asp-controller="Recurso" asp-action="Index">
+                                <i class="fas fa-book"></i> Catálogo
+                            </a>
+                        </li>
                     }
 
                     @if (isLoggedIn)
                     {
-                        <li><a class="nav-link" asp-controller="Auth" asp-action="Logout">Cerrar Sesión</a></li>
+                        <li>
+                            <a class="nav-link" asp-controller="Auth" asp-action="Logout"
+                               title="Cerrar sesión como @nombreCompleto">
+                                <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
+                            </a>
+                        </li>
                     }
                     else
                     {
-                        <li><a class="nav-link" asp-controller="Auth" asp-action="Login">Iniciar Sesión</a></li>
+                        <li>
+                            <a class="nav-link" asp-controller="Auth" asp-action="Login">
+                                <i class="fas fa-right-to-bracket"></i> Iniciar Sesión
+                            </a>
+                        </li>
                     }
                 </ul>
             </div>
         </nav>
     </header>
 
-    <div class="container">
+    <div class="@containerClass">
         <main role="main">
             @RenderBody()
         </main>
