@@ -1,4 +1,5 @@
-﻿using SIGEBI.Web.Models.Notificacion;
+﻿using SIGEBI.Web.Models;
+using SIGEBI.Web.Models.Notificacion;
 
 namespace SIGEBI.Web.Services
 {

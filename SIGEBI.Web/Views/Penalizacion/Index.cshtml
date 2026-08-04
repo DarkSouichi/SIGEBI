@@ -7,6 +7,8 @@
 
 <h1>Listado de Penalizaciones</h1>
 
+<div asp-validation-summary="All" class="text-danger"></div>
+
 @if (esAdmin)
 {
     <p><a asp-action="Create" class="btn btn-primary">Agregar Nueva Penalización</a></p>

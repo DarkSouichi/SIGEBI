@@ -1,4 +1,5 @@
-﻿using SIGEBI.Web.Models.Usuario;
+﻿using SIGEBI.Web.Models;
+using SIGEBI.Web.Models.Usuario;
 
 namespace SIGEBI.Web.Services
 {

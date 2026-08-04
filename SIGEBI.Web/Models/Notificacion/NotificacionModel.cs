@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SIGEBI.Web.Models.Notificacion
@@ -30,19 +31,23 @@ namespace SIGEBI.Web.Models.Notificacion
     public class NotificacionCreateModel
     {
         [JsonPropertyName("UsuarioId")]
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un usuario válido.")]
         public int usuarioId { get; set; }
 
         [JsonPropertyName("Tipo")]
+        [Required(ErrorMessage = "El tipo es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El tipo no puede exceder 50 caracteres.")]
         public string tipo { get; set; } = string.Empty;
 
         [JsonPropertyName("Mensaje")]
+        [Required(ErrorMessage = "El mensaje es obligatorio.")]
         public string mensaje { get; set; } = string.Empty;
 
         [JsonPropertyName("Canal")]
+        [Required(ErrorMessage = "El canal es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El canal no puede exceder 50 caracteres.")]
         public string canal { get; set; } = string.Empty;
-
-        [JsonPropertyName("EnviadoEn")]
-        public DateTime enviadoEn { get; set; }
 
         [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }
@@ -56,18 +61,27 @@ namespace SIGEBI.Web.Models.Notificacion
     public class NotificacionEditModel
     {
         [JsonPropertyName("Id")]
+        [Required(ErrorMessage = "El ID es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "ID inválido.")]
         public int id { get; set; }
 
         [JsonPropertyName("UsuarioId")]
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un usuario válido.")]
         public int usuarioId { get; set; }
 
         [JsonPropertyName("Tipo")]
+        [Required(ErrorMessage = "El tipo es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El tipo no puede exceder 50 caracteres.")]
         public string tipo { get; set; } = string.Empty;
 
         [JsonPropertyName("Mensaje")]
+        [Required(ErrorMessage = "El mensaje es obligatorio.")]
         public string mensaje { get; set; } = string.Empty;
 
         [JsonPropertyName("Canal")]
+        [Required(ErrorMessage = "El canal es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El canal no puede exceder 50 caracteres.")]
         public string canal { get; set; } = string.Empty;
 
         [JsonPropertyName("EnviadoEn")]
@@ -82,10 +96,10 @@ namespace SIGEBI.Web.Models.Notificacion
         public List<SelectListItem> UsuariosList { get; set; } = new();
     }
 
-    public class ApiResponse
+    /*public class ApiResponse
     {
         public bool isSuccess { get; set; }
         public string message { get; set; } = string.Empty;
         public object? data { get; set; }
-    }
+    }*/
 }
