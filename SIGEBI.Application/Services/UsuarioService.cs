@@ -3,7 +3,7 @@ using SIGEBI.Application.Dtos.Users;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Users;
-using SIGEBI.Infrastructure.Audit; 
+using SIGEBI.Infrastructure.Audit;
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 using BCrypt.Net;
@@ -15,12 +15,12 @@ namespace SIGEBI.Application.Services
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly ILoggerService<UsuarioService> _logger;
         private readonly IConfiguration _configuration;
-        private readonly IAuditLogger _auditLogger; 
+        private readonly IAuditLogger _auditLogger;
 
         public UsuarioService(IUsuarioRepository usuarioRepository,
                               ILoggerService<UsuarioService> logger,
                               IConfiguration configuration,
-                              IAuditLogger auditLogger) 
+                              IAuditLogger auditLogger)
         {
             _usuarioRepository = usuarioRepository;
             _logger = logger;
@@ -92,6 +92,14 @@ namespace SIGEBI.Application.Services
             OperationResult result = new OperationResult();
             try
             {
+                var existingUserResult = await _usuarioRepository.GetUsuarioByEmail(dto.Email);
+                if (existingUserResult.IsSuccess && existingUserResult.Data != null)
+                {
+                    result.Success = false;
+                    result.Message = "El correo electrónico ya está registrado.";
+                    return result;
+                }
+
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
                 result = await _usuarioRepository.SaveEntityAsync(new Usuario()
@@ -127,6 +135,18 @@ namespace SIGEBI.Application.Services
             OperationResult result = new OperationResult();
             try
             {
+                var existingUserResult = await _usuarioRepository.GetUsuarioByEmail(dto.Email);
+                if (existingUserResult.IsSuccess && existingUserResult.Data != null)
+                {
+                    var existingUser = existingUserResult.Data as Usuario;
+                    if (existingUser != null && existingUser.Id != dto.Id)
+                    {
+                        result.Success = false;
+                        result.Message = "El correo electrónico ya está registrado por otro usuario.";
+                        return result;
+                    }
+                }
+
                 var usuario = await _usuarioRepository.GetEntityByIdAsync(dto.Id);
 
                 if (usuario == null)
