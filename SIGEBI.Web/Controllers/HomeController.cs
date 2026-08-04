@@ -6,6 +6,11 @@ namespace SIGEBI.Web.Controllers
     {
         public IActionResult Index()
         {
+            var token = HttpContext.Session.GetString("Token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
             return View();
         }
     }
