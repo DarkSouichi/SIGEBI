@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Notificacion;
 
 namespace SIGEBI.Web.Services
@@ -14,6 +15,7 @@ namespace SIGEBI.Web.Services
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
         private void AddAuthorizationHeader()
@@ -29,86 +31,201 @@ namespace SIGEBI.Web.Services
         public async Task<GetAllNotificacionesResponse> GetAll()
         {
             AddAuthorizationHeader();
-            GetAllNotificacionesResponse response = null;
+            var response = new GetAllNotificacionesResponse();
+
             try
             {
                 var httpResponse = await _httpClient.GetAsync("Notificacion");
+                var json = await httpResponse.Content.ReadAsStringAsync();
+
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    var json = await httpResponse.Content.ReadAsStringAsync();
                     response = JsonSerializer.Deserialize<GetAllNotificacionesResponse>(json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new GetAllNotificacionesResponse { isSuccess = false, message = "Error al deserializar." };
                 }
                 else
                 {
-                    response = new GetAllNotificacionesResponse { isSuccess = false, message = "Error obteniendo notificaciones." };
+                    var errorResponse = JsonSerializer.Deserialize<ApiResponse>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    response.isSuccess = false;
+                    response.message = errorResponse?.message ?? httpResponse.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.NotFound => "No se encontraron registros.",
+                        System.Net.HttpStatusCode.Unauthorized => "No tiene permisos.",
+                        System.Net.HttpStatusCode.InternalServerError => "Error interno del servidor.",
+                        _ => $"Error inesperado: {httpResponse.StatusCode}"
+                    };
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                response.isSuccess = false;
+                response.message = "La solicitud tardó demasiado. Verifique su conexión.";
+            }
+            catch (HttpRequestException)
+            {
+                response.isSuccess = false;
+                response.message = "No se pudo conectar con el servidor. Verifique que la API esté disponible.";
             }
             catch (Exception ex)
             {
-                response = new GetAllNotificacionesResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+                response.isSuccess = false;
+                response.message = $"Error inesperado: {ex.Message}";
             }
+
             return response;
         }
 
         public async Task<GetNotificacionResponse> GetById(int id)
         {
             AddAuthorizationHeader();
-            GetNotificacionResponse response = null;
+            var response = new GetNotificacionResponse();
+
             try
             {
                 var httpResponse = await _httpClient.GetAsync($"Notificacion/{id}");
+                var json = await httpResponse.Content.ReadAsStringAsync();
+
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    var json = await httpResponse.Content.ReadAsStringAsync();
                     response = JsonSerializer.Deserialize<GetNotificacionResponse>(json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new GetNotificacionResponse { isSuccess = false, message = "Error al deserializar." };
                 }
                 else
                 {
-                    response = new GetNotificacionResponse { isSuccess = false, message = "Error obteniendo la notificación." };
+                    var errorResponse = JsonSerializer.Deserialize<ApiResponse>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    response.isSuccess = false;
+                    response.message = errorResponse?.message ?? httpResponse.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.NotFound => "Registro no encontrado.",
+                        System.Net.HttpStatusCode.Unauthorized => "No tiene permisos.",
+                        System.Net.HttpStatusCode.InternalServerError => "Error interno del servidor.",
+                        _ => $"Error inesperado: {httpResponse.StatusCode}"
+                    };
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                response.isSuccess = false;
+                response.message = "La solicitud tardó demasiado. Verifique su conexión.";
+            }
+            catch (HttpRequestException)
+            {
+                response.isSuccess = false;
+                response.message = "No se pudo conectar con el servidor. Verifique que la API esté disponible.";
             }
             catch (Exception ex)
             {
-                response = new GetNotificacionResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+                response.isSuccess = false;
+                response.message = $"Error inesperado: {ex.Message}";
             }
+
             return response;
         }
 
         public async Task<ApiResponse> Create(NotificacionCreateModel model)
         {
             AddAuthorizationHeader();
-            ApiResponse response = null;
+            var response = new ApiResponse();
+
             try
             {
                 var httpResponse = await _httpClient.PostAsJsonAsync("Notificacion/CrearNotificacion", model);
                 var json = await httpResponse.Content.ReadAsStringAsync();
-                response = JsonSerializer.Deserialize<ApiResponse>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    response = JsonSerializer.Deserialize<ApiResponse>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new ApiResponse { isSuccess = false, message = "Error al deserializar." };
+                }
+                else
+                {
+                    var errorResponse = JsonSerializer.Deserialize<ApiResponse>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    response.isSuccess = false;
+                    response.message = errorResponse?.message ?? httpResponse.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.BadRequest => "Datos inválidos. Revise los campos.",
+                        System.Net.HttpStatusCode.Unauthorized => "No tiene permisos.",
+                        System.Net.HttpStatusCode.InternalServerError => "Error interno del servidor.",
+                        _ => $"Error inesperado: {httpResponse.StatusCode}"
+                    };
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                response.isSuccess = false;
+                response.message = "La solicitud tardó demasiado. Verifique su conexión.";
+            }
+            catch (HttpRequestException)
+            {
+                response.isSuccess = false;
+                response.message = "No se pudo conectar con el servidor. Verifique que la API esté disponible.";
             }
             catch (Exception ex)
             {
-                response = new ApiResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+                response.isSuccess = false;
+                response.message = $"Error inesperado: {ex.Message}";
             }
+
             return response;
         }
 
         public async Task<ApiResponse> Update(NotificacionEditModel model)
         {
             AddAuthorizationHeader();
-            ApiResponse response = null;
+            var response = new ApiResponse();
+
             try
             {
                 var httpResponse = await _httpClient.PostAsJsonAsync("Notificacion/ActualizarNotificacion", model);
                 var json = await httpResponse.Content.ReadAsStringAsync();
-                response = JsonSerializer.Deserialize<ApiResponse>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    response = JsonSerializer.Deserialize<ApiResponse>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new ApiResponse { isSuccess = false, message = "Error al deserializar." };
+                }
+                else
+                {
+                    var errorResponse = JsonSerializer.Deserialize<ApiResponse>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    response.isSuccess = false;
+                    response.message = errorResponse?.message ?? httpResponse.StatusCode switch
+                    {
+                        System.Net.HttpStatusCode.BadRequest => "Datos inválidos. Revise los campos.",
+                        System.Net.HttpStatusCode.NotFound => "Registro no encontrado.",
+                        System.Net.HttpStatusCode.Unauthorized => "No tiene permisos.",
+                        System.Net.HttpStatusCode.InternalServerError => "Error interno del servidor.",
+                        _ => $"Error inesperado: {httpResponse.StatusCode}"
+                    };
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                response.isSuccess = false;
+                response.message = "La solicitud tardó demasiado. Verifique su conexión.";
+            }
+            catch (HttpRequestException)
+            {
+                response.isSuccess = false;
+                response.message = "No se pudo conectar con el servidor. Verifique que la API esté disponible.";
             }
             catch (Exception ex)
             {
-                response = new ApiResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+                response.isSuccess = false;
+                response.message = $"Error inesperado: {ex.Message}";
             }
+
             return response;
         }
     }

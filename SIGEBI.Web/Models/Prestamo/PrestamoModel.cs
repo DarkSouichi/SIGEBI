@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 
@@ -32,24 +33,33 @@ namespace SIGEBI.Web.Models.Prestamo
     public class PrestamoEditModel
     {
         [JsonPropertyName("Id")]
+        [Required(ErrorMessage = "El ID es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "ID inválido.")]
         public int id { get; set; }
 
         [JsonPropertyName("UsuarioId")]
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un usuario válido.")]
         public int usuarioId { get; set; }
 
         [JsonPropertyName("EjemplarId")]
+        [Required(ErrorMessage = "El ejemplar es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un ejemplar válido.")]
         public int ejemplarId { get; set; }
 
         [JsonPropertyName("FechaPrestamo")]
+        [Required(ErrorMessage = "La fecha de préstamo es obligatoria.")]
         public DateTime fechaPrestamo { get; set; }
 
         [JsonPropertyName("FechaDevolucionEsperada")]
+        [Required(ErrorMessage = "La fecha de devolución esperada es obligatoria.")]
         public DateTime fechaDevolucionEsperada { get; set; }
 
         [JsonPropertyName("FechaDevolucionReal")]
         public DateTime? fechaDevolucionReal { get; set; }
 
         [JsonPropertyName("Estado")]
+        [Required(ErrorMessage = "El estado es obligatorio.")]
         public string estado { get; set; } = string.Empty;
 
         [JsonPropertyName("ChangeDate")]
@@ -65,21 +75,25 @@ namespace SIGEBI.Web.Models.Prestamo
     public class PrestamoCreateModel
     {
         [JsonPropertyName("UsuarioId")]
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un usuario válido.")]
         public int usuarioId { get; set; }
 
         [JsonPropertyName("EjemplarId")]
+        [Required(ErrorMessage = "El ejemplar es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un ejemplar válido.")]
         public int ejemplarId { get; set; }
 
         [JsonPropertyName("FechaPrestamo")]
+        [Required(ErrorMessage = "La fecha de préstamo es obligatoria.")]
         public DateTime fechaPrestamo { get; set; }
 
         [JsonPropertyName("FechaDevolucionEsperada")]
+        [Required(ErrorMessage = "La fecha de devolución esperada es obligatoria.")]
         public DateTime fechaDevolucionEsperada { get; set; }
 
-        [JsonPropertyName("FechaDevolucionReal")]
-        public DateTime? fechaDevolucionReal { get; set; }
-
         [JsonPropertyName("Estado")]
+        [Required(ErrorMessage = "El estado es obligatorio.")]
         public string estado { get; set; } = string.Empty;
 
         [JsonPropertyName("ChangeDate")]
@@ -92,10 +106,10 @@ namespace SIGEBI.Web.Models.Prestamo
         public List<SelectListItem> EjemplaresList { get; set; } = new();
     }
 
-    public class ApiResponse
+    /*public class ApiResponse
     {
         public bool isSuccess { get; set; }
         public string message { get; set; } = string.Empty;
         public object? data { get; set; }
-    }
+    }*/
 }
