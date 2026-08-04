@@ -17,24 +17,20 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _recursoApiService.GetAll();
             if (result.isSuccess)
-                return View(result.data);
-            else
-            {
-                ModelState.AddModelError(string.Empty, result.message);
-                return View(new List<RecursoModel>());
-            }
+                return View(result.data ?? new List<RecursoModel>());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new List<RecursoModel>());
         }
 
         public async Task<IActionResult> Details(int id)
         {
             var result = await _recursoApiService.GetById(id);
             if (result.isSuccess)
-                return View(result.data);
-            else
-            {
-                ModelState.AddModelError(string.Empty, result.message);
-                return View(new RecursoModel());
-            }
+                return View(result.data ?? new RecursoModel());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new RecursoModel());
         }
 
         public IActionResult Create()
@@ -46,6 +42,9 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RecursoCreateModel model)
         {
+            if (!ModelState.IsValid)
+                return View(model);
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -59,9 +58,20 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (HttpRequestException)
             {
-                return View();
+                ModelState.AddModelError(string.Empty, "No se pudo conectar con el servidor. Verifique que la API esté disponible.");
+                return View(model);
+            }
+            catch (TaskCanceledException)
+            {
+                ModelState.AddModelError(string.Empty, "La solicitud tardó demasiado. Verifique su conexión.");
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
+                return View(model);
             }
         }
 
@@ -80,17 +90,18 @@ namespace SIGEBI.Web.Controllers
                 };
                 return View(editModel);
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, result.message);
-                return View(new RecursoEditModel());
-            }
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new RecursoEditModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(RecursoEditModel model)
         {
+            if (!ModelState.IsValid)
+                return View(model);
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -104,9 +115,19 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            catch (HttpRequestException)
+            {
+                ModelState.AddModelError(string.Empty, "No se pudo conectar con el servidor. Verifique que la API esté disponible.");
+                return View(model);
+            }
+            catch (TaskCanceledException)
+            {
+                ModelState.AddModelError(string.Empty, "La solicitud tardó demasiado. Verifique su conexión.");
+                return View(model);
+            }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 return View(model);
             }
         }

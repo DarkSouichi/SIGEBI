@@ -12,7 +12,7 @@ namespace SIGEBI.Web.Controllers
         private readonly IUsuarioApiService _usuarioApiService;
 
         public NotificacionController(INotificacionApiService notificacionApiService,
-                                      IUsuarioApiService usuarioApiService) 
+                                      IUsuarioApiService usuarioApiService)
         {
             _notificacionApiService = notificacionApiService;
             _usuarioApiService = usuarioApiService;
@@ -22,18 +22,20 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _notificacionApiService.GetAll();
             if (result.isSuccess)
-                return View(result.data);
-            else
-                return View(new List<NotificacionModel>());
+                return View(result.data ?? new List<NotificacionModel>());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new List<NotificacionModel>());
         }
 
         public async Task<IActionResult> Details(int id)
         {
             var result = await _notificacionApiService.GetById(id);
             if (result.isSuccess)
-                return View(result.data);
-            else
-                return View(new NotificacionModel());
+                return View(result.data ?? new NotificacionModel());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new NotificacionModel());
         }
 
         public async Task<IActionResult> Create()
@@ -47,6 +49,12 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(NotificacionCreateModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarUsuarios(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -61,8 +69,9 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarUsuarios(model);
                 return View(model);
             }
@@ -72,7 +81,10 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _notificacionApiService.GetById(id);
             if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
                 return View(new NotificacionEditModel());
+            }
 
             var model = new NotificacionEditModel
             {
@@ -91,6 +103,12 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(NotificacionEditModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarUsuarios(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -105,8 +123,9 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarUsuarios(model);
                 return View(model);
             }
@@ -114,22 +133,28 @@ namespace SIGEBI.Web.Controllers
 
         private async Task CargarUsuarios(object model)
         {
-            var usuariosResponse = await _usuarioApiService.GetAll();
-            var usuarios = usuariosResponse.data ?? new List<UsuarioModel>();
-
-            var selectList = usuarios.Select(u => new SelectListItem
+            try
             {
-                Value = u.usuarioId.ToString(),
-                Text = $"{u.nombreCompleto} ({u.email})"
-            }).ToList();
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarios = usuariosResponse.data ?? new List<UsuarioModel>();
 
-            if (model is NotificacionCreateModel createModel)
-            {
-                createModel.UsuariosList = selectList;
+                var selectList = usuarios.Select(u => new SelectListItem
+                {
+                    Value = u.usuarioId.ToString(),
+                    Text = $"{u.nombreCompleto} ({u.email})"
+                }).ToList();
+
+                if (model is NotificacionCreateModel createModel)
+                {
+                    createModel.UsuariosList = selectList;
+                }
+                else if (model is NotificacionEditModel editModel)
+                {
+                    editModel.UsuariosList = selectList;
+                }
             }
-            else if (model is NotificacionEditModel editModel)
+            catch (Exception)
             {
-                editModel.UsuariosList = selectList;
             }
         }
     }
