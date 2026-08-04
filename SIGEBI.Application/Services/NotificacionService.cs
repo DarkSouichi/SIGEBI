@@ -92,7 +92,7 @@ namespace SIGEBI.Application.Services
                     Tipo = dto.Tipo,
                     Mensaje = dto.Mensaje,
                     Canal = dto.Canal,
-                    EnviadoEn = dto.EnviadoEn,
+                    EnviadoEn = DateTime.Now, 
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
@@ -102,7 +102,7 @@ namespace SIGEBI.Application.Services
                     accion: "CrearNotificacion",
                     modulo: "Notificaciones",
                     resultado: result.IsSuccess ? "Exitoso" : "Fallido",
-                    detalles: $"UsuarioId: {dto.UsuarioId}, Tipo: {dto.Tipo}, Canal: {dto.Canal}"
+                    detalles: $"UsuarioId: {dto.UsuarioId}, Tipo: {dto.Tipo}"
                 );
             }
             catch (Exception ex)
