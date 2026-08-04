@@ -4,16 +4,32 @@
 }
 
 <h1>Detalles del Recurso</h1>
-<dl class="row">
-    <dt class="col-sm-2">ID</dt>
-    <dd class="col-sm-10">@Model.recursoId</dd>
-    <dt class="col-sm-2">Título</dt>
-    <dd class="col-sm-10">@Model.titulo</dd>
-    <dt class="col-sm-2">Autor</dt>
-    <dd class="col-sm-10">@Model.autor</dd>
-    <dt class="col-sm-2">ISBN</dt>
-    <dd class="col-sm-10">@Model.isbn</dd>
-    <dt class="col-sm-2">Categoría</dt>
-    <dd class="col-sm-10">@Model.categoria</dd>
-</dl>
-<a asp-action="Index">Volver al listado</a>
+
+<div class="details-card">
+    <div class="detail-row">
+        <span class="detail-label">ID</span>
+        <span class="detail-value">@Model.recursoId</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Título</span>
+        <span class="detail-value">@Model.titulo</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Autor</span>
+        <span class="detail-value">@Model.autor</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">ISBN</span>
+        <span class="detail-value">@Model.isbn</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Categoría</span>
+        <span class="detail-value">@Model.categoria</span>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Volver al listado</a>

@@ -7,7 +7,7 @@
 <h1>Editar Notificación</h1>
 
 <form asp-action="Edit">
-    <div asp-validation-summary="All" class="text-danger"></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <input asp-for="id" type="hidden" />
 
@@ -48,11 +48,11 @@
         <span asp-validation-for="canal" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
+    @*<div class="form-group">
         <label asp-for="enviadoEn">Fecha de Envío</label>
         <input asp-for="enviadoEn" type="datetime-local" class="form-control" />
         <span asp-validation-for="enviadoEn" class="text-danger"></span>
-    </div>
+    </div>*@
 
     <div class="form-group mt-2">
         <input type="submit" value="Guardar" class="btn btn-primary" />
