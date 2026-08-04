@@ -1,4 +1,5 @@
-﻿using SIGEBI.Web.Models.Prestamo;
+﻿using SIGEBI.Web.Models;
+using SIGEBI.Web.Models.Prestamo;
 
 namespace SIGEBI.Web.Services
 {

@@ -1,4 +1,5 @@
-﻿using SIGEBI.Web.Models.Penalizacion;
+﻿using SIGEBI.Web.Models;
+using SIGEBI.Web.Models.Penalizacion;
 
 namespace SIGEBI.Web.Services
 {

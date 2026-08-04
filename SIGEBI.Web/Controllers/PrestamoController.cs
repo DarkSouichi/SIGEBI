@@ -26,9 +26,8 @@ namespace SIGEBI.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var result = await _prestamoApiService.GetAll();
-
             if (result.isSuccess)
-                return View(result.data);
+                return View(result.data ?? new List<PrestamoModel>());
 
             ModelState.AddModelError(string.Empty, result.message);
             return View(new List<PrestamoModel>());
@@ -37,9 +36,8 @@ namespace SIGEBI.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _prestamoApiService.GetById(id);
-
             if (result.isSuccess)
-                return View(result.data);
+                return View(result.data ?? new PrestamoModel());
 
             ModelState.AddModelError(string.Empty, result.message);
             return View(new PrestamoModel());
@@ -48,13 +46,11 @@ namespace SIGEBI.Web.Controllers
         public async Task<IActionResult> Create()
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             if (rol != "Admin")
                 return RedirectToAction("Index", "Home");
 
             var model = new PrestamoCreateModel();
             await CargarListas(model);
-
             return View(model);
         }
 
@@ -62,25 +58,41 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PrestamoCreateModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarListas(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
                 model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
 
                 var result = await _prestamoApiService.Create(model);
-
                 if (!result.isSuccess)
                 {
                     ModelState.AddModelError(string.Empty, result.message);
                     await CargarListas(model);
                     return View(model);
                 }
-
                 return RedirectToAction(nameof(Index));
+            }
+            catch (HttpRequestException)
+            {
+                ModelState.AddModelError(string.Empty, "No se pudo conectar con el servidor. Verifique que la API esté disponible.");
+                await CargarListas(model);
+                return View(model);
+            }
+            catch (TaskCanceledException)
+            {
+                ModelState.AddModelError(string.Empty, "La solicitud tardó demasiado. Verifique su conexión.");
+                await CargarListas(model);
+                return View(model);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarListas(model);
                 return View(model);
             }
@@ -89,12 +101,10 @@ namespace SIGEBI.Web.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             if (rol != "Admin")
                 return RedirectToAction("Index", "Home");
 
             var result = await _prestamoApiService.GetById(id);
-
             if (!result.isSuccess)
             {
                 ModelState.AddModelError(string.Empty, result.message);
@@ -113,7 +123,6 @@ namespace SIGEBI.Web.Controllers
             };
 
             await CargarListas(model);
-
             return View(model);
         }
 
@@ -121,25 +130,41 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PrestamoEditModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarListas(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
                 model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
 
                 var result = await _prestamoApiService.Update(model);
-
                 if (!result.isSuccess)
                 {
                     ModelState.AddModelError(string.Empty, result.message);
                     await CargarListas(model);
                     return View(model);
                 }
-
                 return RedirectToAction(nameof(Index));
+            }
+            catch (HttpRequestException)
+            {
+                ModelState.AddModelError(string.Empty, "No se pudo conectar con el servidor. Verifique que la API esté disponible.");
+                await CargarListas(model);
+                return View(model);
+            }
+            catch (TaskCanceledException)
+            {
+                ModelState.AddModelError(string.Empty, "La solicitud tardó demasiado. Verifique su conexión.");
+                await CargarListas(model);
+                return View(model);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarListas(model);
                 return View(model);
             }
@@ -147,55 +172,45 @@ namespace SIGEBI.Web.Controllers
 
         private async Task CargarListas(object model)
         {
-            var usuariosResponse = await _usuarioApiService.GetAll();
-            var usuarios = usuariosResponse.data ?? new List<UsuarioModel>();
-
-            Console.WriteLine($"Usuarios obtenidos: {usuarios.Count}");
-
-            var ejemplaresResponse = await _ejemplarApiService.GetAll();
-
-            Console.WriteLine($"Ejemplares obtenidos: {ejemplaresResponse?.data?.Count ?? 0}");
-            Console.WriteLine($"isSuccess: {ejemplaresResponse?.isSuccess}");
-            Console.WriteLine($"message: {ejemplaresResponse?.message}");
-
-            var ejemplares = ejemplaresResponse?.data ?? new List<EjemplarModel>();
-
-            foreach (var e in ejemplares.Take(5))
+            try
             {
-                Console.WriteLine($"Ejemplar: {e.ejemplarId} - {e.codigoBarras} - {e.estado}");
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarios = usuariosResponse.data ?? new List<UsuarioModel>();
+
+                var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                var ejemplares = ejemplaresResponse.data ?? new List<EjemplarModel>();
+
+                if (model is PrestamoCreateModel createModel)
+                {
+                    createModel.UsuariosList = usuarios.Select(u => new SelectListItem
+                    {
+                        Value = u.usuarioId.ToString(),
+                        Text = $"{u.nombreCompleto} ({u.email})"
+                    }).ToList();
+
+                    createModel.EjemplaresList = ejemplares.Select(e => new SelectListItem
+                    {
+                        Value = e.ejemplarId.ToString(),
+                        Text = $"Ejemplar #{e.ejemplarId} - Código: {e.codigoBarras} - Estado: {e.estado}"
+                    }).ToList();
+                }
+                else if (model is PrestamoEditModel editModel)
+                {
+                    editModel.UsuariosList = usuarios.Select(u => new SelectListItem
+                    {
+                        Value = u.usuarioId.ToString(),
+                        Text = $"{u.nombreCompleto} ({u.email})"
+                    }).ToList();
+
+                    editModel.EjemplaresList = ejemplares.Select(e => new SelectListItem
+                    {
+                        Value = e.ejemplarId.ToString(),
+                        Text = $"Ejemplar #{e.ejemplarId} - Código: {e.codigoBarras} - Estado: {e.estado}"
+                    }).ToList();
+                }
             }
-
-            if (model is PrestamoCreateModel createModel)
+            catch
             {
-                createModel.UsuariosList = usuarios.Select(u => new SelectListItem
-                {
-                    Value = u.usuarioId.ToString(),
-                    Text = $"{u.nombreCompleto} ({u.email})"
-                }).ToList();
-
-                createModel.EjemplaresList = ejemplares.Select(e => new SelectListItem
-                {
-                    Value = e.ejemplarId.ToString(),
-                    Text = $"Ejemplar #{e.ejemplarId} - Código: {e.codigoBarras} - Estado: {e.estado}"
-                }).ToList();
-
-                Console.WriteLine($"EjemplaresList cargada con {createModel.EjemplaresList.Count} elementos.");
-            }
-            else if (model is PrestamoEditModel editModel)
-            {
-                editModel.UsuariosList = usuarios.Select(u => new SelectListItem
-                {
-                    Value = u.usuarioId.ToString(),
-                    Text = $"{u.nombreCompleto} ({u.email})"
-                }).ToList();
-
-                editModel.EjemplaresList = ejemplares.Select(e => new SelectListItem
-                {
-                    Value = e.ejemplarId.ToString(),
-                    Text = $"Ejemplar #{e.ejemplarId} - Código: {e.codigoBarras} - Estado: {e.estado}"
-                }).ToList();
-
-                Console.WriteLine($"EjemplaresList cargada con {editModel.EjemplaresList.Count} elementos.");
             }
         }
     }

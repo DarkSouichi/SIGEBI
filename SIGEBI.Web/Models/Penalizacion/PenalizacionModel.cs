@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SIGEBI.Web.Models.Penalizacion
@@ -30,18 +31,26 @@ namespace SIGEBI.Web.Models.Penalizacion
     public class PenalizacionCreateModel
     {
         [JsonPropertyName("UsuarioId")]
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un usuario válido.")]
         public int usuarioId { get; set; }
 
         [JsonPropertyName("PrestamoId")]
+        [Required(ErrorMessage = "El préstamo es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un préstamo válido.")]
         public int prestamoId { get; set; }
 
         [JsonPropertyName("Monto")]
+        [Required(ErrorMessage = "El monto es obligatorio.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "El monto debe ser mayor a 0.")]
         public decimal monto { get; set; }
 
         [JsonPropertyName("Estado")]
+        [Required(ErrorMessage = "El estado es obligatorio.")]
         public string estado { get; set; } = string.Empty;
 
         [JsonPropertyName("FechaEmision")]
+        [Required(ErrorMessage = "La fecha de emisión es obligatoria.")]
         public DateTime fechaEmision { get; set; }
 
         [JsonPropertyName("ChangeDate")]
@@ -57,21 +66,31 @@ namespace SIGEBI.Web.Models.Penalizacion
     public class PenalizacionEditModel
     {
         [JsonPropertyName("Id")]
+        [Required(ErrorMessage = "El ID es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "ID inválido.")]
         public int id { get; set; }
 
         [JsonPropertyName("UsuarioId")]
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un usuario válido.")]
         public int usuarioId { get; set; }
 
         [JsonPropertyName("PrestamoId")]
+        [Required(ErrorMessage = "El préstamo es obligatorio.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Seleccione un préstamo válido.")]
         public int prestamoId { get; set; }
 
         [JsonPropertyName("Monto")]
+        [Required(ErrorMessage = "El monto es obligatorio.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "El monto debe ser mayor a 0.")]
         public decimal monto { get; set; }
 
         [JsonPropertyName("Estado")]
+        [Required(ErrorMessage = "El estado es obligatorio.")]
         public string estado { get; set; } = string.Empty;
 
         [JsonPropertyName("FechaEmision")]
+        [Required(ErrorMessage = "La fecha de emisión es obligatoria.")]
         public DateTime fechaEmision { get; set; }
 
         [JsonPropertyName("ChangeDate")]
@@ -84,10 +103,10 @@ namespace SIGEBI.Web.Models.Penalizacion
         public List<SelectListItem> PrestamosList { get; set; } = new();
     }
 
-    public class ApiResponse
+    /*public class ApiResponse
     {
         public bool isSuccess { get; set; }
         public string message { get; set; } = string.Empty;
         public object? data { get; set; }
-    }
+    }*/
 }

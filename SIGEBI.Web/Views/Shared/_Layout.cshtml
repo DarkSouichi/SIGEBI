@@ -43,7 +43,7 @@
                     }
                     else
                     {
-                        <!-- Un Usuario normal solo puede ver el Catalogo -->
+                        <!-- Un Usuario normal registrado solo puede ver el Catalogo -->
                         <li><a class="nav-link" asp-controller="Recurso" asp-action="Index">Catálogo</a></li>
                     }
 
@@ -67,6 +67,6 @@
     </div>
 
     <script src="~/js/site.js"></script>
-    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

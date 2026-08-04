@@ -1,4 +1,5 @@
-﻿using SIGEBI.Web.Models.Recurso;
+﻿using SIGEBI.Web.Models;
+using SIGEBI.Web.Models.Recurso;
 
 namespace SIGEBI.Web.Services
 {

@@ -22,18 +22,20 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _ejemplarApiService.GetAll();
             if (result.isSuccess)
-                return View(result.data);
-            else
-                return View(new List<EjemplarModel>());
+                return View(result.data ?? new List<EjemplarModel>());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new List<EjemplarModel>());
         }
 
         public async Task<IActionResult> Details(int id)
         {
             var result = await _ejemplarApiService.GetById(id);
             if (result.isSuccess)
-                return View(result.data);
-            else
-                return View(new EjemplarModel());
+                return View(result.data ?? new EjemplarModel());
+
+            ModelState.AddModelError(string.Empty, result.message);
+            return View(new EjemplarModel());
         }
 
         public async Task<IActionResult> Create()
@@ -47,6 +49,12 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(EjemplarCreateModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarRecursos(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -61,8 +69,9 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarRecursos(model);
                 return View(model);
             }
@@ -72,7 +81,10 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _ejemplarApiService.GetById(id);
             if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
                 return View(new EjemplarEditModel());
+            }
 
             var model = new EjemplarEditModel
             {
@@ -89,6 +101,12 @@ namespace SIGEBI.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EjemplarEditModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                await CargarRecursos(model);
+                return View(model);
+            }
+
             try
             {
                 model.changeDate = DateTime.Now;
@@ -103,32 +121,38 @@ namespace SIGEBI.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 await CargarRecursos(model);
                 return View(model);
             }
         }
 
-
         private async Task CargarRecursos(object model)
         {
-            var recursosResponse = await _recursoApiService.GetAll();
-            var recursos = recursosResponse.data ?? new List<RecursoModel>();
-
-            var selectList = recursos.Select(r => new SelectListItem
+            try
             {
-                Value = r.recursoId.ToString(),
-                Text = $"{r.titulo} - {r.autor}"
-            }).ToList();
+                var recursosResponse = await _recursoApiService.GetAll();
+                var recursos = recursosResponse.data ?? new List<RecursoModel>();
 
-            if (model is EjemplarCreateModel createModel)
-            {
-                createModel.RecursosList = selectList;
+                var selectList = recursos.Select(r => new SelectListItem
+                {
+                    Value = r.recursoId.ToString(),
+                    Text = $"{r.titulo} - {r.autor}"
+                }).ToList();
+
+                if (model is EjemplarCreateModel createModel)
+                {
+                    createModel.RecursosList = selectList;
+                }
+                else if (model is EjemplarEditModel editModel)
+                {
+                    editModel.RecursosList = selectList;
+                }
             }
-            else if (model is EjemplarEditModel editModel)
+            catch (Exception)
             {
-                editModel.RecursosList = selectList;
             }
         }
     }
