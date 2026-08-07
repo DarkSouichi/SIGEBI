@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using OfficeOpenXml;
 using SIGEBI.Web.Models.Ejemplar;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
 using SIGEBI.Web.Services;
-using OfficeOpenXml;        
-using System.IO;              
-using System.Text;            
 
 namespace SIGEBI.Web.Controllers
 {
@@ -25,6 +23,8 @@ namespace SIGEBI.Web.Controllers
             _usuarioApiService = usuarioApiService;
             _ejemplarApiService = ejemplarApiService;
         }
+
+        // ===================== ACCIONES PRINCIPALES =====================
 
         public async Task<IActionResult> Index(string estado)
         {
@@ -48,6 +48,34 @@ namespace SIGEBI.Web.Controllers
             return View(prestamos);
         }
 
+
+        public async Task<IActionResult> MisPrestamos()
+        {
+            var userId = HttpContext.Session.GetInt32("UsuarioId");
+            var esAdmin = HttpContext.Session.GetString("Rol") == "Admin";
+
+            if (esAdmin)
+                return RedirectToAction("Index");
+
+            if (!userId.HasValue)
+            {
+                TempData["Error"] = "Debes iniciar sesión.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var result = await _prestamoApiService.GetAll();
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<PrestamoModel>());
+            }
+
+            var prestamos = result.data ?? new List<PrestamoModel>();
+            prestamos = prestamos.Where(p => p.usuarioId == userId.Value).ToList();
+
+            return View(prestamos);
+        }
+
         public async Task<IActionResult> Details(int id)
         {
             var result = await _prestamoApiService.GetById(id);
@@ -57,6 +85,8 @@ namespace SIGEBI.Web.Controllers
             ModelState.AddModelError(string.Empty, result.message);
             return View(new PrestamoModel());
         }
+
+        // ===================== ACCIONES DE ADMINISTRACIÓN =====================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -186,6 +216,8 @@ namespace SIGEBI.Web.Controllers
 
             return RedirectToAction("Details", "Recurso", new { id = recursoId });
         }
+
+        // ===================== CRUD (CREAR, EDITAR) =====================
 
         public async Task<IActionResult> Create()
         {
@@ -318,6 +350,7 @@ namespace SIGEBI.Web.Controllers
             }
         }
 
+        // ===================== EXPORTAR A EXCEL =====================
 
         [HttpGet]
         public async Task<IActionResult> ExportarExcel(string estado)
@@ -381,6 +414,7 @@ namespace SIGEBI.Web.Controllers
 
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
+
 
         private async Task CargarListas(object model)
         {

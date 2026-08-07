@@ -58,6 +58,23 @@
 
                     @if (isLoggedIn)
                     {
+                        <!-- Solo si NO es Admin -->
+                        @if (!esAdmin)
+                        {
+                            <li>
+                                <a class="nav-link" asp-controller="Prestamo" asp-action="MisPrestamos">
+                                    <i class="fas fa-book-open"></i> Mis Préstamos
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="nav-link" asp-controller="Penalizacion" asp-action="MisPenalizaciones">
+                                    <i class="fas fa-exclamation-triangle"></i> Mis Penalizaciones
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Estos sí son visibles para todos los logueados (incluyendo Admin) -->
                         <li>
                             <a class="nav-link" asp-controller="Notificacion" asp-action="Index">
                                 <i class="fas fa-bell"></i> Notificaciones
@@ -129,9 +146,9 @@
                     </div>
                 }
 
-            </div> 
+            </div>
 
-        </div> 
+        </div>
     </nav>
 </header>
 

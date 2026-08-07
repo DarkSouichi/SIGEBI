@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using OfficeOpenXml;
 using SIGEBI.Web.Models.Penalizacion;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
 using SIGEBI.Web.Services;
-using OfficeOpenXml;
 
 namespace SIGEBI.Web.Controllers
 {
@@ -23,6 +23,7 @@ namespace SIGEBI.Web.Controllers
             _prestamoApiService = prestamoApiService;
         }
 
+        // ===================== ACCIONES PRINCIPALES =====================
 
         public async Task<IActionResult> Index(string estado)
         {
@@ -45,6 +46,35 @@ namespace SIGEBI.Web.Controllers
 
             return View(penalizaciones);
         }
+
+        public async Task<IActionResult> MisPenalizaciones()
+        {
+            var userId = HttpContext.Session.GetInt32("UsuarioId");
+            var esAdmin = HttpContext.Session.GetString("Rol") == "Admin";
+
+            if (esAdmin)
+                return RedirectToAction("Index");
+
+            if (!userId.HasValue)
+            {
+                TempData["Error"] = "Debes iniciar sesión.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var result = await _penalizacionApiService.GetAll();
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<PenalizacionModel>());
+            }
+
+            var penalizaciones = result.data ?? new List<PenalizacionModel>();
+            penalizaciones = penalizaciones.Where(p => p.usuarioId == userId.Value).ToList();
+
+            return View(penalizaciones);
+        }
+
+        // ===================== EXPORTAR A EXCEL =====================
 
         [HttpGet]
         public async Task<IActionResult> ExportarExcel(string estado)
@@ -107,6 +137,8 @@ namespace SIGEBI.Web.Controllers
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
+     
+
         public async Task<IActionResult> Details(int id)
         {
             var result = await _penalizacionApiService.GetById(id);
@@ -116,6 +148,8 @@ namespace SIGEBI.Web.Controllers
             ModelState.AddModelError(string.Empty, result.message);
             return View(new PenalizacionModel());
         }
+
+        // ===================== CRUD (CREAR, EDITAR) =====================
 
         public async Task<IActionResult> Create()
         {
@@ -247,6 +281,8 @@ namespace SIGEBI.Web.Controllers
             }
         }
 
+        // ===================== MÉTODOS PRIVADOS =====================
+
         private async Task CargarListas(object model)
         {
             try
@@ -288,9 +324,8 @@ namespace SIGEBI.Web.Controllers
             }
             catch
             {
+                // Si falla, no mostrar error para no bloquear la vista
             }
-
-
         }
     }
 }
