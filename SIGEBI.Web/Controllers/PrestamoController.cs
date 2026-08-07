@@ -102,6 +102,47 @@ namespace SIGEBI.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Devolver(int id)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+                return RedirectToAction("Index", "Home");
+
+            var result = await _prestamoApiService.GetById(id);
+            if (!result.isSuccess)
+            {
+                TempData["Error"] = "Préstamo no encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = new PrestamoEditModel
+            {
+                id = result.data.prestamoId,
+                usuarioId = result.data.usuarioId,
+                ejemplarId = result.data.ejemplarId,
+                fechaPrestamo = result.data.fechaPrestamo,
+                fechaDevolucionEsperada = result.data.fechaDevolucionEsperada,
+                fechaDevolucionReal = DateTime.Now, 
+                estado = "Devuelto", 
+                changeDate = DateTime.Now,
+                changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1
+            };
+
+            var updateResult = await _prestamoApiService.Update(model);
+            if (updateResult.isSuccess)
+            {
+                TempData["Success"] = "Devolución registrada correctamente. El inventario se ha actualizado.";
+            }
+            else
+            {
+                TempData["Error"] = updateResult.message ?? "Error al registrar la devolución.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Solicitar(int recursoId)
         {
             var userId = HttpContext.Session.GetInt32("UsuarioId");
