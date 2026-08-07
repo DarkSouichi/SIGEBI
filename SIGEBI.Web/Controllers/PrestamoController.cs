@@ -4,6 +4,7 @@ using OfficeOpenXml;
 using SIGEBI.Web.Models.Ejemplar;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
+using SIGEBI.Web.Models.Notificacion; 
 using SIGEBI.Web.Services;
 
 namespace SIGEBI.Web.Controllers
@@ -13,15 +14,18 @@ namespace SIGEBI.Web.Controllers
         private readonly IPrestamoApiService _prestamoApiService;
         private readonly IUsuarioApiService _usuarioApiService;
         private readonly IEjemplarApiService _ejemplarApiService;
+        private readonly INotificacionApiService _notificacionApiService; 
 
         public PrestamoController(
             IPrestamoApiService prestamoApiService,
             IUsuarioApiService usuarioApiService,
-            IEjemplarApiService ejemplarApiService)
+            IEjemplarApiService ejemplarApiService,
+            INotificacionApiService notificacionApiService) 
         {
             _prestamoApiService = prestamoApiService;
             _usuarioApiService = usuarioApiService;
             _ejemplarApiService = ejemplarApiService;
+            _notificacionApiService = notificacionApiService;
         }
 
         // ===================== ACCIONES PRINCIPALES =====================
@@ -42,12 +46,11 @@ namespace SIGEBI.Web.Controllers
                 prestamos = prestamos.Where(p => p.estado == estado).ToList();
             }
 
-            ViewBag.Estados = new List<string> { "Pendiente", "Activo", "Devuelto", "Vencido" };
+            ViewBag.Estados = new List<string> { "Pendiente", "Activo", "Devuelto", "Vencido", "Rechazado" };
             ViewBag.EstadoSeleccionado = estado;
 
             return View(prestamos);
         }
-
 
         public async Task<IActionResult> MisPrestamos()
         {
@@ -122,11 +125,78 @@ namespace SIGEBI.Web.Controllers
             var updateResult = await _prestamoApiService.Update(model);
             if (updateResult.isSuccess)
             {
+                await CrearNotificacion(
+                    result.data.usuarioId,
+                    "Préstamo Aprobado",
+                    $"Tu préstamo del ejemplar #{result.data.ejemplarId} ha sido aprobado.",
+                    result.data.prestamoId
+                );
                 TempData["Success"] = "Préstamo aprobado correctamente. El inventario se ha actualizado.";
             }
             else
             {
                 TempData["Error"] = updateResult.message ?? "Error al aprobar el préstamo.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Rechazar(int id)
+        {
+            Console.WriteLine($"===== Rechazar llamado con ID: {id} =====");
+
+            var rol = HttpContext.Session.GetString("Rol");
+            Console.WriteLine($"Rol: {rol}");
+
+            if (rol != "Admin")
+            {
+                Console.WriteLine("Usuario no es Admin. Redirigiendo.");
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _prestamoApiService.GetById(id);
+            if (!result.isSuccess || result.data == null)
+            {
+                Console.WriteLine($"Préstamo no encontrado: {result.message}");
+                TempData["Error"] = "Préstamo no encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            Console.WriteLine($"Préstamo encontrado. Estado actual: {result.data.estado}");
+
+            var model = new PrestamoEditModel
+            {
+                id = result.data.prestamoId,
+                usuarioId = result.data.usuarioId,
+                ejemplarId = result.data.ejemplarId,
+                fechaPrestamo = result.data.fechaPrestamo,
+                fechaDevolucionEsperada = result.data.fechaDevolucionEsperada,
+                fechaDevolucionReal = DateTime.Now,
+                estado = "Rechazado",
+                changeDate = DateTime.Now,
+                changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1
+            };
+
+            Console.WriteLine($"Modelo creado con estado: {model.estado}");
+
+            var updateResult = await _prestamoApiService.Update(model);
+            Console.WriteLine($"Resultado del update: isSuccess={updateResult.isSuccess}, message={updateResult.message}");
+
+            if (updateResult.isSuccess)
+            {
+                await CrearNotificacion(
+                    result.data.usuarioId,
+                    "Préstamo Rechazado",
+                    $"Tu solicitud de préstamo del ejemplar #{result.data.ejemplarId} ha sido rechazada por el administrador.",
+                    result.data.prestamoId
+                );
+                TempData["Success"] = "Préstamo rechazado correctamente.";
+            }
+            else
+            {
+                TempData["Error"] = updateResult.message ?? "Error al rechazar el préstamo.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -163,6 +233,12 @@ namespace SIGEBI.Web.Controllers
             var updateResult = await _prestamoApiService.Update(model);
             if (updateResult.isSuccess)
             {
+                await CrearNotificacion(
+                    result.data.usuarioId,
+                    "Devolución Registrada",
+                    $"Tu devolución del ejemplar #{result.data.ejemplarId} ha sido registrada.",
+                    result.data.prestamoId
+                );
                 TempData["Success"] = "Devolución registrada correctamente. El inventario se ha actualizado.";
             }
             else
@@ -172,6 +248,8 @@ namespace SIGEBI.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // ===================== SOLICITUD DE PRÉSTAMO (DESDE CATÁLOGO) =====================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -207,6 +285,11 @@ namespace SIGEBI.Web.Controllers
             var result = await _prestamoApiService.Create(model);
             if (result.isSuccess)
             {
+                await CrearNotificacion(
+                    userId.Value,
+                    "Solicitud de Préstamo",
+                    $"Has solicitado el préstamo del ejemplar #{ejemplar.ejemplarId}. Espera la aprobación."
+                );
                 TempData["Success"] = "Solicitud de préstamo enviada. Espera la aprobación del bibliotecario.";
             }
             else
@@ -415,6 +498,22 @@ namespace SIGEBI.Web.Controllers
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
+        // ===================== MÉTODOS PRIVADOS =====================
+
+        private async Task CrearNotificacion(int usuarioId, string tipo, string mensaje, int? prestamoId = null)
+        {
+            var model = new NotificacionCreateModel
+            {
+                usuarioId = usuarioId,
+                tipo = tipo,
+                mensaje = mensaje,
+                canal = "Sistema",
+                prestamoId = prestamoId,
+                changeDate = DateTime.Now,
+                changeUser = 1
+            };
+            await _notificacionApiService.Create(model);
+        }
 
         private async Task CargarListas(object model)
         {

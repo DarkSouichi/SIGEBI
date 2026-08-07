@@ -53,6 +53,9 @@ namespace SIGEBI.Web.Models.Notificacion
         [StringLength(50, ErrorMessage = "El canal no puede exceder 50 caracteres.")]
         public string canal { get; set; } = string.Empty;
 
+        [JsonPropertyName("PrestamoId")]
+        public int? prestamoId { get; set; }
+
         [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }
 

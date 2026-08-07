@@ -7,6 +7,28 @@
 
 <h1>Listado de Préstamos</h1>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle"></i> @TempData["Info"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <!-- Filtro por estado -->
@@ -66,10 +88,10 @@
                     <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
                     <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>
                     <td>@Html.DisplayFor(x => item.estado)</td>
-
                     @if (esAdmin)
                     {
                         <td>
+                            <!-- Botón Devolver (solo para Activo) -->
                             @if (item.estado == "Activo")
                             {
                                 <form asp-action="Devolver" method="post" style="display:inline;">
@@ -82,6 +104,7 @@
                                 <span>|</span>
                             }
 
+                            <!-- Botones para Pendiente: Aprobar y Rechazar -->
                             @if (item.estado == "Pendiente")
                             {
                                 <form asp-action="Aprobar" method="post" style="display:inline;">
@@ -89,6 +112,16 @@
                                     <input type="hidden" name="id" value="@item.prestamoId" />
                                     <button type="submit" class="btn btn-success btn-sm">
                                         <i class="fas fa-check"></i> Aprobar
+                                    </button>
+                                </form>
+                                <span>|</span>
+
+                                <!-- Botón Rechazar -->
+                                <form asp-action="Rechazar" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.prestamoId" />
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de rechazar este préstamo?');">
+                                        <i class="fas fa-times"></i> Rechazar
                                     </button>
                                 </form>
                                 <span>|</span>

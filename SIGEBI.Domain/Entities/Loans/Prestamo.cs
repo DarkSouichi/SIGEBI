@@ -15,8 +15,9 @@ public class Prestamo : AuditEntity
 
 public enum EstadoPrestamo
 {
-    Pendiente,
-    Activo,
-    Devuelto,
-    Vencido
+    Pendiente = 0,
+    Activo = 1,
+    Devuelto = 2,
+    Vencido = 3,
+    Rechazado = 4 
 }
