@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Prestamo;
+using SIGEBI.Web.Models.Usuario;
+using SIGEBI.Web.Models.Ejemplar;
 
 namespace SIGEBI.Web.Services
 {
@@ -9,12 +11,18 @@ namespace SIGEBI.Web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUsuarioApiService _usuarioApiService;
+        private readonly IEjemplarApiService _ejemplarApiService;
 
         public PrestamoApiService(IHttpClientFactory httpClientFactory,
-                                  IHttpContextAccessor httpContextAccessor)
+                                  IHttpContextAccessor httpContextAccessor,
+                                  IUsuarioApiService usuarioApiService,
+                                  IEjemplarApiService ejemplarApiService)
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _usuarioApiService = usuarioApiService;
+            _ejemplarApiService = ejemplarApiService;
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -75,7 +83,34 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombres(response);
+
             return response;
+        }
+
+        private async Task EnriquecerConNombres(GetAllPrestamosResponse response)
+        {
+            if (response.isSuccess && response.data != null && response.data.Any())
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarioDict = usuariosResponse.isSuccess && usuariosResponse.data != null
+                    ? usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto)
+                    : new Dictionary<int, string>();
+
+                var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                var ejemplarDict = ejemplaresResponse.isSuccess && ejemplaresResponse.data != null
+                    ? ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras)
+                    : new Dictionary<int, string>();
+
+                foreach (var item in response.data)
+                {
+                    if (usuarioDict.TryGetValue(item.usuarioId, out var nombre))
+                        item.nombreUsuario = nombre;
+
+                    if (ejemplarDict.TryGetValue(item.ejemplarId, out var codigo))
+                        item.codigoEjemplar = codigo;
+                }
+            }
         }
 
         public async Task<GetPrestamoResponse> GetById(int id)
@@ -93,6 +128,25 @@ namespace SIGEBI.Web.Services
                     response = JsonSerializer.Deserialize<GetPrestamoResponse>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                         ?? new GetPrestamoResponse { isSuccess = false, message = "Error al deserializar." };
+
+                    if (response.isSuccess && response.data != null)
+                    {
+                        var usuariosResponse = await _usuarioApiService.GetAll();
+                        if (usuariosResponse.isSuccess && usuariosResponse.data != null)
+                        {
+                            var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
+                            if (usuarioDict.TryGetValue(response.data.usuarioId, out var nombre))
+                                response.data.nombreUsuario = nombre;
+                        }
+
+                        var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                        if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null)
+                        {
+                            var ejemplarDict = ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras);
+                            if (ejemplarDict.TryGetValue(response.data.ejemplarId, out var codigo))
+                                response.data.codigoEjemplar = codigo;
+                        }
+                    }
                 }
                 else
                 {

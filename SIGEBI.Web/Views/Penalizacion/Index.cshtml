@@ -18,8 +18,8 @@
     <thead>
         <tr>
             <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
-            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
-            <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+            <th>Usuario</th>                      
+            <th>Préstamo</th>                       
             <th>@Html.DisplayNameFor(m => m.monto)</th>
             <th>@Html.DisplayNameFor(m => m.estado)</th>
             <th>@Html.DisplayNameFor(m => m.fechaEmision)</th>
@@ -34,8 +34,8 @@
         {
             <tr>
                 <td>@Html.DisplayFor(x => item.penalizacionId)</td>
-                <td>@Html.DisplayFor(x => item.usuarioId)</td>
-                <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                <td>@item.nombreUsuario</td>         
+                <td>@item.prestamoInfo</td>
                 <td>@Html.DisplayFor(x => item.monto)</td>
                 <td>@Html.DisplayFor(x => item.estado)</td>
                 <td>@Html.DisplayFor(x => item.fechaEmision)</td>

@@ -8,13 +8,13 @@ namespace SIGEBI.Web.Models.Notificacion
     {
         public int notificacionId { get; set; }
         public int usuarioId { get; set; }
+        public string nombreUsuario { get; set; } = string.Empty;
         public string tipo { get; set; } = string.Empty;
         public string mensaje { get; set; } = string.Empty;
         public DateTime enviadoEn { get; set; }
         public string canal { get; set; } = string.Empty;
-
-        public int? prestamoId { get; set; } 
-        public int? recursoId { get; set; }   
+        public int? prestamoId { get; set; }
+        public int? recursoId { get; set; }
         public bool leida { get; set; }
     }
 

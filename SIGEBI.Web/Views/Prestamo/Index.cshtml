@@ -32,8 +32,8 @@
         <thead>
             <tr>
                 <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
-                <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
-                <th>@Html.DisplayNameFor(m => m.ejemplarId)</th>
+                <th>Usuario</th>                        
+                <th>Ejemplar</th>                        
                 <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
                 <th>@Html.DisplayNameFor(m => m.fechaDevolucionEsperada)</th>
                 <th>@Html.DisplayNameFor(m => m.estado)</th>
@@ -48,8 +48,8 @@
             {
                 <tr>
                     <td>@Html.DisplayFor(x => item.prestamoId)</td>
-                    <td>@Html.DisplayFor(x => item.usuarioId)</td>
-                    <td>@Html.DisplayFor(x => item.ejemplarId)</td>
+                    <td>@item.nombreUsuario</td>      
+                    <td>@item.codigoEjemplar</td>        
                     <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
                     <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>
                     <td>@Html.DisplayFor(x => item.estado)</td>

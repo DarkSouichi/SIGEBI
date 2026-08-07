@@ -12,5 +12,6 @@ public class Notificacion : AuditEntity
     public string Canal { get; set; } = "Email";
 
     public int? PrestamoId { get; set; }  
-    public int? RecursoId { get; set; }   
+    public int? RecursoId { get; set; }
+    public bool Leida { get; set; } = false;
 }

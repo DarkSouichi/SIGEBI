@@ -9,6 +9,7 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+<!-- Filtro por tipo -->
 <form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
     <select name="tipo" class="form-control" style="max-width: 200px;">
         <option value="">-- Todos los tipos --</option>
@@ -26,16 +27,21 @@
     <p><a asp-action="Create" class="btn btn-primary">Agregar Nueva Notificación</a></p>
 }
 
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+}
+
 <table class="table">
     <thead>
         <tr>
             <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
-            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
+            <th>Usuario</th>                        
             <th>@Html.DisplayNameFor(m => m.tipo)</th>
-            <th>Mensaje</th> 
+            <th>Mensaje</th>
             <th>@Html.DisplayNameFor(m => m.enviadoEn)</th>
             <th>@Html.DisplayNameFor(m => m.canal)</th>
-            <th>Estado</th> 
+            <th>Estado</th>
             @if (esAdmin)
             {
                 <th>Acciones</th>
@@ -47,31 +53,37 @@
         {
             <tr>
                 <td>@Html.DisplayFor(x => item.notificacionId)</td>
-                <td>@Html.DisplayFor(x => item.usuarioId)</td>
+                <td>@item.nombreUsuario</td>         
                 <td>@Html.DisplayFor(x => item.tipo)</td>
                 <td>
                     @if (item.prestamoId.HasValue)
                     {
-                        <a asp-controller="Prestamo" asp-action="Details" asp-route-id="@item.prestamoId" style="text-decoration: none; color: #2563EB;">
+                        <a asp-controller="Prestamo" asp-action="Details" asp-route-id="@item.prestamoId"
+                           style="text-decoration: none; color: #2563EB; cursor: pointer;"
+                           onclick="return marcarLeida(@item.notificacionId, this);">
                             <i class="fas fa-link"></i> @item.mensaje
                         </a>
                     }
                     else if (item.recursoId.HasValue)
                     {
-                        <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId" style="text-decoration: none; color: #2563EB;">
+                        <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId"
+                           style="text-decoration: none; color: #2563EB; cursor: pointer;"
+                           onclick="return marcarLeida(@item.notificacionId, this);">
                             <i class="fas fa-link"></i> @item.mensaje
                         </a>
                     }
                     else
                     {
-                        @item.mensaje
+                        <a href="#" style="text-decoration: none; color: #1E293B; cursor: pointer;"
+                           onclick="return marcarLeida(@item.notificacionId, this);">
+                            @item.mensaje
+                        </a>
                     }
                 </td>
                 <td>@item.enviadoEn.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@Html.DisplayFor(x => item.canal)</td>
                 <td>
-
-                    <span class="badge @(item.leida ? "badge-secondary" : "badge-primary")">
+                    <span class="badge @(item.leida ? "badge-secondary" : "badge-primary")" id="badge-@item.notificacionId">
                         @(item.leida ? "Leída" : "No leída")
                     </span>
                 </td>
@@ -82,7 +94,59 @@
                         @Html.ActionLink("Detalles", "Details", new { id = item.notificacionId })
                     </td>
                 }
+                else
+                {
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="return marcarLeida(@item.notificacionId, this);">
+                            <i class="fas fa-check"></i> Marcar leída
+                        </button>
+                    </td>
+                }
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        function marcarLeida(id, element) {
+            var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (!token) {
+                alert('Token CSRF no encontrado. Recarga la página.');
+                return false;
+            }
+
+            fetch(`/Notificacion/MarcarLeida/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: '{}'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isSuccess) {
+                        var badge = document.getElementById(`badge-${id}`);
+                        if (badge) {
+                            badge.textContent = 'Leída';
+                            badge.classList.remove('badge-primary');
+                            badge.classList.add('badge-secondary');
+                        }
+                        if (element && element.tagName === 'A') {
+                            element.style.color = '#64748B';
+                            element.style.textDecoration = 'line-through';
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión. Intente nuevamente.');
+                });
+
+            return false;
+        }
+    </script>
+}

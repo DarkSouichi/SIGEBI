@@ -12,6 +12,7 @@ namespace SIGEBI.Web.Models.Ejemplar
         public string codigoBarras { get; set; } = string.Empty;
 
         public int recursoId { get; set; }
+        public string tituloRecurso { get; set; } = string.Empty;
 
         [JsonPropertyName("estado")] 
         public int estado { get; set; } 

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Penalizacion;
+using SIGEBI.Web.Models.Usuario;
+using SIGEBI.Web.Models.Prestamo;
 
 namespace SIGEBI.Web.Services
 {
@@ -9,12 +11,18 @@ namespace SIGEBI.Web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUsuarioApiService _usuarioApiService;
+        private readonly IPrestamoApiService _prestamoApiService;
 
         public PenalizacionApiService(IHttpClientFactory httpClientFactory,
-                                      IHttpContextAccessor httpContextAccessor)
+                                      IHttpContextAccessor httpContextAccessor,
+                                      IUsuarioApiService usuarioApiService,
+                                      IPrestamoApiService prestamoApiService)
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _usuarioApiService = usuarioApiService;
+            _prestamoApiService = prestamoApiService;
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -75,7 +83,36 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombres(response);
+
             return response;
+        }
+
+        private async Task EnriquecerConNombres(GetAllPenalizacionesResponse response)
+        {
+            if (response.isSuccess && response.data != null && response.data.Any())
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarioDict = usuariosResponse.isSuccess && usuariosResponse.data != null
+                    ? usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto)
+                    : new Dictionary<int, string>();
+
+                var prestamosResponse = await _prestamoApiService.GetAll();
+                var prestamoDict = prestamosResponse.isSuccess && prestamosResponse.data != null
+                    ? prestamosResponse.data.ToDictionary(p => p.prestamoId, p => p.codigoEjemplar ?? $"Préstamo #{p.prestamoId}")
+                    : new Dictionary<int, string>();
+
+                foreach (var item in response.data)
+                {
+                    if (usuarioDict.TryGetValue(item.usuarioId, out var nombre))
+                        item.nombreUsuario = nombre;
+
+                    if (prestamoDict.TryGetValue(item.prestamoId, out var info))
+                        item.prestamoInfo = info;
+                    else
+                        item.prestamoInfo = $"Préstamo #{item.prestamoId}";
+                }
+            }
         }
 
         public async Task<GetPenalizacionResponse> GetById(int id)
@@ -125,7 +162,33 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombres(response);
+
             return response;
+        }
+
+        private async Task EnriquecerConNombres(GetPenalizacionResponse response)
+        {
+            if (response.isSuccess && response.data != null)
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                if (usuariosResponse.isSuccess)
+                {
+                    var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
+                    if (usuarioDict.TryGetValue(response.data.usuarioId, out var nombre))
+                        response.data.nombreUsuario = nombre;
+                }
+
+                var prestamosResponse = await _prestamoApiService.GetAll();
+                if (prestamosResponse.isSuccess)
+                {
+                    var prestamoDict = prestamosResponse.data.ToDictionary(p => p.prestamoId, p => p.codigoEjemplar ?? $"Préstamo #{p.prestamoId}");
+                    if (prestamoDict.TryGetValue(response.data.prestamoId, out var info))
+                        response.data.prestamoInfo = info;
+                    else
+                        response.data.prestamoInfo = $"Préstamo #{response.data.prestamoId}";
+                }
+            }
         }
 
         public async Task<ApiResponse> Create(PenalizacionCreateModel model)

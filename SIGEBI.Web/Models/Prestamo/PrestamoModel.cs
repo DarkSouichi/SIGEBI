@@ -9,7 +9,9 @@ namespace SIGEBI.Web.Models.Prestamo
     {
         public int prestamoId { get; set; }
         public int usuarioId { get; set; }
+        public string nombreUsuario { get; set; } = string.Empty;  
         public int ejemplarId { get; set; }
+        public string codigoEjemplar { get; set; } = string.Empty; 
         public DateTime fechaPrestamo { get; set; }
         public DateTime fechaDevolucionEsperada { get; set; }
         public DateTime? fechaDevolucionReal { get; set; }

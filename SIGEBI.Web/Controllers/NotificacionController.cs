@@ -150,6 +150,17 @@ namespace SIGEBI.Web.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarcarLeida(int id)
+        {
+            var result = await _notificacionApiService.MarcarLeida(id);
+            if (result.isSuccess)
+                return Json(new { isSuccess = true, message = result.message });
+            else
+                return Json(new { isSuccess = false, message = result.message });
+        }
+
         private async Task CargarUsuarios(object model)
         {
             try

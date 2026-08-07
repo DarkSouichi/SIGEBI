@@ -15,7 +15,7 @@
             <th>ID</th>
             <th>Código de Barras</th>
             <th>Estado</th>
-            <th>Recurso ID</th>
+            <th>Recurso</th>                  
             <th>Acciones</th>
         </tr>
     </thead>
@@ -26,7 +26,7 @@
                 <td>@item.ejemplarId</td>
                 <td>@item.codigoBarras</td>
                 <td>@item.EstadoTexto</td>
-                <td>@item.recursoId</td>
+                <td>@item.tituloRecurso</td>      
                 <td>
                     @Html.ActionLink("Editar", "Edit", new { id = item.ejemplarId }) |
                     @Html.ActionLink("Detalles", "Details", new { id = item.ejemplarId }) |

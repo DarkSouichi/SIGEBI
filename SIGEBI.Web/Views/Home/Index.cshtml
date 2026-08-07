@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "SIGEBI - Sistema de Gestión de Bibliotecas";
-    var rol = Context.Session.GetString("Rol");
-    var esAdmin = rol == "Admin";
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("Token"));
+    var esAdmin = Context.Session.GetString("Rol") == "Admin";
 }
 
 <div class="hero">
@@ -10,9 +10,23 @@
 </div>
 
 <div class="card-grid">
+    <!-- Catálogo visible para todos -->
+    <a asp-controller="Recurso" asp-action="Index" class="card-item">
+        <h3>Catálogo</h3>
+        <p>Gestión de recursos</p>
+    </a>
+
+    @if (isLoggedIn)
+    {
+        <a asp-controller="Notificacion" asp-action="Index" class="card-item">
+            <h3>Notificaciones</h3>
+            <p>Consulta tus notificaciones</p>
+        </a>
+    }
+
+    <!-- Módulos solo para Admin -->
     @if (esAdmin)
     {
-        <!-- Catalogo completo solo para Administradores -->
         <a asp-controller="Usuario" asp-action="Index" class="card-item">
             <h3>Usuarios</h3>
             <p>Gestión de usuarios</p>
@@ -25,19 +39,9 @@
             <h3>Penalizaciones</h3>
             <p>Gestión de penalizaciones</p>
         </a>
-        <a asp-controller="Notificacion" asp-action="Index" class="card-item">
-            <h3>Notificaciones</h3>
-            <p>Gestión de notificaciones</p>
+        <a asp-controller="Ejemplar" asp-action="Index" class="card-item">
+            <h3>Ejemplares</h3>
+            <p>Gestión de ejemplares</p>
         </a>
-    }
-
-    <!-- Catalogo que es visible para todos -->
-    <a asp-controller="Recurso" asp-action="Index" class="card-item">
-        <h3>Catálogo</h3>
-        <p>Gestión de recursos</p>
-    </a>
-
-    @if (!esAdmin)
-    {
     }
 </div>

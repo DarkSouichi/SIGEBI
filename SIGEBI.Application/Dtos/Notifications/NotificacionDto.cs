@@ -12,6 +12,7 @@ namespace SIGEBI.Application.Dtos.Notifications
         public string Canal { get; set; } = string.Empty;
         public int? PrestamoId { get; set; }
         public int? RecursoId { get; set; }
+        public bool Leida { get; set; }
 
         public DateTime ChangeDate { get; set; }
         public int ChangeUser { get; set; }
@@ -37,6 +38,7 @@ namespace SIGEBI.Application.Dtos.Notifications
 
         public int? PrestamoId { get; set; }
         public int? RecursoId { get; set; }
+        public bool Leida { get; set; } = false;
 
 
         public DateTime ChangeDate { get; set; }
@@ -64,6 +66,7 @@ namespace SIGEBI.Application.Dtos.Notifications
         [StringLength(50, ErrorMessage = "El canal no puede tener más de 50 caracteres.")]
         public string Canal { get; set; } = string.Empty;
 
+        public bool Leida { get; set; }
         public DateTime EnviadoEn { get; set; }
 
         public DateTime ChangeDate { get; set; }
