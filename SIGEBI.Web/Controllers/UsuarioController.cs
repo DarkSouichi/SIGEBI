@@ -8,10 +8,13 @@ namespace SIGEBI.Web.Controllers
     public class UsuarioController : Controller
     {
         private readonly IUsuarioApiService _usuarioApiService;
+        private readonly IPenalizacionApiService _penalizacionApiService;
 
-        public UsuarioController(IUsuarioApiService usuarioApiService)
+        public UsuarioController(IUsuarioApiService usuarioApiService,
+                                 IPenalizacionApiService penalizacionApiService) 
         {
             _usuarioApiService = usuarioApiService;
+            _penalizacionApiService = penalizacionApiService;
         }
 
         public async Task<IActionResult> Index(string rol, bool? activo)
@@ -25,17 +28,15 @@ namespace SIGEBI.Web.Controllers
 
             var usuarios = result.data ?? new List<UsuarioModel>();
 
-            ViewBag.RolSeleccionado = rol;
-            ViewBag.ActivoSeleccionado = activo;
+            await EnriquecerConMora(usuarios);
 
             if (!string.IsNullOrEmpty(rol) && int.TryParse(rol, out var rolId))
-            {
                 usuarios = usuarios.Where(u => u.rolId == rolId).ToList();
-            }
             if (activo.HasValue)
-            {
                 usuarios = usuarios.Where(u => u.estaActivo == activo.Value).ToList();
-            }
+
+            ViewBag.RolSeleccionado = rol;
+            ViewBag.ActivoSeleccionado = activo?.ToString();
 
             return View(usuarios);
         }
@@ -43,11 +44,52 @@ namespace SIGEBI.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _usuarioApiService.GetById(id);
-            if (result.isSuccess)
-                return View(result.data ?? new UsuarioModel());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new UsuarioModel());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new UsuarioModel());
+            var usuario = result.data;
+            await EnriquecerConMora(usuario);
+
+            return View(usuario);
+        }
+
+        private async Task EnriquecerConMora(List<UsuarioModel> usuarios)
+        {
+            if (usuarios == null || !usuarios.Any()) return;
+
+            var penalizacionesResponse = await _penalizacionApiService.GetAll();
+            if (penalizacionesResponse.isSuccess && penalizacionesResponse.data != null)
+            {
+                var moraPorUsuario = penalizacionesResponse.data
+                    .Where(p => p.estado == "Activa")
+                    .GroupBy(p => p.usuarioId)
+                    .ToDictionary(g => g.Key, g => g.Sum(p => p.monto));
+
+                foreach (var item in usuarios)
+                {
+                    if (moraPorUsuario.TryGetValue(item.usuarioId, out var totalMora))
+                        item.TotalMora = totalMora;
+                    else
+                        item.TotalMora = 0;
+                }
+            }
+        }
+
+        private async Task EnriquecerConMora(UsuarioModel usuario)
+        {
+            if (usuario == null) return;
+
+            var penalizacionesResponse = await _penalizacionApiService.GetAll();
+            if (penalizacionesResponse.isSuccess && penalizacionesResponse.data != null)
+            {
+                var totalMora = penalizacionesResponse.data
+                    .Where(p => p.usuarioId == usuario.usuarioId && p.estado == "Activa")
+                    .Sum(p => p.monto);
+                usuario.TotalMora = totalMora;
+            }
         }
 
         public IActionResult Create()
@@ -170,14 +212,12 @@ namespace SIGEBI.Web.Controllers
 
             var usuarios = result.data;
 
+            await EnriquecerConMora(usuarios);
+
             if (!string.IsNullOrEmpty(rol) && int.TryParse(rol, out var rolId))
-            {
                 usuarios = usuarios.Where(u => u.rolId == rolId).ToList();
-            }
             if (activo.HasValue)
-            {
                 usuarios = usuarios.Where(u => u.estaActivo == activo.Value).ToList();
-            }
 
             using var package = new ExcelPackage();
             var worksheet = package.Workbook.Worksheets.Add("Usuarios");
@@ -187,8 +227,9 @@ namespace SIGEBI.Web.Controllers
             worksheet.Cells[1, 3].Value = "Email";
             worksheet.Cells[1, 4].Value = "Activo";
             worksheet.Cells[1, 5].Value = "Rol";
+            worksheet.Cells[1, 6].Value = "Mora Acumulada"; 
 
-            using (var range = worksheet.Cells[1, 1, 1, 5])
+            using (var range = worksheet.Cells[1, 1, 1, 6])
             {
                 range.Style.Font.Bold = true;
                 range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -203,6 +244,7 @@ namespace SIGEBI.Web.Controllers
                 worksheet.Cells[row, 3].Value = item.email;
                 worksheet.Cells[row, 4].Value = item.estaActivo ? "Sí" : "No";
                 worksheet.Cells[row, 5].Value = item.rolId == 1 ? "Admin" : "Usuario";
+                worksheet.Cells[row, 6].Value = item.TotalMora; 
                 row++;
             }
 

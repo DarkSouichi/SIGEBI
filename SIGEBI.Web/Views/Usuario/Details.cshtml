@@ -34,6 +34,11 @@
         <span class="detail-label">Rol</span>
         <span class="detail-value">@Model.rolId</span>
     </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Mora Acumulada</span>
+        <span class="detail-value">@Model.TotalMora.ToString("C")</span>
+    </div>
 </div>
 
 <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>

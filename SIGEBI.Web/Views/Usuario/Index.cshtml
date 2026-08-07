@@ -51,6 +51,7 @@
             <th>@Html.DisplayNameFor(m => m.email)</th>
             <th>@Html.DisplayNameFor(m => m.estaActivo)</th>
             <th>@Html.DisplayNameFor(m => m.rolId)</th>
+            <th>Mora</th> 
             @if (esAdmin)
             {
                 <th>Acciones</th>
@@ -66,6 +67,7 @@
                 <td>@Html.DisplayFor(x => item.email)</td>
                 <td>@Html.DisplayFor(x => item.estaActivo)</td>
                 <td>@Html.DisplayFor(x => item.rolId)</td>
+                <td>@item.TotalMora.ToString("C")</td>
                 @if (esAdmin)
                 {
                     <td>
