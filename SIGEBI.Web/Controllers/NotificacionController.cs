@@ -18,14 +18,34 @@ namespace SIGEBI.Web.Controllers
             _usuarioApiService = usuarioApiService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string tipo)
         {
-            var result = await _notificacionApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<NotificacionModel>());
+            var userId = HttpContext.Session.GetInt32("UsuarioId");
+            var esAdmin = HttpContext.Session.GetString("Rol") == "Admin";
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<NotificacionModel>());
+            var result = await _notificacionApiService.GetAll();
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<NotificacionModel>());
+            }
+
+            var notificaciones = result.data ?? new List<NotificacionModel>();
+
+            if (!esAdmin && userId.HasValue)
+            {
+                notificaciones = notificaciones.Where(n => n.usuarioId == userId.Value).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(tipo))
+            {
+                notificaciones = notificaciones.Where(n => n.tipo == tipo).ToList();
+            }
+
+            ViewBag.Tipos = new List<string> { "Recordatorio", "Alerta", "Información", "Confirmación" };
+            ViewBag.TipoSeleccionado = tipo;
+
+            return View(notificaciones);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -154,6 +174,7 @@ namespace SIGEBI.Web.Controllers
             }
             catch (Exception)
             {
+
             }
         }
     }

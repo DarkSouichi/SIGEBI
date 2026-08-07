@@ -11,6 +11,12 @@ namespace SIGEBI.Web.Models.Recurso
         public string autor { get; set; } = string.Empty;
         public string isbn { get; set; } = string.Empty;
         public string categoria { get; set; } = string.Empty;
+
+        public int totalEjemplares { get; set; }
+        public int ejemplaresDisponibles { get; set; }
+        public string? descripcion { get; set; }
+        public DateTime? fechaLanzamiento { get; set; }
+
         public List<EjemplarModel> Ejemplares { get; set; } = new();
     }
 
@@ -26,6 +32,44 @@ namespace SIGEBI.Web.Models.Recurso
         public bool isSuccess { get; set; }
         public string message { get; set; } = string.Empty;
         public RecursoModel data { get; set; }
+    }
+
+    public class RecursoCreateModel
+    {
+        [JsonPropertyName("Titulo")]
+        [Required(ErrorMessage = "El título es obligatorio.")]
+        [StringLength(200, ErrorMessage = "El título no puede exceder 200 caracteres.")]
+        public string titulo { get; set; } = string.Empty;
+
+        [JsonPropertyName("Autor")]
+        [Required(ErrorMessage = "El autor es obligatorio.")]
+        [StringLength(100, ErrorMessage = "El autor no puede exceder 100 caracteres.")]
+        public string autor { get; set; } = string.Empty;
+
+        [JsonPropertyName("ISBN")]
+        [Required(ErrorMessage = "El ISBN es obligatorio.")]
+        [StringLength(20, ErrorMessage = "El ISBN no puede exceder 20 caracteres.")]
+        public string isbn { get; set; } = string.Empty;
+
+        [JsonPropertyName("Categoria")]
+        [Required(ErrorMessage = "La categoría es obligatoria.")]
+        [StringLength(50, ErrorMessage = "La categoría no puede exceder 50 caracteres.")]
+        public string categoria { get; set; } = string.Empty;
+
+        [JsonPropertyName("Descripcion")]
+        public string? descripcion { get; set; }
+
+        [JsonIgnore]
+        public int? fechaLanzamiento { get; set; }
+
+        [JsonPropertyName("FechaLanzamiento")]
+        public DateTime? FechaLanzamientoApi { get; set; }
+
+        [JsonPropertyName("ChangeDate")]
+        public DateTime changeDate { get; set; }
+
+        [JsonPropertyName("ChangeUser")]
+        public int changeUser { get; set; }
     }
 
     public class RecursoEditModel
@@ -55,34 +99,14 @@ namespace SIGEBI.Web.Models.Recurso
         [StringLength(50, ErrorMessage = "La categoría no puede exceder 50 caracteres.")]
         public string categoria { get; set; } = string.Empty;
 
-        [JsonPropertyName("ChangeDate")]
-        public DateTime changeDate { get; set; }
+        [JsonPropertyName("Descripcion")]
+        public string? descripcion { get; set; }
+        
+        [JsonIgnore]
+        public int? fechaLanzamiento { get; set; }
 
-        [JsonPropertyName("ChangeUser")]
-        public int changeUser { get; set; }
-    }
-
-    public class RecursoCreateModel
-    {
-        [JsonPropertyName("Titulo")]
-        [Required(ErrorMessage = "El título es obligatorio.")]
-        [StringLength(200, ErrorMessage = "El título no puede exceder 200 caracteres.")]
-        public string titulo { get; set; } = string.Empty;
-
-        [JsonPropertyName("Autor")]
-        [Required(ErrorMessage = "El autor es obligatorio.")]
-        [StringLength(100, ErrorMessage = "El autor no puede exceder 100 caracteres.")]
-        public string autor { get; set; } = string.Empty;
-
-        [JsonPropertyName("ISBN")]
-        [Required(ErrorMessage = "El ISBN es obligatorio.")]
-        [StringLength(20, ErrorMessage = "El ISBN no puede exceder 20 caracteres.")]
-        public string isbn { get; set; } = string.Empty;
-
-        [JsonPropertyName("Categoria")]
-        [Required(ErrorMessage = "La categoría es obligatoria.")]
-        [StringLength(50, ErrorMessage = "La categoría no puede exceder 50 caracteres.")]
-        public string categoria { get; set; } = string.Empty;
+        [JsonPropertyName("FechaLanzamiento")]
+        public DateTime? FechaLanzamientoApi { get; set; }
 
         [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }

@@ -1,15 +1,43 @@
 ﻿@model SIGEBI.Web.Models.Recurso.RecursoModel
+
 @{
     ViewData["Title"] = "Detalles del Recurso";
+    var rol = Context.Session.GetString("Rol");
+    var esAdmin = rol == "Admin";
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("Token"));
 }
 
 <h1>Detalles del Recurso</h1>
 
-<div class="details-card">
-    <div class="detail-row">
-        <span class="detail-label">ID</span>
-        <span class="detail-value">@Model.recursoId</span>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" style="max-width: 800px; margin: 0 auto 20px;">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
     </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" style="max-width: 800px; margin: 0 auto 20px;">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+    </div>
+}
+
+@if (!isLoggedIn)
+{
+    <div class="alert alert-info" style="max-width: 800px; margin: 0 auto 20px;">
+        <i class="fas fa-info-circle"></i>
+        Para solicitar un préstamo, <a asp-controller="Auth" asp-action="Login">inicia sesión</a> o <a asp-controller="Register" asp-action="Index">regístrate</a>.
+    </div>
+}
+
+<div class="details-card">
+    @if (esAdmin)
+    {
+        <div class="detail-row">
+            <span class="detail-label">ID</span>
+            <span class="detail-value">@Model.recursoId</span>
+        </div>
+    }
 
     <div class="detail-row">
         <span class="detail-label">Título</span>
@@ -30,6 +58,47 @@
         <span class="detail-label">Categoría</span>
         <span class="detail-value">@Model.categoria</span>
     </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">@Model.descripcion</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Año de Lanzamiento</span>
+        <span class="detail-value">
+            @(Model.fechaLanzamiento?.Year.ToString() ?? "No especificado")
+        </span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Total Ejemplares</span>
+        <span class="detail-value">@Model.totalEjemplares</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Disponibles</span>
+        <span class="detail-value">@Model.ejemplaresDisponibles</span>
+    </div>
 </div>
+
+@if (isLoggedIn && Model.ejemplaresDisponibles > 0)
+{
+    <div style="max-width: 800px; margin: 20px auto; text-align: center;">
+        <form asp-controller="Prestamo" asp-action="Solicitar" method="post">
+            @Html.AntiForgeryToken()  
+            <input type="hidden" name="recursoId" value="@Model.recursoId" />
+            <button type="submit" class="btn btn-success" style="padding: 12px 30px; font-size: 1.1rem;">
+                <i class="fas fa-handshake"></i> Solicitar Préstamo
+            </button>
+        </form>
+    </div>
+}
+else if (isLoggedIn && Model.ejemplaresDisponibles == 0)
+{
+    <div class="alert alert-warning" style="max-width: 800px; margin: 20px auto;">
+        <i class="fas fa-exclamation-triangle"></i> No hay ejemplares disponibles de este libro en este momento.
+    </div>
+}
 
 <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>

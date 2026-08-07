@@ -6,7 +6,7 @@ using SIGEBI.Infrastructure.Logger;
 
 namespace SIGEBI.Api.Controllers
 {
-    [Authorize]
+    [Authorize]  
     [Route("api/[controller]")]
     [ApiController]
     public class RecursoController : ControllerBase
@@ -15,12 +15,13 @@ namespace SIGEBI.Api.Controllers
         private readonly ILoggerService<RecursoController> _logger;
 
         public RecursoController(IRecursoService recursoService,
-                                  ILoggerService<RecursoController> logger) 
+                                  ILoggerService<RecursoController> logger)
         {
             _recursoService = recursoService;
             _logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -34,6 +35,7 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -50,6 +52,7 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("GetByCategoria/{categoria}")]
         public async Task<IActionResult> GetByCategoria(string categoria)
         {
@@ -66,6 +69,7 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("GetDisponibles")]
         public async Task<IActionResult> GetDisponibles()
         {
@@ -79,6 +83,7 @@ namespace SIGEBI.Api.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("GetEjemplares/{recursoId}")]
         public async Task<IActionResult> GetEjemplares(int recursoId)
         {

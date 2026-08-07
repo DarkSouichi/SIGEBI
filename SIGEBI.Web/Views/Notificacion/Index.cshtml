@@ -7,7 +7,19 @@
 
 <h1>Listado de Notificaciones</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
+    <select name="tipo" class="form-control" style="max-width: 200px;">
+        <option value="">-- Todos los tipos --</option>
+        <option value="Recordatorio">Recordatorio</option>
+        <option value="Alerta">Alerta</option>
+        <option value="Información">Información</option>
+        <option value="Confirmación">Confirmación</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+</form>
 
 @if (esAdmin)
 {
@@ -20,9 +32,10 @@
             <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
             <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
             <th>@Html.DisplayNameFor(m => m.tipo)</th>
-            <th>@Html.DisplayNameFor(m => m.mensaje)</th>
+            <th>Mensaje</th> 
             <th>@Html.DisplayNameFor(m => m.enviadoEn)</th>
             <th>@Html.DisplayNameFor(m => m.canal)</th>
+            <th>Estado</th> 
             @if (esAdmin)
             {
                 <th>Acciones</th>
@@ -36,9 +49,32 @@
                 <td>@Html.DisplayFor(x => item.notificacionId)</td>
                 <td>@Html.DisplayFor(x => item.usuarioId)</td>
                 <td>@Html.DisplayFor(x => item.tipo)</td>
-                <td>@Html.DisplayFor(x => item.mensaje)</td>
-                <td>@Html.DisplayFor(x => item.enviadoEn)</td>
+                <td>
+                    @if (item.prestamoId.HasValue)
+                    {
+                        <a asp-controller="Prestamo" asp-action="Details" asp-route-id="@item.prestamoId" style="text-decoration: none; color: #2563EB;">
+                            <i class="fas fa-link"></i> @item.mensaje
+                        </a>
+                    }
+                    else if (item.recursoId.HasValue)
+                    {
+                        <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId" style="text-decoration: none; color: #2563EB;">
+                            <i class="fas fa-link"></i> @item.mensaje
+                        </a>
+                    }
+                    else
+                    {
+                        @item.mensaje
+                    }
+                </td>
+                <td>@item.enviadoEn.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>@Html.DisplayFor(x => item.canal)</td>
+                <td>
+
+                    <span class="badge @(item.leida ? "badge-secondary" : "badge-primary")">
+                        @(item.leida ? "Leída" : "No leída")
+                    </span>
+                </td>
                 @if (esAdmin)
                 {
                     <td>

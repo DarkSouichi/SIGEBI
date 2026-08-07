@@ -23,14 +23,27 @@ namespace SIGEBI.Web.Controllers
             _ejemplarApiService = ejemplarApiService;
         }
 
-        public async Task<IActionResult> Index()
+
+        public async Task<IActionResult> Index(string estado)
         {
             var result = await _prestamoApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<PrestamoModel>());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<PrestamoModel>());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<PrestamoModel>());
+            var prestamos = result.data ?? new List<PrestamoModel>();
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                prestamos = prestamos.Where(p => p.estado == estado).ToList();
+            }
+
+            ViewBag.Estados = new List<string> { "Pendiente", "Activo", "Devuelto", "Vencido" };
+            ViewBag.EstadoSeleccionado = estado;
+
+            return View(prestamos);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -41,6 +54,94 @@ namespace SIGEBI.Web.Controllers
 
             ModelState.AddModelError(string.Empty, result.message);
             return View(new PrestamoModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Aprobar(int id)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                TempData["Error"] = "No tienes permisos para aprobar préstamos.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _prestamoApiService.GetById(id);
+            if (!result.isSuccess)
+            {
+                TempData["Error"] = "Préstamo no encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = new PrestamoEditModel
+            {
+                id = result.data.prestamoId,
+                usuarioId = result.data.usuarioId,
+                ejemplarId = result.data.ejemplarId,
+                fechaPrestamo = result.data.fechaPrestamo,
+                fechaDevolucionEsperada = result.data.fechaDevolucionEsperada,
+                fechaDevolucionReal = result.data.fechaDevolucionReal,
+                estado = "Activo",
+                changeDate = DateTime.Now,
+                changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1
+            };
+
+            var updateResult = await _prestamoApiService.Update(model);
+            if (updateResult.isSuccess)
+            {
+                TempData["Success"] = "Préstamo aprobado correctamente. El inventario se ha actualizado.";
+            }
+            else
+            {
+                TempData["Error"] = updateResult.message ?? "Error al aprobar el préstamo.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Solicitar(int recursoId)
+        {
+            var userId = HttpContext.Session.GetInt32("UsuarioId");
+            if (!userId.HasValue)
+            {
+                TempData["Error"] = "Debes iniciar sesión para solicitar un préstamo.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var ejemplaresResponse = await _ejemplarApiService.GetAll();
+            var ejemplar = ejemplaresResponse?.data?.FirstOrDefault(e => e.recursoId == recursoId && e.estado == 0);
+
+            if (ejemplar == null)
+            {
+                TempData["Error"] = "No hay ejemplares disponibles de este libro.";
+                return RedirectToAction("Details", "Recurso", new { id = recursoId });
+            }
+
+            var model = new PrestamoCreateModel
+            {
+                usuarioId = userId.Value,
+                ejemplarId = ejemplar.ejemplarId,
+                fechaPrestamo = DateTime.Now,
+                fechaDevolucionEsperada = DateTime.Now.AddDays(7),
+                estado = "Pendiente",
+                changeDate = DateTime.Now,
+                changeUser = userId.Value
+            };
+
+            var result = await _prestamoApiService.Create(model);
+            if (result.isSuccess)
+            {
+                TempData["Success"] = "Solicitud de préstamo enviada. Espera la aprobación del bibliotecario.";
+            }
+            else
+            {
+                TempData["Error"] = result.message ?? "Error al solicitar el préstamo.";
+            }
+
+            return RedirectToAction("Details", "Recurso", new { id = recursoId });
         }
 
         public async Task<IActionResult> Create()
@@ -215,6 +316,7 @@ namespace SIGEBI.Web.Controllers
             }
             catch
             {
+                // Si falla, no mostrar error para no bloquear la vista
             }
         }
     }

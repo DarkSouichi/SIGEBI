@@ -3,7 +3,7 @@
 
 @{
     var isLoggedIn = !string.IsNullOrEmpty(
-        HttpContextAccessor.HttpContext?.Session?.GetString("Token")
+    HttpContextAccessor.HttpContext?.Session?.GetString("Token")
     );
 
     var rol = HttpContextAccessor.HttpContext?.Session?.GetString("Rol");
@@ -21,150 +21,142 @@
     var containerClass = isHomePage ? "container-home" : "container-content";
 }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SIGEBI</title>
+<link rel="stylesheet" href="~/css/site.css?v=5" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+<link rel="icon" type="image/x-icon" href="~/images/favicon.ico" />
 
-    <link rel="stylesheet" href="~/css/site.css?v=3" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-    <link rel="icon" type="image/x-icon" href="~/images/favicon.ico" />
-</head>
-<body>
+<div id="fondo"></div>
 
-    <div id="fondo"></div>
+<header>
+    <nav class="navbar">
+        <div class="container">
 
-    <header>
-        <nav class="navbar">
-            <div class="container">
+            <div class="navbar-logo">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/Logo.png" alt="SIGEBI" height="60" />
+                    <span>SIGEBI</span>
+                </a>
+            </div>
 
-                <div class="navbar-logo">
-                    <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                        <img src="~/images/Logo.png" alt="SIGEBI" height="60" />
-                        <span>SIGEBI</span>
-                    </a>
-                </div>
+            <div class="navbar-row">
 
-                <div class="navbar-row">
+                <!-- ========== MENÚ ========== -->
+                <ul class="navbar-menu">
+                    <li>
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-house"></i> Inicio
+                        </a>
+                    </li>
 
-                    <ul class="navbar-menu">
-                        <li>
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-house"></i> Inicio
-                            </a>
-                        </li>
-
-                        @if (esAdmin)
-                        {
-                            <li>
-                                <a class="nav-link" asp-controller="Usuario" asp-action="Index">
-                                    <i class="fas fa-users"></i> Usuarios
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" asp-controller="Recurso" asp-action="Index">
-                                    <i class="fas fa-book"></i> Catálogo
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" asp-controller="Ejemplar" asp-action="Index">
-                                    <i class="fas fa-copy"></i> Ejemplares
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" asp-controller="Prestamo" asp-action="Index">
-                                    <i class="fas fa-handshake"></i> Préstamos
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" asp-controller="Penalizacion" asp-action="Index">
-                                    <i class="fas fa-triangle-exclamation"></i> Penalizaciones
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-link" asp-controller="Notificacion" asp-action="Index">
-                                    <i class="fas fa-bell"></i> Notificaciones
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li>
-                                <a class="nav-link" asp-controller="Recurso" asp-action="Index">
-                                    <i class="fas fa-book"></i> Catálogo
-                                </a>
-                            </li>
-                        }
-                    </ul>
+                    <li>
+                        <a class="nav-link" asp-controller="Recurso" asp-action="Index">
+                            <i class="fas fa-book"></i> Catálogo
+                        </a>
+                    </li>
 
                     @if (isLoggedIn)
                     {
-                        <div class="nav-profile">
-                            <div class="profile-trigger">
-                                <span class="avatar">@inicial</span>
-                            </div>
-                            <ul class="profile-dropdown">
-                                <li class="profile-name-item">
-                                    <i class="fas fa-user-circle"></i> @nombreCompleto
-                                </li>
-                                <li class="dropdown-divider"></li>
-                                <li>
-                                    <a asp-controller="Auth" asp-action="Logout">
-                                        <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="nav-profile">
-                            <a class="btn btn-primary btn-sm" asp-controller="Auth" asp-action="Login">
-                                <i class="fas fa-right-to-bracket"></i> Iniciar Sesión
+                        <li>
+                            <a class="nav-link" asp-controller="Notificacion" asp-action="Index">
+                                <i class="fas fa-bell"></i> Notificaciones
                             </a>
-                        </div>
+                        </li>
                     }
-                </div>
 
-            </div>
-        </nav>
-    </header>
+                    <!-- Módulos solo para Admin -->
+                    @if (isLoggedIn && esAdmin)
+                    {
+                        <li>
+                            <a class="nav-link" asp-controller="Usuario" asp-action="Index">
+                                <i class="fas fa-users"></i> Usuarios
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Ejemplar" asp-action="Index">
+                                <i class="fas fa-copy"></i> Ejemplares
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Prestamo" asp-action="Index">
+                                <i class="fas fa-handshake"></i> Préstamos
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" asp-controller="Penalizacion" asp-action="Index">
+                                <i class="fas fa-triangle-exclamation"></i> Penalizaciones
+                            </a>
+                        </li>
+                    }
+                </ul>
+                <!-- ========== FIN MENÚ ========== -->
+                <!-- Perfil de usuario -->
+                @if (isLoggedIn)
+                {
+                    <div class="nav-profile">
+                        <div class="profile-trigger">
+                            <span class="avatar">@inicial</span>
+                        </div>
+                        <ul class="profile-dropdown">
+                            <li class="profile-name-item">
+                                <i class="fas fa-user-circle"></i> @nombreCompleto
+                            </li>
+                            <li class="dropdown-divider"></li>
+                            <li>
+                                <a asp-controller="Auth" asp-action="Logout">
+                                    <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="nav-profile">
+                        <a class="btn btn-primary btn-sm" asp-controller="Auth" asp-action="Login">
+                            <i class="fas fa-right-to-bracket"></i> Iniciar Sesión
+                        </a>
+                        <a class="btn btn-secondary btn-sm" asp-controller="Register" asp-action="Index">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    </div>
+                }
 
-    <div class="@containerClass">
-        <main role="main">
-            @RenderBody()
-        </main>
-    </div>
+            </div> 
 
-    <script src="~/js/site.js"></script>
+        </div> 
+    </nav>
+</header>
 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<div class="@containerClass">
+    <main role="main">
+        @RenderBody()
+    </main>
+</div>
 
-    <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                flatpickr.localize(flatpickr.l10ns.es);
-            });
-    </script>
+<script src="~/js/site.js"></script>
 
-    <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                flatpickr('.flatpickr-penalizacion', {
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    defaultDate: new Date(),
-                    yearSelectorType: "dropdown",
-                    minDate: "today",
-                    locale: 'es'
-                });
-            });
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr.localize(flatpickr.l10ns.es);
+    });
+</script>
 
-</body>
-</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr('.flatpickr-penalizacion', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            defaultDate: new Date(),
+            yearSelectorType: "dropdown",
+            minDate: "today",
+            locale: 'es'
+        });
+    });
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)

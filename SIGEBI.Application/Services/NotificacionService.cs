@@ -92,7 +92,9 @@ namespace SIGEBI.Application.Services
                     Tipo = dto.Tipo,
                     Mensaje = dto.Mensaje,
                     Canal = dto.Canal,
-                    EnviadoEn = DateTime.Now, 
+                    EnviadoEn = DateTime.Now,
+                    PrestamoId = dto.PrestamoId, 
+                    RecursoId = dto.RecursoId,     
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });

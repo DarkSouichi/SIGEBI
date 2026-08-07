@@ -13,14 +13,26 @@ namespace SIGEBI.Web.Controllers
             _recursoApiService = recursoApiService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string categoria)
         {
             var result = await _recursoApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<RecursoModel>());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<RecursoModel>());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<RecursoModel>());
+            var recursos = result.data ?? new List<RecursoModel>();
+
+            ViewBag.Categorias = recursos.Select(r => r.categoria).Distinct().OrderBy(c => c).ToList();
+            ViewBag.CategoriaSeleccionada = categoria;
+
+            if (!string.IsNullOrEmpty(categoria))
+            {
+                recursos = recursos.Where(r => r.categoria == categoria).ToList();
+            }
+
+            return View(recursos);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -49,6 +61,15 @@ namespace SIGEBI.Web.Controllers
             {
                 model.changeDate = DateTime.Now;
                 model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+
+                if (model.fechaLanzamiento.HasValue)
+                {
+                    model.FechaLanzamientoApi = new DateTime(model.fechaLanzamiento.Value, 1, 1);
+                }
+                else
+                {
+                    model.FechaLanzamientoApi = null;
+                }
 
                 var result = await _recursoApiService.Create(model);
                 if (!result.isSuccess)
@@ -86,7 +107,9 @@ namespace SIGEBI.Web.Controllers
                     titulo = result.data.titulo,
                     autor = result.data.autor,
                     isbn = result.data.isbn,
-                    categoria = result.data.categoria
+                    categoria = result.data.categoria,
+                    descripcion = result.data.descripcion,
+                    fechaLanzamiento = result.data.fechaLanzamiento?.Year
                 };
                 return View(editModel);
             }
@@ -106,6 +129,15 @@ namespace SIGEBI.Web.Controllers
             {
                 model.changeDate = DateTime.Now;
                 model.changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1;
+
+                if (model.fechaLanzamiento.HasValue)
+                {
+                    model.FechaLanzamientoApi = new DateTime(model.fechaLanzamiento.Value, 1, 1);
+                }
+                else
+                {
+                    model.FechaLanzamientoApi = null;
+                }
 
                 var result = await _recursoApiService.Update(model);
                 if (!result.isSuccess)

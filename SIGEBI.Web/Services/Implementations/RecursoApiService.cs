@@ -30,7 +30,7 @@ namespace SIGEBI.Web.Services
 
         public async Task<GetAllRecursosResponse> GetAll()
         {
-            AddAuthorizationHeader();
+            AddAuthorizationHeader(); 
             var response = new GetAllRecursosResponse();
 
             try

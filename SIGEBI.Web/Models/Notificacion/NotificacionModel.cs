@@ -12,6 +12,10 @@ namespace SIGEBI.Web.Models.Notificacion
         public string mensaje { get; set; } = string.Empty;
         public DateTime enviadoEn { get; set; }
         public string canal { get; set; } = string.Empty;
+
+        public int? prestamoId { get; set; } 
+        public int? recursoId { get; set; }   
+        public bool leida { get; set; }
     }
 
     public class GetAllNotificacionesResponse

@@ -7,44 +7,84 @@
 
 <h1>Catálogo de Recursos</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 @if (esAdmin)
 {
     <p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Recurso</a></p>
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(m => m.recursoId)</th>
-            <th>@Html.DisplayNameFor(m => m.titulo)</th>
-            <th>@Html.DisplayNameFor(m => m.autor)</th>
-            <th>@Html.DisplayNameFor(m => m.isbn)</th>
-            <th>@Html.DisplayNameFor(m => m.categoria)</th>
-            @if (esAdmin)
-            {
-                <th>Acciones</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
+    <select name="categoria" class="form-control" style="max-width: 200px;">
+        <option value="">-- Todas las categorías --</option>
+        @foreach (var cat in ViewBag.Categorias as List<string> ?? new List<string>())
         {
+            var selected = ViewBag.CategoriaSeleccionada as string == cat ? "selected" : null;
+            <option value="@cat" selected="@selected">@cat</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+</form>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(x => item.recursoId)</td>
-                <td>@Html.DisplayFor(x => item.titulo)</td>
-                <td>@Html.DisplayFor(x => item.autor)</td>
-                <td>@Html.DisplayFor(x => item.isbn)</td>
-                <td>@Html.DisplayFor(x => item.categoria)</td>
                 @if (esAdmin)
                 {
-                    <td>
-                        @Html.ActionLink("Editar", "Edit", new { id = item.recursoId }) |
-                        @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
-                    </td>
+                    <th>@Html.DisplayNameFor(m => m.recursoId)</th>
+                }
+                <th>@Html.DisplayNameFor(m => m.titulo)</th>
+                <th>@Html.DisplayNameFor(m => m.autor)</th>
+                <th>@Html.DisplayNameFor(m => m.isbn)</th>
+                <th>@Html.DisplayNameFor(m => m.categoria)</th>
+                <th>@Html.DisplayNameFor(m => m.descripcion)</th>
+                <th>@Html.DisplayNameFor(m => m.totalEjemplares)</th>
+                <th>@Html.DisplayNameFor(m => m.ejemplaresDisponibles)</th>
+                <th>Año de Lanzamiento</th>
+                @if (esAdmin)
+                {
+                    <th>Acciones</th>
                 }
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @if (esAdmin)
+                    {
+                        <td>@Html.DisplayFor(x => item.recursoId)</td>
+                    }
+                    <td>@Html.DisplayFor(x => item.titulo)</td>
+                    <td>@Html.DisplayFor(x => item.autor)</td>
+                    <td>@Html.DisplayFor(x => item.isbn)</td>
+                    <td>@Html.DisplayFor(x => item.categoria)</td>
+                    <td title="@item.descripcion">
+                        @if (!string.IsNullOrEmpty(item.descripcion))
+                        {
+                            @(item.descripcion.Length > 50 ? item.descripcion.Substring(0, 50) + "..." : item.descripcion)
+                        }
+                        else
+                        {
+                            <span style="color: #aaa;">Sin descripción</span>
+                        }
+                    </td>
+                    <td>@Html.DisplayFor(x => item.totalEjemplares)</td>
+                    <td>@Html.DisplayFor(x => item.ejemplaresDisponibles)</td>
+                    <td>@(item.fechaLanzamiento?.Year.ToString() ?? "")</td>
+
+                    <td>
+                        @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
+                        @if (esAdmin)
+                        {
+                            @Html.Raw(" | ")
+                            @Html.ActionLink("Editar", "Edit", new { id = item.recursoId })
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SIGEBI.Persistence.Context;
 
@@ -11,9 +12,11 @@ using SIGEBI.Persistence.Context;
 namespace SIGEBI.Persistence.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    partial class LibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20260804235055_AddDescripcionFechaLanzamientoToRecurso")]
+    partial class AddDescripcionFechaLanzamientoToRecurso
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,12 +222,6 @@ namespace SIGEBI.Persistence.Migrations
                     b.Property<string>("ModificadoPor")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PrestamoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RecursoId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -367,13 +364,13 @@ namespace SIGEBI.Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            CreadoEn = new DateTime(2026, 8, 6, 23, 32, 44, 693, DateTimeKind.Local).AddTicks(3501),
+                            CreadoEn = new DateTime(2026, 8, 4, 19, 50, 54, 366, DateTimeKind.Local).AddTicks(5499),
                             CreadoPor = "Sistema",
                             Email = "admin@test.com",
                             EstaActivo = true,
                             IntentosFallidos = 0,
                             NombreCompleto = "Administrador",
-                            PasswordHash = "$2a$11$rnthPNnNUJRM1iJRhGTLheLOxTboqx53vJddnyXdyahnEkABgaPSK",
+                            PasswordHash = "$2a$11$lUlbjS0FAkX.yK9lvO5uiumZ6lu62Q8tEq2KJLr08jJuC9kBUWmKK",
                             RolId = 1
                         });
                 });

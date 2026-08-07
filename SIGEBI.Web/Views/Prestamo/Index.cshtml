@@ -7,46 +7,72 @@
 
 <h1>Listado de Préstamos</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
+    <select name="estado" class="form-control" style="max-width: 200px;">
+        <option value="">-- Todos los estados --</option>
+        @foreach (var est in ViewBag.Estados as List<string> ?? new List<string>())
+        {
+            var selected = ViewBag.EstadoSeleccionado as string == est ? "selected" : null;
+            <option value="@est" selected="@selected">@est</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+</form>
 
 @if (esAdmin)
 {
     <p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Préstamo</a></p>
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
-            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
-            <th>@Html.DisplayNameFor(m => m.ejemplarId)</th>
-            <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
-            <th>@Html.DisplayNameFor(m => m.fechaDevolucionEsperada)</th>
-            <th>@Html.DisplayNameFor(m => m.estado)</th>
-            @if (esAdmin)
-            {
-                <th>Acciones</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="table-responsive">
+    <table class="table">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(x => item.prestamoId)</td>
-                <td>@Html.DisplayFor(x => item.usuarioId)</td>
-                <td>@Html.DisplayFor(x => item.ejemplarId)</td>
-                <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
-                <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>
-                <td>@Html.DisplayFor(x => item.estado)</td>
+                <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+                <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
+                <th>@Html.DisplayNameFor(m => m.ejemplarId)</th>
+                <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
+                <th>@Html.DisplayNameFor(m => m.fechaDevolucionEsperada)</th>
+                <th>@Html.DisplayNameFor(m => m.estado)</th>
                 @if (esAdmin)
                 {
-                    <td>
-                        @Html.ActionLink("Editar", "Edit", new { id = item.prestamoId }) |
-                        @Html.ActionLink("Detalles", "Details", new { id = item.prestamoId })
-                    </td>
+                    <th>Acciones</th>
                 }
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                    <td>@Html.DisplayFor(x => item.usuarioId)</td>
+                    <td>@Html.DisplayFor(x => item.ejemplarId)</td>
+                    <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
+                    <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>
+                    <td>@Html.DisplayFor(x => item.estado)</td>
+                    @if (esAdmin)
+                    {
+                        <td>
+                            @if (item.estado == "Pendiente")
+                            {
+                                <form asp-action="Aprobar" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.prestamoId" />
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Aprobar
+                                    </button>
+                                </form>
+                                <span>|</span>
+                            }
+                            @Html.ActionLink("Editar", "Edit", new { id = item.prestamoId }) |
+                            @Html.ActionLink("Detalles", "Details", new { id = item.prestamoId })
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

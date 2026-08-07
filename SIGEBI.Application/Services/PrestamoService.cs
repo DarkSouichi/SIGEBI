@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SIGEBI.Application.Dtos.Loans;
+using SIGEBI.Application.Dtos.Notifications;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
+using SIGEBI.Domain.Entities.Catalog;
 using SIGEBI.Domain.Entities.Loans;
-using SIGEBI.Infrastructure.Audit; 
+using SIGEBI.Infrastructure.Audit;
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
@@ -12,19 +14,41 @@ namespace SIGEBI.Application.Services
     public class PrestamoService : IPrestamoService
     {
         private readonly IPrestamoRepository _prestamoRepository;
+        private readonly IEjemplarRepository _ejemplarRepository;
         private readonly ILoggerService<PrestamoService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IAuditLogger _auditLogger;
+        private readonly INotificacionService _notificacionService;
 
         public PrestamoService(IPrestamoRepository prestamoRepository,
+                               IEjemplarRepository ejemplarRepository,
                                ILoggerService<PrestamoService> logger,
                                IConfiguration configuration,
-                               IAuditLogger auditLogger) 
+                               IAuditLogger auditLogger,
+                               INotificacionService notificacionService) 
         {
             _prestamoRepository = prestamoRepository;
+            _ejemplarRepository = ejemplarRepository;
             _logger = logger;
             _configuration = configuration;
             _auditLogger = auditLogger;
+            _notificacionService = notificacionService; 
+        }
+
+        private async Task CrearNotificacion(int usuarioId, string tipo, string mensaje, int? prestamoId = null, int? recursoId = null)
+        {
+            var notificacionDto = new SaveNotificacionDto
+            {
+                UsuarioId = usuarioId,
+                Tipo = tipo,
+                Mensaje = mensaje,
+                Canal = "Sistema",
+                PrestamoId = prestamoId,
+                RecursoId = recursoId,
+                ChangeDate = DateTime.Now,
+                ChangeUser = 1 
+            };
+            await _notificacionService.Save(notificacionDto);
         }
 
         public async Task<OperationResult> GetAll()
@@ -117,6 +141,39 @@ namespace SIGEBI.Application.Services
 
                 result = await _prestamoRepository.SaveEntityAsync(prestamo);
 
+                if (result.IsSuccess)
+                {
+                    int prestamoId = (result.Data as Prestamo)?.Id ?? 0;
+
+                    if (estadoEnum == EstadoPrestamo.Pendiente)
+                    {
+                        await CrearNotificacion(
+                            dto.UsuarioId,
+                            "Solicitud de Préstamo",
+                            $"Has solicitado el préstamo del ejemplar #{dto.EjemplarId}. Espera la aprobación.",
+                            prestamoId: prestamoId
+                        );
+                    }
+                    else if (estadoEnum == EstadoPrestamo.Activo)
+                    {
+                        await CrearNotificacion(
+                            dto.UsuarioId,
+                            "Préstamo Aprobado",
+                            $"Tu préstamo del ejemplar #{dto.EjemplarId} ha sido aprobado.",
+                            prestamoId: prestamoId
+                        );
+
+                        var ejemplar = await _ejemplarRepository.GetEntityByIdAsync(dto.EjemplarId);
+                        if (ejemplar != null)
+                        {
+                            ejemplar.Estado = EstadoEjemplar.Prestado;
+                            ejemplar.ModificadoEn = DateTime.Now;
+                            ejemplar.ModificadoPor = dto.ChangeUser.ToString();
+                            await _ejemplarRepository.UpdateEntityAsync(ejemplar);
+                        }
+                    }
+                }
+
                 await _auditLogger.LogAsync(
                     actor: dto.ChangeUser.ToString(),
                     accion: "CrearPrestamo",
@@ -154,6 +211,8 @@ namespace SIGEBI.Application.Services
                     return result;
                 }
 
+                var estadoAnterior = prestamo.Estado;
+
                 prestamo.FechaDevolucionEsperada = dto.FechaDevolucionEsperada;
                 prestamo.FechaDevolucionReal = dto.FechaDevolucionReal;
                 prestamo.Estado = estadoEnum;
@@ -161,6 +220,45 @@ namespace SIGEBI.Application.Services
                 prestamo.ModificadoPor = dto.ChangeUser.ToString();
 
                 await _prestamoRepository.UpdateEntityAsync(prestamo);
+
+                if (estadoAnterior == EstadoPrestamo.Pendiente && estadoEnum == EstadoPrestamo.Activo)
+                {
+                    await CrearNotificacion(
+                        prestamo.UsuarioId,
+                        "Préstamo Aprobado",
+                        $"Tu préstamo del ejemplar #{prestamo.EjemplarId} ha sido aprobado por el administrador.",
+                        prestamoId: prestamo.Id
+                    );
+
+                    var ejemplar = await _ejemplarRepository.GetEntityByIdAsync(prestamo.EjemplarId);
+                    if (ejemplar != null)
+                    {
+                        ejemplar.Estado = EstadoEjemplar.Prestado;
+                        ejemplar.ModificadoEn = DateTime.Now;
+                        ejemplar.ModificadoPor = dto.ChangeUser.ToString();
+                        await _ejemplarRepository.UpdateEntityAsync(ejemplar);
+                    }
+                }
+
+                if (estadoAnterior == EstadoPrestamo.Activo && estadoEnum == EstadoPrestamo.Devuelto)
+                {
+                    await CrearNotificacion(
+                        prestamo.UsuarioId,
+                        "Devolución Registrada",
+                        $"Tu devolución del ejemplar #{prestamo.EjemplarId} ha sido registrada.",
+                        prestamoId: prestamo.Id
+                    );
+
+                    var ejemplar = await _ejemplarRepository.GetEntityByIdAsync(prestamo.EjemplarId);
+                    if (ejemplar != null)
+                    {
+                        ejemplar.Estado = EstadoEjemplar.Disponible;
+                        ejemplar.ModificadoEn = DateTime.Now;
+                        ejemplar.ModificadoPor = dto.ChangeUser.ToString();
+                        await _ejemplarRepository.UpdateEntityAsync(ejemplar);
+                    }
+                }
+
                 result.Message = "Préstamo actualizado correctamente";
 
                 await _auditLogger.LogAsync(

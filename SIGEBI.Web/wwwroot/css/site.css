@@ -45,7 +45,7 @@ main {
 }
 
 .container-content {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 20px auto 40px;
     padding: 20px 24px;
     background: rgba(255, 255, 255, 0.85);
@@ -225,11 +225,15 @@ main {
     }
 
 .table-responsive {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid #E2E8F0;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+.table {
+    width: 100%;
+    min-width: 700px;
+    table-layout: auto;
 }
 
 .table thead {
@@ -249,6 +253,12 @@ main {
     padding: 14px 20px;
     border-bottom: 1px solid #F1F5F9;
 }
+
+    .table th, .table td {
+        white-space: nowrap; 
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
 
 .table tbody tr:hover {
     background: #F8FAFC;
@@ -574,6 +584,20 @@ p .btn-primary {
     .profile-dropdown li a i {
         width: 18px;
         text-align: center;
+    }
+
+/* Notificaciones clickeables */
+.notificacion-enlace {
+    text-decoration: none;
+    color: #1E293B;
+    display: block;
+    padding: 4px 0;
+    transition: color 0.2s;
+}
+
+    .notificacion-enlace:hover {
+        color: #2563EB;
+        text-decoration: underline;
     }
 
 @media (max-width: 768px) {
