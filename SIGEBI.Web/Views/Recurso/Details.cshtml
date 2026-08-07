@@ -82,22 +82,33 @@
     </div>
 </div>
 
-@if (isLoggedIn && Model.ejemplaresDisponibles > 0)
+@if (isLoggedIn)
 {
-    <div style="max-width: 800px; margin: 20px auto; text-align: center;">
-        <form asp-controller="Prestamo" asp-action="Solicitar" method="post">
-            @Html.AntiForgeryToken()  
+    <div style="max-width: 800px; margin: 20px auto; text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <form asp-controller="Carrito" asp-action="Agregar" method="post" style="display:inline;">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="recursoId" value="@Model.recursoId" />
-            <button type="submit" class="btn btn-success" style="padding: 12px 30px; font-size: 1.1rem;">
-                <i class="fas fa-handshake"></i> Solicitar Préstamo
+            <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 1.1rem;">
+                <i class="fas fa-cart-plus"></i> Agregar al carrito
             </button>
         </form>
-    </div>
-}
-else if (isLoggedIn && Model.ejemplaresDisponibles == 0)
-{
-    <div class="alert alert-warning" style="max-width: 800px; margin: 20px auto;">
-        <i class="fas fa-exclamation-triangle"></i> No hay ejemplares disponibles de este libro en este momento.
+
+        @if (Model.ejemplaresDisponibles > 0)
+        {
+            <form asp-controller="Prestamo" asp-action="Solicitar" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="recursoId" value="@Model.recursoId" />
+                <button type="submit" class="btn btn-success" style="padding: 12px 30px; font-size: 1.1rem;">
+                    <i class="fas fa-handshake"></i> Solicitar Préstamo
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-warning" style="max-width: 800px; margin: 20px auto;">
+                <i class="fas fa-exclamation-triangle"></i> No hay ejemplares disponibles de este libro en este momento.
+            </div>
+        }
     </div>
 }
 

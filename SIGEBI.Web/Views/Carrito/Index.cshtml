@@ -1,0 +1,97 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Recurso.RecursoModel>
+@{
+    ViewData["Title"] = "Carrito de Préstamos";
+    var totalItems = Model.Count();
+}
+
+<h1>Carrito de Préstamos</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center mt-5" style="padding: 40px 0;">
+        <i class="fas fa-shopping-cart" style="font-size: 4rem; color: #94A3B8;"></i>
+        <p class="lead mt-3" style="color: #64748B;">Tu carrito está vacío.</p>
+        <a asp-controller="Recurso" asp-action="Index" class="btn btn-primary mt-2">
+            <i class="fas fa-book"></i> Volver al catálogo
+        </a>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="badge bg-primary" style="font-size: 1rem; padding: 8px 16px;">
+            <i class="fas fa-list"></i> @totalItems libro(s) en el carrito
+        </span>
+        <span>
+            <a asp-controller="Recurso" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Seguir agregando
+            </a>
+        </span>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-truncate" title="@item.titulo">@item.titulo</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@item.autor</h6>
+                        <p class="card-text small text-truncate" style="max-width: 100%;">
+                            <span class="badge bg-light text-dark">@item.categoria</span>
+                            @if (item.totalEjemplares > 0)
+                            {
+                                <span class="badge bg-success">@item.ejemplaresDisponibles disponibles</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Sin ejemplares</span>
+                            }
+                        </p>
+                        <div class="mt-auto">
+                            <form asp-action="Quitar" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="recursoId" value="@item.recursoId" />
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Quitar este libro del carrito?');">
+                                    <i class="fas fa-trash"></i> Quitar
+                                </button>
+                            </form>
+                            <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-info-circle"></i> Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-light rounded-3">
+        <div>
+            <span class="text-muted">Libros seleccionados: <strong>@totalItems</strong></span>
+        </div>
+        <div>
+            <form asp-action="Solicitar" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('¿Estás seguro de solicitar todos los préstamos de este carrito?');">
+                    <i class="fas fa-handshake"></i> Solicitar todos
+                </button>
+            </form>
+        </div>
+    </div>
+}
