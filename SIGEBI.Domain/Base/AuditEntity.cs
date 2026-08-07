@@ -2,6 +2,7 @@
 
 public abstract class AuditEntity
 {
+    public int Id { get; set; }
     public DateTime CreadoEn { get; set; } = DateTime.Now;
     public string CreadoPor { get; set; } = string.Empty;
     public DateTime? ModificadoEn { get; set; }

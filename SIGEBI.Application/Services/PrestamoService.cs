@@ -15,6 +15,8 @@ namespace SIGEBI.Application.Services
     {
         private readonly IPrestamoRepository _prestamoRepository;
         private readonly IEjemplarRepository _ejemplarRepository;
+        private readonly IUsuarioRepository _usuarioRepository;     
+        private readonly IRolRepository _rolRepository;            
         private readonly ILoggerService<PrestamoService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IAuditLogger _auditLogger;
@@ -22,17 +24,35 @@ namespace SIGEBI.Application.Services
 
         public PrestamoService(IPrestamoRepository prestamoRepository,
                                IEjemplarRepository ejemplarRepository,
+                               IUsuarioRepository usuarioRepository,       
+                               IRolRepository rolRepository,               
                                ILoggerService<PrestamoService> logger,
                                IConfiguration configuration,
                                IAuditLogger auditLogger,
-                               INotificacionService notificacionService) 
+                               INotificacionService notificacionService)
         {
             _prestamoRepository = prestamoRepository;
             _ejemplarRepository = ejemplarRepository;
+            _usuarioRepository = usuarioRepository;
+            _rolRepository = rolRepository;
             _logger = logger;
             _configuration = configuration;
             _auditLogger = auditLogger;
-            _notificacionService = notificacionService; 
+            _notificacionService = notificacionService;
+        }
+
+        private async Task<bool> ValidarLimitePrestamos(int usuarioId)
+        {
+            var usuario = await _usuarioRepository.GetEntityByIdAsync(usuarioId);
+            if (usuario == null) return false;
+
+            var rol = await _rolRepository.GetEntityByIdAsync(usuario.RolId);
+            if (rol == null) return false;
+
+            var prestamosActivos = await _prestamoRepository.GetPrestamosActivosByUsuarioId(usuarioId);
+            int cantidadActivos = prestamosActivos?.Count ?? 0;
+
+            return cantidadActivos < rol.LimitePrestamos;
         }
 
         private async Task CrearNotificacion(int usuarioId, string tipo, string mensaje, int? prestamoId = null, int? recursoId = null)
@@ -46,7 +66,7 @@ namespace SIGEBI.Application.Services
                 PrestamoId = prestamoId,
                 RecursoId = recursoId,
                 ChangeDate = DateTime.Now,
-                ChangeUser = 1 
+                ChangeUser = 1
             };
             await _notificacionService.Save(notificacionDto);
         }
@@ -120,6 +140,13 @@ namespace SIGEBI.Application.Services
             OperationResult result = new OperationResult();
             try
             {
+                if (!await ValidarLimitePrestamos(dto.UsuarioId))
+                {
+                    result.Success = false;
+                    result.Message = "El usuario ha alcanzado el límite máximo de préstamos activos permitidos para su rol.";
+                    return result;
+                }
+
                 if (!Enum.TryParse<EstadoPrestamo>(dto.Estado, true, out var estadoEnum))
                 {
                     result.Success = false;
