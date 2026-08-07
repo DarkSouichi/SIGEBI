@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SIGEBI.Web.Extensions;         
+using SIGEBI.Web.Extensions;          
 using SIGEBI.Web.Models.Ejemplar;     
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Recurso;
@@ -31,6 +31,13 @@ namespace SIGEBI.Web.Controllers
             {
                 TempData["Error"] = "Debes iniciar sesión para agregar al carrito.";
                 return RedirectToAction("Login", "Auth");
+            }
+
+            var recursoResult = await _recursoApiService.GetById(recursoId);
+            if (!recursoResult.isSuccess || recursoResult.data == null || recursoResult.data.ejemplaresDisponibles <= 0)
+            {
+                TempData["Error"] = "No hay ejemplares disponibles de este libro.";
+                return RedirectToAction("Details", "Recurso", new { id = recursoId });
             }
 
             var carrito = HttpContext.Session.GetObjectFromJson<List<int>>("Carrito") ?? new List<int>();
