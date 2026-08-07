@@ -4,6 +4,7 @@ using SIGEBI.Web.Models.Penalizacion;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
 using SIGEBI.Web.Services;
+using OfficeOpenXml;
 
 namespace SIGEBI.Web.Controllers
 {
@@ -22,7 +23,7 @@ namespace SIGEBI.Web.Controllers
             _prestamoApiService = prestamoApiService;
         }
 
-        // ✅ GET: Penalizaciones con filtro por estado
+
         public async Task<IActionResult> Index(string estado)
         {
             var result = await _penalizacionApiService.GetAll();
@@ -43,6 +44,67 @@ namespace SIGEBI.Web.Controllers
             ViewBag.EstadoSeleccionado = estado;
 
             return View(penalizaciones);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(string estado)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                TempData["Error"] = "No tienes permisos para exportar.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _penalizacionApiService.GetAll();
+            if (!result.isSuccess || result.data == null || !result.data.Any())
+            {
+                TempData["Error"] = "No hay datos para exportar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var penalizaciones = result.data;
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                penalizaciones = penalizaciones.Where(p => p.estado == estado).ToList();
+            }
+
+            using var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Penalizaciones");
+
+            worksheet.Cells[1, 1].Value = "ID";
+            worksheet.Cells[1, 2].Value = "Usuario";
+            worksheet.Cells[1, 3].Value = "Préstamo";
+            worksheet.Cells[1, 4].Value = "Monto";
+            worksheet.Cells[1, 5].Value = "Estado";
+            worksheet.Cells[1, 6].Value = "Fecha Emisión";
+
+            using (var range = worksheet.Cells[1, 1, 1, 6])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            int row = 2;
+            foreach (var item in penalizaciones)
+            {
+                worksheet.Cells[row, 1].Value = item.penalizacionId;
+                worksheet.Cells[row, 2].Value = item.nombreUsuario;
+                worksheet.Cells[row, 3].Value = item.prestamoInfo;
+                worksheet.Cells[row, 4].Value = item.monto;
+                worksheet.Cells[row, 5].Value = item.estado;
+                worksheet.Cells[row, 6].Value = item.fechaEmision.ToString("dd/MM/yyyy HH:mm");
+                row++;
+            }
+
+            worksheet.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            var fileName = $"Penalizaciones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -227,6 +289,8 @@ namespace SIGEBI.Web.Controllers
             catch
             {
             }
+
+
         }
     }
 }

@@ -4,6 +4,9 @@ using SIGEBI.Web.Models.Ejemplar;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
 using SIGEBI.Web.Services;
+using OfficeOpenXml;        
+using System.IO;              
+using System.Text;            
 
 namespace SIGEBI.Web.Controllers
 {
@@ -22,7 +25,6 @@ namespace SIGEBI.Web.Controllers
             _usuarioApiService = usuarioApiService;
             _ejemplarApiService = ejemplarApiService;
         }
-
 
         public async Task<IActionResult> Index(string estado)
         {
@@ -122,8 +124,8 @@ namespace SIGEBI.Web.Controllers
                 ejemplarId = result.data.ejemplarId,
                 fechaPrestamo = result.data.fechaPrestamo,
                 fechaDevolucionEsperada = result.data.fechaDevolucionEsperada,
-                fechaDevolucionReal = DateTime.Now, 
-                estado = "Devuelto", 
+                fechaDevolucionReal = DateTime.Now,
+                estado = "Devuelto",
                 changeDate = DateTime.Now,
                 changeUser = HttpContext.Session.GetInt32("UsuarioId") ?? 1
             };
@@ -314,6 +316,70 @@ namespace SIGEBI.Web.Controllers
                 await CargarListas(model);
                 return View(model);
             }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(string estado)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                TempData["Error"] = "No tienes permisos para exportar.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _prestamoApiService.GetAll();
+            if (!result.isSuccess || result.data == null || !result.data.Any())
+            {
+                TempData["Error"] = "No hay datos para exportar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var prestamos = result.data;
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                prestamos = prestamos.Where(p => p.estado == estado).ToList();
+            }
+
+            using var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Préstamos");
+
+            worksheet.Cells[1, 1].Value = "ID";
+            worksheet.Cells[1, 2].Value = "Usuario";
+            worksheet.Cells[1, 3].Value = "Ejemplar";
+            worksheet.Cells[1, 4].Value = "Fecha Préstamo";
+            worksheet.Cells[1, 5].Value = "Fecha Devolución Esperada";
+            worksheet.Cells[1, 6].Value = "Fecha Devolución Real";
+            worksheet.Cells[1, 7].Value = "Estado";
+
+            using (var range = worksheet.Cells[1, 1, 1, 7])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            int row = 2;
+            foreach (var item in prestamos)
+            {
+                worksheet.Cells[row, 1].Value = item.prestamoId;
+                worksheet.Cells[row, 2].Value = item.nombreUsuario;
+                worksheet.Cells[row, 3].Value = item.codigoEjemplar;
+                worksheet.Cells[row, 4].Value = item.fechaPrestamo.ToString("dd/MM/yyyy HH:mm");
+                worksheet.Cells[row, 5].Value = item.fechaDevolucionEsperada.ToString("dd/MM/yyyy HH:mm");
+                worksheet.Cells[row, 6].Value = item.fechaDevolucionReal?.ToString("dd/MM/yyyy HH:mm") ?? "-";
+                worksheet.Cells[row, 7].Value = item.estado;
+                row++;
+            }
+
+            worksheet.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            var fileName = $"Prestamos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
         private async Task CargarListas(object model)

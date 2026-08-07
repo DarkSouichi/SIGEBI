@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using SIGEBI.Web.Models.Recurso;
 using SIGEBI.Web.Services;
 
@@ -162,6 +163,73 @@ namespace SIGEBI.Web.Controllers
                 ModelState.AddModelError(string.Empty, $"Error inesperado: {ex.Message}");
                 return View(model);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(string categoria)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                TempData["Error"] = "No tienes permisos para exportar.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _recursoApiService.GetAll();
+            if (!result.isSuccess || result.data == null || !result.data.Any())
+            {
+                TempData["Error"] = "No hay datos para exportar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var recursos = result.data;
+
+            if (!string.IsNullOrEmpty(categoria))
+            {
+                recursos = recursos.Where(r => r.categoria == categoria).ToList();
+            }
+
+            using var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Recursos");
+
+            worksheet.Cells[1, 1].Value = "ID";
+            worksheet.Cells[1, 2].Value = "Título";
+            worksheet.Cells[1, 3].Value = "Autor";
+            worksheet.Cells[1, 4].Value = "ISBN";
+            worksheet.Cells[1, 5].Value = "Categoría";
+            worksheet.Cells[1, 6].Value = "Total Ejemplares";
+            worksheet.Cells[1, 7].Value = "Disponibles";
+            worksheet.Cells[1, 8].Value = "Año de Lanzamiento";
+            worksheet.Cells[1, 9].Value = "Descripción";
+
+            using (var range = worksheet.Cells[1, 1, 1, 9])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            int row = 2;
+            foreach (var item in recursos)
+            {
+                worksheet.Cells[row, 1].Value = item.recursoId;
+                worksheet.Cells[row, 2].Value = item.titulo;
+                worksheet.Cells[row, 3].Value = item.autor;
+                worksheet.Cells[row, 4].Value = item.isbn;
+                worksheet.Cells[row, 5].Value = item.categoria;
+                worksheet.Cells[row, 6].Value = item.totalEjemplares;
+                worksheet.Cells[row, 7].Value = item.ejemplaresDisponibles;
+                worksheet.Cells[row, 8].Value = item.fechaLanzamiento?.Year.ToString() ?? "";
+                worksheet.Cells[row, 9].Value = item.descripcion;
+                row++;
+            }
+
+            worksheet.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            var fileName = $"Recursos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
     }
 }

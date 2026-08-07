@@ -9,23 +9,35 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <form asp-action="Index" method="get" class="d-flex gap-2">
+        <select name="categoria" class="form-control" style="max-width: 200px;">
+            <option value="">-- Todas las categorías --</option>
+            @foreach (var cat in ViewBag.Categorias as List<string> ?? new List<string>())
+            {
+                var selected = ViewBag.CategoriaSeleccionada as string == cat ? "selected" : null;
+                <option value="@cat" selected="@selected">@cat</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    @if (esAdmin)
+    {
+        <form asp-action="ExportarExcel" method="get" style="display:inline;">
+            <input type="hidden" name="categoria" value="@ViewBag.CategoriaSeleccionada" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+        </form>
+    }
+</div>
+
 @if (esAdmin)
 {
     <p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Recurso</a></p>
 }
-
-<form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
-    <select name="categoria" class="form-control" style="max-width: 200px;">
-        <option value="">-- Todas las categorías --</option>
-        @foreach (var cat in ViewBag.Categorias as List<string> ?? new List<string>())
-        {
-            var selected = ViewBag.CategoriaSeleccionada as string == cat ? "selected" : null;
-            <option value="@cat" selected="@selected">@cat</option>
-        }
-    </select>
-    <button type="submit" class="btn btn-primary">Filtrar</button>
-    <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
-</form>
 
 <div class="table-responsive">
     <table class="table">
@@ -74,7 +86,6 @@
                     <td>@Html.DisplayFor(x => item.totalEjemplares)</td>
                     <td>@Html.DisplayFor(x => item.ejemplaresDisponibles)</td>
                     <td>@(item.fechaLanzamiento?.Year.ToString() ?? "")</td>
-
                     <td>
                         @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
                         @if (esAdmin)

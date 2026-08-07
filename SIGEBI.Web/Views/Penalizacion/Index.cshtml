@@ -9,19 +9,30 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<!-- Filtro por estado -->
-<form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
-    <select name="estado" class="form-control" style="max-width: 200px;">
-        <option value="">-- Todos los estados --</option>
-        @foreach (var est in ViewBag.Estados as List<string> ?? new List<string>())
-        {
-            var selected = ViewBag.EstadoSeleccionado as string == est ? "selected" : null;
-            <option value="@est" selected="@selected">@est</option>
-        }
-    </select>
-    <button type="submit" class="btn btn-primary">Filtrar</button>
-    <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
-</form>
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <form asp-action="Index" method="get" class="d-flex gap-2">
+        <select name="estado" class="form-control" style="max-width: 200px;">
+            <option value="">-- Todos los estados --</option>
+            @foreach (var est in ViewBag.Estados as List<string> ?? new List<string>())
+            {
+                var selected = ViewBag.EstadoSeleccionado as string == est ? "selected" : null;
+                <option value="@est" selected="@selected">@est</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    @if (esAdmin)
+    {
+        <form asp-action="ExportarExcel" method="get" style="display:inline;">
+            <input type="hidden" name="estado" value="@ViewBag.EstadoSeleccionado" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+        </form>
+    }
+</div>
 
 @if (esAdmin)
 {

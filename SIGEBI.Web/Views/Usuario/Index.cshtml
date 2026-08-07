@@ -7,7 +7,36 @@
 
 <h1>Listado de Usuarios</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<!-- Filtros -->
+<div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+    <form asp-action="Index" method="get" class="d-flex gap-2 flex-wrap align-items-center">
+        <select name="rol" class="form-control" style="max-width: 120px;">
+            <option value="">-- Todos --</option>
+            <option value="1" selected="@(ViewBag.RolSeleccionado?.ToString() == "1" ? "selected" : null)">Admin</option>
+            <option value="2" selected="@(ViewBag.RolSeleccionado?.ToString() == "2" ? "selected" : null)">Usuario</option>
+        </select>
+        <select name="activo" class="form-control" style="max-width: 120px;">
+            <option value="">-- Activo --</option>
+            <option value="true" selected="@(ViewBag.ActivoSeleccionado?.ToString() == "true" ? "selected" : null)">Sí</option>
+            <option value="false" selected="@(ViewBag.ActivoSeleccionado?.ToString() == "false" ? "selected" : null)">No</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    @if (esAdmin)
+    {
+        <form asp-action="ExportarExcel" method="get" style="display:inline;">
+            <input type="hidden" name="rol" value="@ViewBag.RolSeleccionado" />
+            <input type="hidden" name="activo" value="@ViewBag.ActivoSeleccionado" />
+            <button type="submit" class="btn btn-success" style="white-space: nowrap;">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+        </form>
+    }
+</div>
 
 @if (esAdmin)
 {
