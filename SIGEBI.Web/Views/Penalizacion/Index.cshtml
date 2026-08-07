@@ -7,7 +7,21 @@
 
 <h1>Listado de Penalizaciones</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<!-- Filtro por estado -->
+<form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
+    <select name="estado" class="form-control" style="max-width: 200px;">
+        <option value="">-- Todos los estados --</option>
+        @foreach (var est in ViewBag.Estados as List<string> ?? new List<string>())
+        {
+            var selected = ViewBag.EstadoSeleccionado as string == est ? "selected" : null;
+            <option value="@est" selected="@selected">@est</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+</form>
 
 @if (esAdmin)
 {
@@ -18,8 +32,8 @@
     <thead>
         <tr>
             <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
-            <th>Usuario</th>                      
-            <th>Préstamo</th>                       
+            <th>Usuario</th>
+            <th>Préstamo</th>
             <th>@Html.DisplayNameFor(m => m.monto)</th>
             <th>@Html.DisplayNameFor(m => m.estado)</th>
             <th>@Html.DisplayNameFor(m => m.fechaEmision)</th>
@@ -34,7 +48,7 @@
         {
             <tr>
                 <td>@Html.DisplayFor(x => item.penalizacionId)</td>
-                <td>@item.nombreUsuario</td>         
+                <td>@item.nombreUsuario</td>
                 <td>@item.prestamoInfo</td>
                 <td>@Html.DisplayFor(x => item.monto)</td>
                 <td>@Html.DisplayFor(x => item.estado)</td>

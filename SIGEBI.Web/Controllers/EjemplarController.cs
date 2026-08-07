@@ -18,14 +18,32 @@ namespace SIGEBI.Web.Controllers
             _recursoApiService = recursoApiService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string estado)
         {
             var result = await _ejemplarApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<EjemplarModel>());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<EjemplarModel>());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<EjemplarModel>());
+            var ejemplares = result.data ?? new List<EjemplarModel>();
+
+            if (!string.IsNullOrEmpty(estado) && int.TryParse(estado, out var estadoInt))
+            {
+                ejemplares = ejemplares.Where(e => e.estado == estadoInt).ToList();
+            }
+
+            ViewBag.Estados = new Dictionary<int, string>
+            {
+                { 0, "Disponible" },
+                { 1, "Prestado" },
+                { 2, "Reservado" },
+                { 3, "No Disponible" }
+            };
+            ViewBag.EstadoSeleccionado = estado;
+
+            return View(ejemplares);
         }
 
         public async Task<IActionResult> Details(int id)

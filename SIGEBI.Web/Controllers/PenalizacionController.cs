@@ -22,14 +22,27 @@ namespace SIGEBI.Web.Controllers
             _prestamoApiService = prestamoApiService;
         }
 
-        public async Task<IActionResult> Index()
+        // ✅ GET: Penalizaciones con filtro por estado
+        public async Task<IActionResult> Index(string estado)
         {
             var result = await _penalizacionApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<PenalizacionModel>());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<PenalizacionModel>());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<PenalizacionModel>());
+            var penalizaciones = result.data ?? new List<PenalizacionModel>();
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                penalizaciones = penalizaciones.Where(p => p.estado == estado).ToList();
+            }
+
+            ViewBag.Estados = new List<string> { "Activa", "Resuelta", "Cancelada" };
+            ViewBag.EstadoSeleccionado = estado;
+
+            return View(penalizaciones);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -193,7 +206,7 @@ namespace SIGEBI.Web.Controllers
                     createModel.PrestamosList = prestamos.Select(p => new SelectListItem
                     {
                         Value = p.prestamoId.ToString(),
-                        Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
+                        Text = $"Préstamo #{p.prestamoId} - {p.codigoEjemplar} - {p.estado}"
                     }).ToList();
                 }
                 else if (model is PenalizacionEditModel editModel)
@@ -207,7 +220,7 @@ namespace SIGEBI.Web.Controllers
                     editModel.PrestamosList = prestamos.Select(p => new SelectListItem
                     {
                         Value = p.prestamoId.ToString(),
-                        Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
+                        Text = $"Préstamo #{p.prestamoId} - {p.codigoEjemplar} - {p.estado}"
                     }).ToList();
                 }
             }
