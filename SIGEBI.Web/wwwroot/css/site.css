@@ -586,7 +586,6 @@ p .btn-primary {
         text-align: center;
     }
 
-/* Notificaciones clickeables */
 .notificacion-enlace {
     text-decoration: none;
     color: #1E293B;
@@ -599,6 +598,157 @@ p .btn-primary {
         color: #2563EB;
         text-decoration: underline;
     }
+
+/* ===== BOTÓN MARCAR LEÍDA ===== */
+.btn-marcar-leida {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+    .btn-marcar-leida:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-marcar-leida:active {
+        transform: scale(0.95);
+    }
+
+/* ===== MENSAJES DE ESTADO ===== */
+.estado-mensaje {
+    padding: 20px 28px;
+    border-radius: 16px;
+    background: #FEF3C7;
+    border-left: 6px solid #D97706;
+    color: #92400E;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+    .estado-mensaje i {
+        font-size: 1.8rem;
+        color: #D97706;
+    }
+
+/* ===== TOAST ===== */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+}
+
+.toast-item {
+    padding: 16px 24px;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-left: 6px solid #2563EB;
+    animation: slideInRight 0.4s ease-out forwards;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+    .toast-item.success {
+        border-left-color: #059669;
+    }
+
+    .toast-item.error {
+        border-left-color: #DC2626;
+    }
+
+    .toast-item.info {
+        border-left-color: #2563EB;
+    }
+
+    .toast-item i {
+        font-size: 1.4rem;
+    }
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== ALERTAS MEJORADAS ===== */
+.alert {
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    animation: slideInDown 0.4s ease-out forwards;
+}
+
+.alert i {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    color: #065F46;
+    border-left: 6px solid #059669;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #FEE2E2, #FECACA);
+    color: #991B1B;
+    border-left: 6px solid #DC2626;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    border-left: 6px solid #D97706;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+    color: #1E40AF;
+    border-left: 6px solid #2563EB;
+}
+
+/* Animación de entrada */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 @media (max-width: 768px) {
     .navbar .container {

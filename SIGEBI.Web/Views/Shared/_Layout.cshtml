@@ -74,7 +74,7 @@
                             </li>
                         }
 
-                        <!-- Estos sí son visibles para todos los logueados (incluyendo Admin) -->
+                        <!-- Visibles para todos los logueados (incluyendo Admin) -->
                         <li>
                             <a class="nav-link" asp-controller="Notificacion" asp-action="Index">
                                 <i class="fas fa-bell"></i> Notificaciones
@@ -164,13 +164,13 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         flatpickr.localize(flatpickr.l10ns.es);
     });
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         flatpickr('.flatpickr-penalizacion', {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
@@ -181,5 +181,21 @@
         });
     });
 </script>
+
+@if (TempData["Success"] != null || TempData["Error"] != null)
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (TempData["Success"] != null)
+                {
+                    @:showToast('@TempData["Success"]', 'success');
+            }
+                @if (TempData["Error"] != null)
+                {
+                    @:showToast('@TempData["Error"]', 'error');
+            }
+                });
+    </script>
+}
 
 @await RenderSectionAsync("Scripts", required: false)

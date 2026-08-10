@@ -5,6 +5,78 @@
     var esAdmin = rol == "Admin";
 }
 
+<style>
+    /* Botón personalizado "Marcar leída" */
+    .btn-marcar-leida {
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 4px 8px;
+        transition: color 0.2s ease;
+        white-space: nowrap;
+    }
+
+        .btn-marcar-leida:hover {
+            color: #0d6efd;
+            text-decoration: underline;
+        }
+
+        .btn-marcar-leida i {
+            margin-right: 4px;
+        }
+
+    /* Contenedor con scroll horizontal Y vertical */
+    .table-responsive {
+        overflow-x: scroll !important;
+        overflow-y: auto;
+        max-height: 70vh;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        width: 100%;
+    }
+
+        .table-responsive table {
+            min-width: 1400px;
+            width: max-content;
+            margin-bottom: 0;
+        }
+
+        .table-responsive thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background-color: #f8f9fa;
+        }
+        /* Estilos de scrollbar personalizados */
+        .table-responsive::-webkit-scrollbar {
+            height: 14px;
+            width: 12px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 6px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 6px;
+            border: 2px solid #e9ecef;
+        }
+
+            .table-responsive::-webkit-scrollbar-thumb:hover {
+                background: #495057;
+            }
+
+    .table-responsive {
+        scrollbar-width: auto;
+        scrollbar-color: #6c757d #e9ecef;
+    }
+</style>
+
 <h1>Listado de Notificaciones</h1>
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -32,80 +104,84 @@
     @Html.AntiForgeryToken()
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
-            <th>Usuario</th>                        
-            <th>@Html.DisplayNameFor(m => m.tipo)</th>
-            <th>Mensaje</th>
-            <th>@Html.DisplayNameFor(m => m.enviadoEn)</th>
-            <th>@Html.DisplayNameFor(m => m.canal)</th>
-            <th>Estado</th>
-            @if (esAdmin)
-            {
-                <th>Acciones</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<!-- Tabla con scroll horizontal y vertical -->
+<div class="table-responsive" id="tablaNotificaciones">
+    <table class="table">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(x => item.notificacionId)</td>
-                <td>@item.nombreUsuario</td>         
-                <td>@Html.DisplayFor(x => item.tipo)</td>
-                <td>
-                    @if (item.prestamoId.HasValue)
+                <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
+                <th>Usuario</th>
+                <th>@Html.DisplayNameFor(m => m.tipo)</th>
+                <th>Mensaje</th>
+                <th>@Html.DisplayNameFor(m => m.enviadoEn)</th>
+                <th>@Html.DisplayNameFor(m => m.canal)</th>
+                <th>Estado</th>
+                @if (esAdmin)
+                {
+                    <th>Acciones</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(x => item.notificacionId)</td>
+                    <td>@item.nombreUsuario</td>
+                    <td>@Html.DisplayFor(x => item.tipo)</td>
+                    <td>
+                        @if (item.prestamoId.HasValue)
+                        {
+                            <a asp-controller="Prestamo" asp-action="Details" asp-route-id="@item.prestamoId"
+                               style="text-decoration: none; color: #2563EB; cursor: pointer;"
+                               onclick="return marcarLeida(@item.notificacionId, this);">
+                                <i class="fas fa-link"></i> @item.mensaje
+                            </a>
+                        }
+                        else if (item.recursoId.HasValue)
+                        {
+                            <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId"
+                               style="text-decoration: none; color: #2563EB; cursor: pointer;"
+                               onclick="return marcarLeida(@item.notificacionId, this);">
+                                <i class="fas fa-link"></i> @item.mensaje
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="#" style="text-decoration: none; color: #1E293B; cursor: pointer;"
+                               onclick="return marcarLeida(@item.notificacionId, this);">
+                                @item.mensaje
+                            </a>
+                        }
+                    </td>
+                    <td>@item.enviadoEn.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@Html.DisplayFor(x => item.canal)</td>
+                    <td>
+                        <!-- Badge con colores según estado -->
+                        <span class="badge @(item.leida ? "bg-success" : "bg-danger")" id="badge-@item.notificacionId">
+                            @(item.leida ? "✓ Leída" : "✗ No leída")
+                        </span>
+                    </td>
+                    @if (esAdmin)
                     {
-                        <a asp-controller="Prestamo" asp-action="Details" asp-route-id="@item.prestamoId"
-                           style="text-decoration: none; color: #2563EB; cursor: pointer;"
-                           onclick="return marcarLeida(@item.notificacionId, this);">
-                            <i class="fas fa-link"></i> @item.mensaje
-                        </a>
-                    }
-                    else if (item.recursoId.HasValue)
-                    {
-                        <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId"
-                           style="text-decoration: none; color: #2563EB; cursor: pointer;"
-                           onclick="return marcarLeida(@item.notificacionId, this);">
-                            <i class="fas fa-link"></i> @item.mensaje
-                        </a>
+                        <td>
+                            @Html.ActionLink("Editar", "Edit", new { id = item.notificacionId }) |
+                            @Html.ActionLink("Detalles", "Details", new { id = item.notificacionId })
+                        </td>
                     }
                     else
                     {
-                        <a href="#" style="text-decoration: none; color: #1E293B; cursor: pointer;"
-                           onclick="return marcarLeida(@item.notificacionId, this);">
-                            @item.mensaje
-                        </a>
+                        <td>
+                            <button class="btn-marcar-leida" onclick="return marcarLeida(@item.notificacionId, this);">
+                                <i class="fas fa-check-circle"></i> Marcar leída
+                            </button>
+                        </td>
                     }
-                </td>
-                <td>@item.enviadoEn.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@Html.DisplayFor(x => item.canal)</td>
-                <td>
-                    <span class="badge @(item.leida ? "badge-secondary" : "badge-primary")" id="badge-@item.notificacionId">
-                        @(item.leida ? "Leída" : "No leída")
-                    </span>
-                </td>
-                @if (esAdmin)
-                {
-                    <td>
-                        @Html.ActionLink("Editar", "Edit", new { id = item.notificacionId }) |
-                        @Html.ActionLink("Detalles", "Details", new { id = item.notificacionId })
-                    </td>
-                }
-                else
-                {
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="return marcarLeida(@item.notificacionId, this);">
-                            <i class="fas fa-check"></i> Marcar leída
-                        </button>
-                    </td>
-                }
-            </tr>
-        }
-    </tbody>
-</table>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @section Scripts {
     <script>
@@ -129,9 +205,9 @@
                     if (data.isSuccess) {
                         var badge = document.getElementById(`badge-${id}`);
                         if (badge) {
-                            badge.textContent = 'Leída';
-                            badge.classList.remove('badge-primary');
-                            badge.classList.add('badge-secondary');
+                            badge.textContent = '✓ Leída';
+                            badge.classList.remove('bg-danger');
+                            badge.classList.add('bg-success');
                         }
                         if (element && element.tagName === 'A') {
                             element.style.color = '#64748B';
