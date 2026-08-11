@@ -12,9 +12,10 @@
         <thead>
             <tr>
                 <th>Ejemplar</th>
-                <th>Fecha Préstamo</th>
-                <th>Fecha Devolución Esperada</th>
-                <th>Estado</th>
+                <th>Recurso</th>
+                <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
+                <th>@Html.DisplayNameFor(m => m.fechaDevolucionEsperada)</th>
+                <th>@Html.DisplayNameFor(m => m.estado)</th>
             </tr>
         </thead>
         <tbody>
@@ -22,6 +23,7 @@
             {
                 <tr>
                     <td>@item.codigoEjemplar</td>
+                    <td>@item.tituloRecurso</td>
                     <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
                     <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>
                     <td>@Html.DisplayFor(x => item.estado)</td>

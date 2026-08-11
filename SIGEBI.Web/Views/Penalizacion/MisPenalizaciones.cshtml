@@ -10,15 +10,17 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Monto</th>
-            <th>Estado</th>
-            <th>Fecha Emisión</th>
+            <th>Préstamo</th>
+            <th>@Html.DisplayNameFor(m => m.monto)</th>
+            <th>@Html.DisplayNameFor(m => m.estado)</th>
+            <th>@Html.DisplayNameFor(m => m.fechaEmision)</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
+                <td>@item.prestamoInfo</td>
                 <td>@Html.DisplayFor(x => item.monto)</td>
                 <td>@Html.DisplayFor(x => item.estado)</td>
                 <td>@Html.DisplayFor(x => item.fechaEmision)</td>
