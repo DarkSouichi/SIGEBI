@@ -1,0 +1,234 @@
+﻿@model IEnumerable<SIGEBI.Web.Models.Recurso.RecursoModel>
+@{
+    ViewData["Title"] = "Carrito de Préstamos";
+    var totalItems = Model.Count();
+}
+
+<style>
+    .carrito-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #E2E8F0;
+    }
+
+        .carrito-header .badge-contador {
+            font-size: 1rem;
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: #2563EB;
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+    .carrito-vacio {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        border: 2px dashed #E2E8F0;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+        .carrito-vacio i {
+            font-size: 4rem;
+            color: #94A3B8;
+            margin-bottom: 16px;
+        }
+
+        .carrito-vacio .lead {
+            font-size: 1.2rem;
+            color: #64748B;
+            margin-bottom: 20px;
+        }
+
+    .card-carrito {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+        .card-carrito:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+        }
+
+        .card-carrito .card-body {
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-carrito .card-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .card-carrito .card-subtitle {
+            font-size: 0.9rem;
+            color: #64748B;
+        }
+
+        .card-carrito .card-text {
+            margin: 8px 0 12px 0;
+        }
+
+        .card-carrito .badge-categoria {
+            background: #F1F5F9;
+            color: #0F172A;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .card-carrito .badge.bg-success,
+        .card-carrito .badge.bg-danger {
+            font-size: 0.8rem;
+            padding: 2px 10px;
+        }
+
+    .footer-carrito {
+        background: #F8FAFC;
+        border-radius: 16px;
+        padding: 16px 24px;
+        margin-top: 28px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid #E2E8F0;
+    }
+
+        .footer-carrito .total-items {
+            font-size: 0.95rem;
+            color: #0F172A;
+        }
+
+            .footer-carrito .total-items strong {
+                color: #2563EB;
+            }
+
+    .btn-solicitar-todos {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+        .btn-solicitar-todos:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
+    .row-carrito {
+        --bs-gutter-x: 1rem; 
+        --bs-gutter-y: 1rem; 
+    }
+
+
+</style>
+
+<h1>Carrito de Préstamos</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="carrito-vacio">
+        <i class="fas fa-shopping-cart"></i>
+        <p class="lead">Tu carrito está vacío</p>
+        <p style="color: #94A3B8; margin-bottom: 20px;">
+            Explora el catálogo y agrega los libros que te interesan.
+        </p>
+        <a asp-controller="Recurso" asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-book"></i> Explorar catálogo
+        </a>
+    </div>
+}
+else
+{
+    <div class="carrito-header">
+        <span class="badge-contador">
+            <i class="fas fa-list"></i> @totalItems libro(s) en el carrito
+        </span>
+        <a asp-controller="Recurso" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Seguir agregando
+        </a>
+    </div>
+
+    <div class="row row-carrito @(totalItems == 1 ? "justify-content-center" : "")">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-3 @(totalItems == 1 ? "col-lg-6" : "")">
+                <div class="card card-carrito">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate" title="@item.titulo">@item.titulo</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@item.autor</h6>
+                        <div class="card-text">
+                            <span class="badge-categoria">@item.categoria</span>
+                            @if (item.ejemplaresDisponibles > 0)
+                            {
+                                <span class="badge bg-success">@item.ejemplaresDisponibles disponibles</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Sin ejemplares</span>
+                            }
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <form asp-action="Quitar" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="recursoId" value="@item.recursoId" />
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Quitar este libro del carrito?');">
+                                    <i class="fas fa-trash"></i> Quitar
+                                </button>
+                            </form>
+                            <a asp-controller="Recurso" asp-action="Details" asp-route-id="@item.recursoId" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-info-circle"></i> Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="footer-carrito">
+        <span class="total-items">
+            <i class="fas fa-shopping-cart"></i> Total: <strong>@totalItems</strong> libro(s)
+        </span>
+        <form asp-action="Solicitar" method="post" style="display:inline;">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-solicitar-todos" onclick="return confirm('¿Estás seguro de solicitar todos los préstamos de este carrito?');">
+                <i class="fas fa-handshake"></i> Solicitar todos
+            </button>
+        </form>
+    </div>
+}

@@ -8,7 +8,9 @@ namespace SIGEBI.Web.Models.Penalizacion
     {
         public int penalizacionId { get; set; }
         public int usuarioId { get; set; }
+        public string nombreUsuario { get; set; } = string.Empty;
         public int prestamoId { get; set; }
+        public string prestamoInfo { get; set; } = string.Empty;
         public decimal monto { get; set; }
         public string estado { get; set; } = string.Empty;
         public DateTime fechaEmision { get; set; }
