@@ -10,6 +10,7 @@
 </div>
 
 <div class="card-grid">
+    <!-- Catálogo visible para todos -->
     <a asp-controller="Recurso" asp-action="Index" class="card-item">
         <i class="fas fa-book"></i>
         <h3>Catálogo</h3>
@@ -18,6 +19,7 @@
 
     @if (isLoggedIn)
     {
+        <!-- Solo para usuarios normales (NO Admin) -->
         @if (!esAdmin)
         {
             <a asp-controller="Prestamo" asp-action="MisPrestamos" class="card-item">
@@ -31,6 +33,12 @@
                 <h3>Mis Penalizaciones</h3>
                 <p>Consulta tus penalizaciones</p>
             </a>
+
+            <a asp-controller="Carrito" asp-action="Index" class="card-item">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Carrito</h3>
+                <p>Gestiona tu carrito</p>
+            </a>
         }
 
         <a asp-controller="Notificacion" asp-action="Index" class="card-item">
@@ -38,14 +46,9 @@
             <h3>Notificaciones</h3>
             <p>Consulta tus notificaciones</p>
         </a>
-
-        <a asp-controller="Carrito" asp-action="Index" class="card-item">
-            <i class="fas fa-shopping-cart"></i>
-            <h3>Carrito</h3>
-            <p>Gestiona tu carrito</p>
-        </a>
     }
 
+    <!-- Módulos solo para Admin -->
     @if (esAdmin)
     {
         <a asp-controller="Usuario" asp-action="Index" class="card-item">
