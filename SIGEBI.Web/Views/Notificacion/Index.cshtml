@@ -46,7 +46,6 @@
         display: inline-block;
     }
 
-  
     .table-responsive {
         overflow-x: scroll !important;
         overflow-y: auto;
@@ -69,7 +68,7 @@
             z-index: 2;
             background-color: #f8f9fa;
         }
-    
+
         .table-responsive::-webkit-scrollbar {
             height: 14px;
             width: 12px;
@@ -100,7 +99,6 @@
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<!-- Filtro por tipo -->
 <form asp-action="Index" method="get" class="mb-3 d-flex gap-2">
     <select name="tipo" class="form-control" style="max-width: 200px;">
         <option value="">-- Todos los tipos --</option>
@@ -127,7 +125,10 @@
     <table class="table">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
+                @if (esAdmin)
+                {
+                    <th>@Html.DisplayNameFor(m => m.notificacionId)</th>
+                }
                 <th>Usuario</th>
                 <th>@Html.DisplayNameFor(m => m.tipo)</th>
                 <th>Mensaje</th>
@@ -144,7 +145,10 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(x => item.notificacionId)</td>
+                    @if (esAdmin)
+                    {
+                        <td>@Html.DisplayFor(x => item.notificacionId)</td>
+                    }
                     <td>@item.nombreUsuario</td>
                     <td>@Html.DisplayFor(x => item.tipo)</td>
                     <td>
@@ -224,12 +228,6 @@
                         if (estadoSpan) {
                             estadoSpan.className = 'estado-leida';
                             estadoSpan.textContent = 'Leída';
-                        }
-                        var badge = document.getElementById(`badge-${id}`);
-                        if (badge) {
-                            badge.textContent = 'Leída';
-                            badge.classList.remove('badge-primary');
-                            badge.classList.add('badge-secondary');
                         }
                         if (element && element.tagName === 'A') {
                             element.style.color = '#64748B';

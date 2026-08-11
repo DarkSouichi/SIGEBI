@@ -1,6 +1,7 @@
 ﻿@model SIGEBI.Web.Models.Notificacion.NotificacionModel
 @{
     ViewData["Title"] = "Detalles de la Notificación";
+    var esAdmin = Context.Session.GetString("Rol") == "Admin";
 }
 
 <div class="details-container">
@@ -8,11 +9,14 @@
         <h2><i class="fas fa-bell"></i> Detalles de la Notificación</h2>
     </div>
     <div class="details-body">
-        <div class="detail-item">
-            <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
-            <span class="detail-label">ID</span>
-            <span class="detail-value">@Model.notificacionId</span>
-        </div>
+        @if (esAdmin)
+        {
+            <div class="detail-item">
+                <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
+                <span class="detail-label">ID</span>
+                <span class="detail-value">@Model.notificacionId</span>
+            </div>
+        }
         <div class="detail-item">
             <span class="detail-icon"><i class="fas fa-user"></i></span>
             <span class="detail-label">Usuario</span>
@@ -89,7 +93,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.isSuccess) {
-                        location.reload(); 
+                        location.reload();
                     } else {
                         alert('Error: ' + data.message);
                     }

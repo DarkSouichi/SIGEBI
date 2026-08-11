@@ -66,7 +66,10 @@
     <table class="table">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+                @if (esAdmin)
+                {
+                    <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+                }
                 <th>Usuario</th>
                 <th>Ejemplar</th>
                 <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
@@ -82,7 +85,10 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                    @if (esAdmin)
+                    {
+                        <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                    }
                     <td>@item.nombreUsuario</td>
                     <td>@item.codigoEjemplar</td>
                     <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
@@ -91,7 +97,6 @@
                     @if (esAdmin)
                     {
                         <td>
-                            <!-- Botón Devolver (solo para Activo) -->
                             @if (item.estado == "Activo")
                             {
                                 <form asp-action="Devolver" method="post" style="display:inline;">
@@ -104,7 +109,6 @@
                                 <span>|</span>
                             }
 
-                            <!-- Botones para Pendiente: Aprobar y Rechazar -->
                             @if (item.estado == "Pendiente")
                             {
                                 <form asp-action="Aprobar" method="post" style="display:inline;">
@@ -116,7 +120,6 @@
                                 </form>
                                 <span>|</span>
 
-                                <!-- Botón Rechazar -->
                                 <form asp-action="Rechazar" method="post" style="display:inline;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@item.prestamoId" />

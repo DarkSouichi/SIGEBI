@@ -52,7 +52,10 @@
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
+            @if (esAdmin)
+            {
+                <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
+            }
             <th>Usuario</th>
             <th>Préstamo</th>
             <th>@Html.DisplayNameFor(m => m.monto)</th>
@@ -68,7 +71,10 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@Html.DisplayFor(x => item.penalizacionId)</td>
+                @if (esAdmin)
+                {
+                    <td>@Html.DisplayFor(x => item.penalizacionId)</td>
+                }
                 <td>@item.nombreUsuario</td>
                 <td>@item.prestamoInfo</td>
                 <td>@Html.DisplayFor(x => item.monto)</td>

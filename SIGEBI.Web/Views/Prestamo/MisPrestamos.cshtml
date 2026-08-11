@@ -11,18 +11,16 @@
     <table class="table">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
-                <th>@Html.DisplayNameFor(m => m.codigoEjemplar)</th>
-                <th>@Html.DisplayNameFor(m => m.fechaPrestamo)</th>
-                <th>@Html.DisplayNameFor(m => m.fechaDevolucionEsperada)</th>
-                <th>@Html.DisplayNameFor(m => m.estado)</th>
+                <th>Ejemplar</th>
+                <th>Fecha Préstamo</th>
+                <th>Fecha Devolución Esperada</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(x => item.prestamoId)</td>
                     <td>@item.codigoEjemplar</td>
                     <td>@Html.DisplayFor(x => item.fechaPrestamo)</td>
                     <td>@Html.DisplayFor(x => item.fechaDevolucionEsperada)</td>

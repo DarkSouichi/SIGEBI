@@ -1,6 +1,7 @@
 ﻿@model SIGEBI.Web.Models.Prestamo.PrestamoModel
 @{
     ViewData["Title"] = "Detalles del Préstamo";
+    var esAdmin = Context.Session.GetString("Rol") == "Admin";
     var estadoColor = Model.estado switch
     {
         "Pendiente" => "badge-warning",
@@ -16,11 +17,14 @@
         <h2><i class="fas fa-handshake"></i> Detalles del Préstamo</h2>
     </div>
     <div class="details-body">
-        <div class="detail-item">
-            <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
-            <span class="detail-label">ID</span>
-            <span class="detail-value">@Model.prestamoId</span>
-        </div>
+        @if (esAdmin)
+        {
+            <div class="detail-item">
+                <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
+                <span class="detail-label">ID</span>
+                <span class="detail-value">@Model.prestamoId</span>
+            </div>
+        }
         <div class="detail-item">
             <span class="detail-icon"><i class="fas fa-user"></i></span>
             <span class="detail-label">Usuario</span>
@@ -67,7 +71,7 @@
     </div>
     <div class="details-actions">
         <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al listado</a>
-        @if (User.IsInRole("Admin"))
+        @if (esAdmin)
         {
             <a asp-action="Edit" asp-route-id="@Model.prestamoId" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
         }
