@@ -17,6 +17,8 @@ namespace SIGEBI.Web.Models.Recurso
         public string? descripcion { get; set; }
         public DateTime? fechaLanzamiento { get; set; }
 
+        public string? imagenUrl { get; set; }
+
         public List<EjemplarModel> Ejemplares { get; set; } = new();
     }
 

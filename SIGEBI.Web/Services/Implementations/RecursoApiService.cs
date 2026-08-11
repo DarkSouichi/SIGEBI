@@ -28,9 +28,36 @@ namespace SIGEBI.Web.Services
             }
         }
 
+        private void AsignarImagenUrl(RecursoModel recurso)
+        {
+            if (recurso != null)
+            {
+                if (!string.IsNullOrEmpty(recurso.isbn))
+                {
+                    var isbnLimpio = recurso.isbn.Replace("-", "").Replace(" ", "");
+                    recurso.imagenUrl = $"https://covers.openlibrary.org/b/isbn/{isbnLimpio}-L.jpg";
+                }
+                else
+                {
+                    recurso.imagenUrl = "/images/no-cover.png"; 
+                }
+            }
+        }
+
+        private void AsignarImagenUrlLista(List<RecursoModel> lista)
+        {
+            if (lista != null)
+            {
+                foreach (var item in lista)
+                {
+                    AsignarImagenUrl(item);
+                }
+            }
+        }
+
         public async Task<GetAllRecursosResponse> GetAll()
         {
-            AddAuthorizationHeader(); 
+            AddAuthorizationHeader();
             var response = new GetAllRecursosResponse();
 
             try
@@ -43,6 +70,11 @@ namespace SIGEBI.Web.Services
                     response = JsonSerializer.Deserialize<GetAllRecursosResponse>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                         ?? new GetAllRecursosResponse { isSuccess = false, message = "Error al deserializar." };
+
+                    if (response.isSuccess && response.data != null)
+                    {
+                        AsignarImagenUrlLista(response.data);
+                    }
                 }
                 else
                 {
@@ -93,6 +125,11 @@ namespace SIGEBI.Web.Services
                     response = JsonSerializer.Deserialize<GetRecursoResponse>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                         ?? new GetRecursoResponse { isSuccess = false, message = "Error al deserializar." };
+
+                    if (response.isSuccess && response.data != null)
+                    {
+                        AsignarImagenUrl(response.data);
+                    }
                 }
                 else
                 {

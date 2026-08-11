@@ -47,6 +47,7 @@
                 {
                     <th>@Html.DisplayNameFor(m => m.recursoId)</th>
                 }
+                <th>Portada</th> 
                 <th>@Html.DisplayNameFor(m => m.titulo)</th>
                 <th>@Html.DisplayNameFor(m => m.autor)</th>
                 <th>@Html.DisplayNameFor(m => m.isbn)</th>
@@ -69,6 +70,16 @@
                     {
                         <td>@Html.DisplayFor(x => item.recursoId)</td>
                     }
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.imagenUrl))
+                        {
+                            <img src="@item.imagenUrl" alt="Portada de @item.titulo" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px;" />
+                        }
+                        else
+                        {
+                            <span style="color: #aaa;">Sin imagen</span>
+                        }
+                    </td>
                     <td>@Html.DisplayFor(x => item.titulo)</td>
                     <td>@Html.DisplayFor(x => item.autor)</td>
                     <td>@Html.DisplayFor(x => item.isbn)</td>
