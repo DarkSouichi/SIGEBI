@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Penalizacion;
+using SIGEBI.Web.Models.Usuario;
+using SIGEBI.Web.Models.Prestamo;
+using SIGEBI.Web.Models.Ejemplar;
+using SIGEBI.Web.Models.Recurso;
 
 namespace SIGEBI.Web.Services
 {
@@ -9,12 +13,24 @@ namespace SIGEBI.Web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUsuarioApiService _usuarioApiService;
+        private readonly IPrestamoApiService _prestamoApiService;
+        private readonly IEjemplarApiService _ejemplarApiService;  
+        private readonly IRecursoApiService _recursoApiService;    
 
         public PenalizacionApiService(IHttpClientFactory httpClientFactory,
-                                      IHttpContextAccessor httpContextAccessor)
+                                      IHttpContextAccessor httpContextAccessor,
+                                      IUsuarioApiService usuarioApiService,
+                                      IPrestamoApiService prestamoApiService,
+                                      IEjemplarApiService ejemplarApiService,  
+                                      IRecursoApiService recursoApiService)    
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _usuarioApiService = usuarioApiService;
+            _prestamoApiService = prestamoApiService;
+            _ejemplarApiService = ejemplarApiService;  
+            _recursoApiService = recursoApiService;    
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -75,8 +91,67 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombres(response);
+
             return response;
         }
+
+        private async Task EnriquecerConNombres(GetAllPenalizacionesResponse response)
+        {
+            if (response.isSuccess && response.data != null && response.data.Any())
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarioDict = usuariosResponse.isSuccess && usuariosResponse.data != null
+                    ? usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto)
+                    : new Dictionary<int, string>();
+
+                var prestamosResponse = await _prestamoApiService.GetAll();
+                var prestamoDict = prestamosResponse.isSuccess && prestamosResponse.data != null
+                    ? prestamosResponse.data.ToDictionary(p => p.prestamoId, p => p)
+                    : new Dictionary<int, PrestamoModel>();
+
+                var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                var ejemplarCodigoDict = ejemplaresResponse.isSuccess && ejemplaresResponse.data != null
+                    ? ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras)
+                    : new Dictionary<int, string>();
+
+                var recursosResponse = await _recursoApiService.GetAll();
+                var recursoTituloDict = recursosResponse.isSuccess && recursosResponse.data != null
+                    ? recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo)
+                    : new Dictionary<int, string>();
+
+                var ejemplarTituloDict = new Dictionary<int, string>();
+                if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null &&
+                    recursosResponse.isSuccess && recursosResponse.data != null)
+                {
+                    foreach (var ejemplar in ejemplaresResponse.data)
+                    {
+                        if (recursoTituloDict.TryGetValue(ejemplar.recursoId, out var titulo))
+                        {
+                            ejemplarTituloDict[ejemplar.ejemplarId] = titulo;
+                        }
+                    }
+                }
+
+                foreach (var item in response.data)
+                {
+                    if (usuarioDict.TryGetValue(item.usuarioId, out var nombre))
+                        item.nombreUsuario = nombre;
+
+                    if (prestamoDict.TryGetValue(item.prestamoId, out var prestamo))
+                    {
+                        var codigo = ejemplarCodigoDict.TryGetValue(prestamo.ejemplarId, out var c) ? c : "N/A";
+                        var titulo = ejemplarTituloDict.TryGetValue(prestamo.ejemplarId, out var t) ? t : "Sin título";
+                        item.prestamoInfo = $"Préstamo #{item.prestamoId} - Código: {codigo} - {titulo}";
+                    }
+                    else
+                    {
+                        item.prestamoInfo = $"Préstamo #{item.prestamoId} (no encontrado)";
+                    }
+                }
+            }
+        }
+
 
         public async Task<GetPenalizacionResponse> GetById(int id)
         {
@@ -93,6 +168,11 @@ namespace SIGEBI.Web.Services
                     response = JsonSerializer.Deserialize<GetPenalizacionResponse>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                         ?? new GetPenalizacionResponse { isSuccess = false, message = "Error al deserializar." };
+
+                    if (response.isSuccess && response.data != null)
+                    {
+                        await EnriquecerPenalizacionIndividual(response.data);
+                    }
                 }
                 else
                 {
@@ -126,6 +206,54 @@ namespace SIGEBI.Web.Services
             }
 
             return response;
+        }
+
+        private async Task EnriquecerPenalizacionIndividual(PenalizacionModel penalizacion)
+        {
+            var usuariosResponse = await _usuarioApiService.GetAll();
+            if (usuariosResponse.isSuccess && usuariosResponse.data != null)
+            {
+                var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
+                if (usuarioDict.TryGetValue(penalizacion.usuarioId, out var nombre))
+                    penalizacion.nombreUsuario = nombre;
+            }
+
+            var prestamosResponse = await _prestamoApiService.GetAll();
+            if (prestamosResponse.isSuccess && prestamosResponse.data != null)
+            {
+                var prestamo = prestamosResponse.data.FirstOrDefault(p => p.prestamoId == penalizacion.prestamoId);
+                if (prestamo != null)
+                {
+                    var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                    string codigo = "N/A";
+                    if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null)
+                    {
+                        var ejemplar = ejemplaresResponse.data.FirstOrDefault(e => e.ejemplarId == prestamo.ejemplarId);
+                        codigo = ejemplar?.codigoBarras ?? "N/A";
+                    }
+
+                    string titulo = "Sin título";
+                    if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null)
+                    {
+                        var ejemplar = ejemplaresResponse.data.FirstOrDefault(e => e.ejemplarId == prestamo.ejemplarId);
+                        if (ejemplar != null)
+                        {
+                            var recursosResponse = await _recursoApiService.GetAll();
+                            if (recursosResponse.isSuccess && recursosResponse.data != null)
+                            {
+                                var recurso = recursosResponse.data.FirstOrDefault(r => r.recursoId == ejemplar.recursoId);
+                                titulo = recurso?.titulo ?? "Sin título";
+                            }
+                        }
+                    }
+
+                    penalizacion.prestamoInfo = $"Préstamo #{penalizacion.prestamoId} - Código: {codigo} - {titulo}";
+                }
+                else
+                {
+                    penalizacion.prestamoInfo = $"Préstamo #{penalizacion.prestamoId} (no encontrado)";
+                }
+            }
         }
 
         public async Task<ApiResponse> Create(PenalizacionCreateModel model)

@@ -11,6 +11,8 @@ namespace SIGEBI.Web.Models.Usuario
         public string email { get; set; } = string.Empty;
         public bool estaActivo { get; set; }
         public int rolId { get; set; }
+
+        public decimal TotalMora { get; set; }
     }
 
     public class GetAllUsuariosResponse
@@ -90,11 +92,4 @@ namespace SIGEBI.Web.Models.Usuario
         [JsonPropertyName("ChangeUser")]
         public int changeUser { get; set; }
     }
-
-   /*public class ApiResponse
-    {
-        public bool isSuccess { get; set; }
-        public string message { get; set; } = string.Empty;
-        public object? data { get; set; }
-    }*/
 }

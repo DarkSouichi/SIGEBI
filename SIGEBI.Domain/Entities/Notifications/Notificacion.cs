@@ -10,4 +10,8 @@ public class Notificacion : AuditEntity
     public string Mensaje { get; set; } = string.Empty;
     public DateTime EnviadoEn { get; set; }
     public string Canal { get; set; } = "Email";
+
+    public int? PrestamoId { get; set; }  
+    public int? RecursoId { get; set; }
+    public bool Leida { get; set; } = false;
 }

@@ -1,39 +1,50 @@
 ﻿@model SIGEBI.Web.Models.Ejemplar.EjemplarModel
 @{
     ViewData["Title"] = "Detalles del Ejemplar";
+    var estadoColor = Model.estado switch
+    {
+        0 => "badge-success",
+        1 => "badge-warning",
+        2 => "badge-info",
+        _ => "badge-danger"
+    };
 }
 
-<h1>Detalles del Ejemplar</h1>
-
-<div class="details-card">
-    <div class="detail-row">
-        <span class="detail-label">ID</span>
-        <span class="detail-value">@Model.ejemplarId</span>
+<div class="details-container">
+    <div class="details-header">
+        <h2><i class="fas fa-copy"></i> Detalles del Ejemplar</h2>
     </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Código de Barras</span>
-        <span class="detail-value">@Model.codigoBarras</span>
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Estado</span>
-        <span class="detail-value">
-            <span class="badge @(Model.estado == 0 ? "badge-success" :
-                                                 Model.estado == 1 ? "badge-warning" :
-                                                 Model.estado == 2 ? "badge-info" : "badge-danger")">
-                @Model.EstadoTexto
+    <div class="details-body">
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
+            <span class="detail-label">ID</span>
+            <span class="detail-value">@Model.ejemplarId</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-barcode"></i></span>
+            <span class="detail-label">Código de Barras</span>
+            <span class="detail-value">@Model.codigoBarras</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-info-circle"></i></span>
+            <span class="detail-label">Estado</span>
+            <span class="detail-value">
+                <span class="badge @estadoColor">@Model.EstadoTexto</span>
             </span>
-        </span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-book"></i></span>
+            <span class="detail-label">Recurso (Libro)</span>
+            <span class="detail-value">
+                <a asp-controller="Recurso" asp-action="Details" asp-route-id="@Model.recursoId">@Model.tituloRecurso (ID: @Model.recursoId)</a>
+            </span>
+        </div>
     </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Recurso (Libro) ID</span>
-        <span class="detail-value">@Model.recursoId</span>
+    <div class="details-actions">
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al listado</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.ejemplarId" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+        }
     </div>
-</div>
-
-<div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.ejemplarId" class="btn btn-primary">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
 </div>

@@ -7,5 +7,6 @@ namespace SIGEBI.Application.Interfaces
     public interface INotificacionService : IBaseService<SaveNotificacionDto, UpdateNotificacionDto>
     {
         Task<OperationResult> GetNotificacionesByUsuarioId(int usuarioId);
+        Task<OperationResult> MarcarLeida(int id);
     }
 }

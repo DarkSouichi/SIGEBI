@@ -8,10 +8,14 @@ namespace SIGEBI.Web.Models.Notificacion
     {
         public int notificacionId { get; set; }
         public int usuarioId { get; set; }
+        public string nombreUsuario { get; set; } = string.Empty;
         public string tipo { get; set; } = string.Empty;
         public string mensaje { get; set; } = string.Empty;
         public DateTime enviadoEn { get; set; }
         public string canal { get; set; } = string.Empty;
+        public int? prestamoId { get; set; }
+        public int? recursoId { get; set; }
+        public bool leida { get; set; }
     }
 
     public class GetAllNotificacionesResponse
@@ -48,6 +52,9 @@ namespace SIGEBI.Web.Models.Notificacion
         [Required(ErrorMessage = "El canal es obligatorio.")]
         [StringLength(50, ErrorMessage = "El canal no puede exceder 50 caracteres.")]
         public string canal { get; set; } = string.Empty;
+
+        [JsonPropertyName("PrestamoId")]
+        public int? prestamoId { get; set; }
 
         [JsonPropertyName("ChangeDate")]
         public DateTime changeDate { get; set; }

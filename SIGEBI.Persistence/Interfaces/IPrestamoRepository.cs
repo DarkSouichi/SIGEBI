@@ -9,5 +9,8 @@ namespace SIGEBI.Persistence.Interfaces
         Task<OperationResult> GetPrestamosByUsuarioId(int usuarioId);
         Task<OperationResult> GetPrestamosActivos();
         Task<OperationResult> GetPrestamosByEjemplarId(int ejemplarId);
+
+        Task<List<Prestamo>> GetPrestamosActivosByUsuarioId(int usuarioId);
+
     }
 }

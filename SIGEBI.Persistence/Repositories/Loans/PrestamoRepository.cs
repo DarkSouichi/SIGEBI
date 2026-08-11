@@ -69,5 +69,12 @@ namespace SIGEBI.Persistence.Repositories.Loans
             }
             return result;
         }
+
+        public async Task<List<Prestamo>> GetPrestamosActivosByUsuarioId(int usuarioId)
+        {
+            return await _context.Prestamos
+                .Where(p => p.UsuarioId == usuarioId && p.Estado == EstadoPrestamo.Activo)
+                .ToListAsync();
+        }
     }
 }

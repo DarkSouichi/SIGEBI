@@ -7,7 +7,42 @@
 
 <h1>Listado de Penalizaciones</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+@{
+    var totalMora = Model.Sum(p => p.monto);
+}
+@if (totalMora > 0)
+{
+    <div class="alert alert-info">
+        <strong>Total de mora acumulada:</strong> @totalMora.ToString("C")
+    </div>
+}
+
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <form asp-action="Index" method="get" class="d-flex gap-2">
+        <select name="estado" class="form-control" style="max-width: 200px;">
+            <option value="">-- Todos los estados --</option>
+            @foreach (var est in ViewBag.Estados as List<string> ?? new List<string>())
+            {
+                var selected = ViewBag.EstadoSeleccionado as string == est ? "selected" : null;
+                <option value="@est" selected="@selected">@est</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    @if (esAdmin)
+    {
+        <form asp-action="ExportarExcel" method="get" style="display:inline;">
+            <input type="hidden" name="estado" value="@ViewBag.EstadoSeleccionado" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+        </form>
+    }
+</div>
 
 @if (esAdmin)
 {
@@ -17,9 +52,12 @@
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
-            <th>@Html.DisplayNameFor(m => m.usuarioId)</th>
-            <th>@Html.DisplayNameFor(m => m.prestamoId)</th>
+            @if (esAdmin)
+            {
+                <th>@Html.DisplayNameFor(m => m.penalizacionId)</th>
+            }
+            <th>Usuario</th>
+            <th>Préstamo</th>
             <th>@Html.DisplayNameFor(m => m.monto)</th>
             <th>@Html.DisplayNameFor(m => m.estado)</th>
             <th>@Html.DisplayNameFor(m => m.fechaEmision)</th>
@@ -33,9 +71,12 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@Html.DisplayFor(x => item.penalizacionId)</td>
-                <td>@Html.DisplayFor(x => item.usuarioId)</td>
-                <td>@Html.DisplayFor(x => item.prestamoId)</td>
+                @if (esAdmin)
+                {
+                    <td>@Html.DisplayFor(x => item.penalizacionId)</td>
+                }
+                <td>@item.nombreUsuario</td>
+                <td>@item.prestamoInfo</td>
                 <td>@Html.DisplayFor(x => item.monto)</td>
                 <td>@Html.DisplayFor(x => item.estado)</td>
                 <td>@Html.DisplayFor(x => item.fechaEmision)</td>

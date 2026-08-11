@@ -34,7 +34,8 @@ namespace SIGEBI.Application.Dtos.Loans
         public DateTime? FechaDevolucionReal { get; set; }
 
         [Required(ErrorMessage = "El estado es requerido.")]
-        [RegularExpression("^(Pendiente|Activo|Devuelto|Vencido)$", ErrorMessage = "Estado inválido. Valores permitidos: Pendiente, Activo, Devuelto, Vencido.")]
+        [RegularExpression("^(Pendiente|Activo|Devuelto|Vencido|Rechazado)$",
+            ErrorMessage = "Estado inválido. Valores permitidos: Pendiente, Activo, Devuelto, Vencido, Rechazado.")]
         public string Estado { get; set; } = string.Empty;
 
         public DateTime ChangeDate { get; set; }
@@ -64,11 +65,11 @@ namespace SIGEBI.Application.Dtos.Loans
         public DateTime? FechaDevolucionReal { get; set; }
 
         [Required(ErrorMessage = "El estado es requerido.")]
-        [RegularExpression("^(Pendiente|Activo|Devuelto|Vencido)$", ErrorMessage = "Estado inválido. Valores permitidos: Pendiente, Activo, Devuelto, Vencido.")]
+        [RegularExpression("^(Pendiente|Activo|Devuelto|Vencido|Rechazado)$",
+            ErrorMessage = "Estado inválido. Valores permitidos: Pendiente, Activo, Devuelto, Vencido, Rechazado.")]
         public string Estado { get; set; } = string.Empty;
 
         public DateTime ChangeDate { get; set; }
         public int ChangeUser { get; set; }
     }
-
 }
