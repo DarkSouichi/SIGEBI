@@ -9,5 +9,7 @@ namespace SIGEBI.Persistence.Interfaces
         Task<OperationResult> GetEjemplaresByRecursoId(int recursoId);
         Task<OperationResult> GetRecursosByCategoria(string categoria);
         Task<OperationResult> GetRecursosDisponibles();
+        Task<List<Recurso>> GetAllWithEjemplaresAsync();
+        Task<Recurso?> GetByIdWithEjemplaresAsync(int id);
     }
 }

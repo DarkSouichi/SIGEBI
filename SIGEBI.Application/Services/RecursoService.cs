@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SIGEBI.Application.Dtos.Catalog;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Catalog;
-using SIGEBI.Infrastructure.Audit; 
+using SIGEBI.Infrastructure.Audit;
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
@@ -14,12 +15,12 @@ namespace SIGEBI.Application.Services
         private readonly IRecursoRepository _recursoRepository;
         private readonly ILoggerService<RecursoService> _logger;
         private readonly IConfiguration _configuration;
-        private readonly IAuditLogger _auditLogger; 
+        private readonly IAuditLogger _auditLogger;
 
         public RecursoService(IRecursoRepository recursoRepository,
                               ILoggerService<RecursoService> logger,
                               IConfiguration configuration,
-                              IAuditLogger auditLogger) 
+                              IAuditLogger auditLogger)
         {
             _recursoRepository = recursoRepository;
             _logger = logger;
@@ -32,17 +33,22 @@ namespace SIGEBI.Application.Services
             OperationResult result = new OperationResult();
             try
             {
-                result.Data = (await _recursoRepository.GetAllAsync())
-                    .Select(r => new RecursoDto()
-                    {
-                        RecursoId = r.Id,
-                        Titulo = r.Titulo,
-                        Autor = r.Autor,
-                        ISBN = r.ISBN,
-                        Categoria = r.Categoria,
-                        ChangeDate = r.CreadoEn,
-                        ChangeUser = r.Id
-                    }).OrderByDescending(r => r.ChangeDate).ToList();
+                var recursos = await _recursoRepository.GetAllWithEjemplaresAsync();
+
+                result.Data = recursos.Select(r => new RecursoDto()
+                {
+                    RecursoId = r.Id,
+                    Titulo = r.Titulo,
+                    Autor = r.Autor,
+                    ISBN = r.ISBN,
+                    Categoria = r.Categoria,
+                    ChangeDate = r.CreadoEn,
+                    ChangeUser = r.Id,
+                    TotalEjemplares = r.Ejemplares?.Count ?? 0,
+                    EjemplaresDisponibles = r.Ejemplares?.Count(e => e.Estado == EstadoEjemplar.Disponible) ?? 0,
+                               Descripcion = r.Descripcion,
+                    FechaLanzamiento = r.FechaLanzamiento
+                }).OrderByDescending(r => r.ChangeDate).ToList();
             }
             catch (Exception ex)
             {
@@ -58,7 +64,14 @@ namespace SIGEBI.Application.Services
             OperationResult result = new OperationResult();
             try
             {
-                var recurso = await _recursoRepository.GetEntityByIdAsync(Id);
+                var recurso = await _recursoRepository.GetByIdWithEjemplaresAsync(Id);
+                if (recurso == null)
+                {
+                    result.Success = false;
+                    result.Message = "Recurso no encontrado";
+                    return result;
+                }
+
                 result.Data = new RecursoDto()
                 {
                     RecursoId = recurso.Id,
@@ -67,7 +80,11 @@ namespace SIGEBI.Application.Services
                     ISBN = recurso.ISBN,
                     Categoria = recurso.Categoria,
                     ChangeDate = recurso.CreadoEn,
-                    ChangeUser = recurso.Id
+                    ChangeUser = recurso.Id,
+                    TotalEjemplares = recurso.Ejemplares?.Count ?? 0,
+                    EjemplaresDisponibles = recurso.Ejemplares?.Count(e => e.Estado == EstadoEjemplar.Disponible) ?? 0,
+                    Descripcion = recurso.Descripcion,
+                    FechaLanzamiento = recurso.FechaLanzamiento
                 };
             }
             catch (Exception ex)
@@ -90,6 +107,8 @@ namespace SIGEBI.Application.Services
                     Autor = dto.Autor,
                     ISBN = dto.ISBN,
                     Categoria = dto.Categoria,
+                    Descripcion = dto.Descripcion,
+                    FechaLanzamiento = dto.FechaLanzamiento,
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
@@ -117,10 +136,19 @@ namespace SIGEBI.Application.Services
             try
             {
                 var recurso = await _recursoRepository.GetEntityByIdAsync(dto.Id);
+                if (recurso == null)
+                {
+                    result.Success = false;
+                    result.Message = "Recurso no encontrado";
+                    return result;
+                }
+
                 recurso.Titulo = dto.Titulo;
                 recurso.Autor = dto.Autor;
                 recurso.ISBN = dto.ISBN;
                 recurso.Categoria = dto.Categoria;
+                recurso.Descripcion = dto.Descripcion;
+                recurso.FechaLanzamiento = dto.FechaLanzamiento;
                 recurso.ModificadoEn = dto.ChangeDate;
                 recurso.ModificadoPor = dto.ChangeUser.ToString();
                 await _recursoRepository.UpdateEntityAsync(recurso);

@@ -3,48 +3,179 @@
     ViewData["Title"] = "Catálogo de Recursos";
     var rol = Context.Session.GetString("Rol");
     var esAdmin = rol == "Admin";
+    var vistaActual = ViewBag.VistaActual as string ?? "lista";
 }
 
 <h1>Catálogo de Recursos</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+    <form asp-action="Index" method="get" class="d-flex gap-2 flex-wrap align-items-center">
+        <select name="categoria" class="form-control" style="max-width: 200px;">
+            <option value="">-- Todas las categorías --</option>
+            @foreach (var cat in ViewBag.Categorias as List<string> ?? new List<string>())
+            {
+                var selected = ViewBag.CategoriaSeleccionada as string == cat ? "selected" : null;
+                <option value="@cat" selected="@selected">@cat</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    <div class="btn-group" role="group" style="margin-left: 8px;">
+        <a asp-action="Index" asp-route-categoria="@ViewBag.CategoriaSeleccionada" asp-route-vista="lista"
+           class="btn btn-outline-secondary @(vistaActual == "lista" ? "active" : "")">
+            <i class="fas fa-list"></i> Lista
+        </a>
+        <a asp-action="Index" asp-route-categoria="@ViewBag.CategoriaSeleccionada" asp-route-vista="cuadricula"
+           class="btn btn-outline-secondary @(vistaActual == "cuadricula" ? "active" : "")">
+            <i class="fas fa-th"></i> Cuadrícula
+        </a>
+    </div>
+
+    @if (esAdmin)
+    {
+        <form asp-action="ExportarExcel" method="get" style="display:inline;">
+            <input type="hidden" name="categoria" value="@ViewBag.CategoriaSeleccionada" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+        </form>
+    }
+</div>
 
 @if (esAdmin)
 {
     <p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Recurso</a></p>
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(m => m.recursoId)</th>
-            <th>@Html.DisplayNameFor(m => m.titulo)</th>
-            <th>@Html.DisplayNameFor(m => m.autor)</th>
-            <th>@Html.DisplayNameFor(m => m.isbn)</th>
-            <th>@Html.DisplayNameFor(m => m.categoria)</th>
-            @if (esAdmin)
-            {
-                <th>Acciones</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
+@if (vistaActual == "lista")
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Portada</th>
+                    @if (esAdmin)
+                    {
+                        <th>@Html.DisplayNameFor(m => m.recursoId)</th>
+                    }
+                    <th>@Html.DisplayNameFor(m => m.titulo)</th>
+                    <th>@Html.DisplayNameFor(m => m.autor)</th>
+                    <th>@Html.DisplayNameFor(m => m.isbn)</th>
+                    <th>@Html.DisplayNameFor(m => m.categoria)</th>
+                    <th>@Html.DisplayNameFor(m => m.descripcion)</th>
+                    <th>@Html.DisplayNameFor(m => m.totalEjemplares)</th>
+                    <th>@Html.DisplayNameFor(m => m.ejemplaresDisponibles)</th>
+                    <th>Año</th>
+                    @if (esAdmin)
+                    {
+                        <th>Acciones</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.imagenUrl))
+                            {
+                                <img src="@item.imagenUrl" alt="Portada de @item.titulo" style="width: 40px; height: 56px; object-fit: cover; border-radius: 4px;" />
+                            }
+                            else
+                            {
+                                <span style="color: #aaa;">Sin</span>
+                            }
+                        </td>
+                        @if (esAdmin)
+                        {
+                            <td>@Html.DisplayFor(x => item.recursoId)</td>
+                        }
+                        <td>@Html.DisplayFor(x => item.titulo)</td>
+                        <td>@Html.DisplayFor(x => item.autor)</td>
+                        <td>@Html.DisplayFor(x => item.isbn)</td>
+                        <td>@Html.DisplayFor(x => item.categoria)</td>
+                        <td title="@item.descripcion">
+                            @if (!string.IsNullOrEmpty(item.descripcion))
+                            {
+                                @(item.descripcion.Length > 50 ? item.descripcion.Substring(0, 50) + "..." : item.descripcion)
+                            }
+                            else
+                            {
+                                <span style="color: #aaa;">Sin descripción</span>
+                            }
+                        </td>
+                        <td>@Html.DisplayFor(x => item.totalEjemplares)</td>
+                        <td>@Html.DisplayFor(x => item.ejemplaresDisponibles)</td>
+                        <td>@(item.fechaLanzamiento?.Year.ToString() ?? "")</td>
+                        <td>
+                            @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
+                            @if (esAdmin)
+                            {
+                                @Html.Raw(" | ")
+                                @Html.ActionLink("Editar", "Edit", new { id = item.recursoId })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="recurso-grid">
         @foreach (var item in Model)
         {
-            <tr>
-                <td>@Html.DisplayFor(x => item.recursoId)</td>
-                <td>@Html.DisplayFor(x => item.titulo)</td>
-                <td>@Html.DisplayFor(x => item.autor)</td>
-                <td>@Html.DisplayFor(x => item.isbn)</td>
-                <td>@Html.DisplayFor(x => item.categoria)</td>
-                @if (esAdmin)
+            <div class="recurso-card">
+                @if (!string.IsNullOrEmpty(item.imagenUrl))
                 {
-                    <td>
-                        @Html.ActionLink("Editar", "Edit", new { id = item.recursoId }) |
-                        @Html.ActionLink("Detalles", "Details", new { id = item.recursoId })
-                    </td>
+                    <img src="@item.imagenUrl" alt="Portada de @item.titulo" class="recurso-card-img" />
                 }
-            </tr>
+                else
+                {
+                    <div class="recurso-card-img-placeholder">
+                        <i class="fas fa-book"></i>
+                        <span>Sin portada</span>
+                    </div>
+                }
+                <div class="recurso-card-body">
+                    <h5 class="recurso-card-title" title="@item.titulo">@item.titulo</h5>
+                    <p class="recurso-card-autor">@item.autor</p>
+                    <p class="recurso-card-categoria">
+                        <span class="badge bg-secondary">@item.categoria</span>
+                    </p>
+                    <div class="recurso-card-info">
+                        <span class="badge @(item.ejemplaresDisponibles > 0 ? "bg-success" : "bg-danger")">
+                            @item.ejemplaresDisponibles disponibles
+                        </span>
+                    </div>
+                    <div class="recurso-card-actions">
+                        <a asp-action="Details" asp-route-id="@item.recursoId" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        @if (esAdmin)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.recursoId" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        }
+                        @if (item.ejemplaresDisponibles > 0)
+                        {
+                            <form asp-controller="Carrito" asp-action="Agregar" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="recursoId" value="@item.recursoId" />
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+}

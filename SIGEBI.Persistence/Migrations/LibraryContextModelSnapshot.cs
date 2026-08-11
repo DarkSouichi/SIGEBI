@@ -118,6 +118,12 @@ namespace SIGEBI.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("FechaLanzamiento")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ISBN")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -203,6 +209,9 @@ namespace SIGEBI.Persistence.Migrations
                     b.Property<DateTime>("EnviadoEn")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("Leida")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Mensaje")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -212,6 +221,12 @@ namespace SIGEBI.Persistence.Migrations
 
                     b.Property<string>("ModificadoPor")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PrestamoId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RecursoId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
@@ -278,6 +293,22 @@ namespace SIGEBI.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreadoEn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreadoPor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LimitePrestamos")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModificadoEn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModificadoPor")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -294,12 +325,18 @@ namespace SIGEBI.Persistence.Migrations
                         new
                         {
                             Id = 1,
+                            CreadoEn = new DateTime(2026, 8, 7, 18, 32, 12, 817, DateTimeKind.Local).AddTicks(1512),
+                            CreadoPor = "",
+                            LimitePrestamos = 10,
                             Nombre = "Admin",
                             Permisos = "Todos"
                         },
                         new
                         {
                             Id = 2,
+                            CreadoEn = new DateTime(2026, 8, 7, 18, 32, 12, 817, DateTimeKind.Local).AddTicks(1532),
+                            CreadoPor = "",
+                            LimitePrestamos = 3,
                             Nombre = "Usuario",
                             Permisos = "Lectura"
                         });
@@ -349,19 +386,21 @@ namespace SIGEBI.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RolId");
+
                     b.ToTable("Usuarios");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            CreadoEn = new DateTime(2026, 8, 2, 16, 1, 4, 618, DateTimeKind.Local).AddTicks(7937),
+                            CreadoEn = new DateTime(2026, 8, 7, 18, 32, 13, 73, DateTimeKind.Local).AddTicks(3144),
                             CreadoPor = "Sistema",
                             Email = "admin@test.com",
                             EstaActivo = true,
                             IntentosFallidos = 0,
                             NombreCompleto = "Administrador",
-                            PasswordHash = "$2a$11$0lfkdEbYY6U0CTbs84nuFOalyk3Eoqsi7xQNVul6FLTTdP8StK8P.",
+                            PasswordHash = "$2a$11$Hs3o1hL6xAGlYybnMyQ6OeNLAxienJPcoBxtCaAHUIllFryPBE0q.",
                             RolId = 1
                         });
                 });
@@ -375,9 +414,25 @@ namespace SIGEBI.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SIGEBI.Domain.Entities.Users.Usuario", b =>
+                {
+                    b.HasOne("SIGEBI.Domain.Entities.Users.Rol", "Rol")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rol");
+                });
+
             modelBuilder.Entity("SIGEBI.Domain.Entities.Catalog.Recurso", b =>
                 {
                     b.Navigation("Ejemplares");
+                });
+
+            modelBuilder.Entity("SIGEBI.Domain.Entities.Users.Rol", b =>
+                {
+                    b.Navigation("Usuarios");
                 });
 #pragma warning restore 612, 618
         }

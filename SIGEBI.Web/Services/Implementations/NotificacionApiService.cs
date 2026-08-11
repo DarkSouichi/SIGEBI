@@ -9,12 +9,15 @@ namespace SIGEBI.Web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUsuarioApiService _usuarioApiService;
 
         public NotificacionApiService(IHttpClientFactory httpClientFactory,
-                                      IHttpContextAccessor httpContextAccessor)
+                                      IHttpContextAccessor httpContextAccessor,
+                                      IUsuarioApiService usuarioApiService)
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _usuarioApiService = usuarioApiService;
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -75,8 +78,28 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombresUsuario(response);
+
             return response;
         }
+
+        private async Task EnriquecerConNombresUsuario(GetAllNotificacionesResponse response)
+        {
+            if (response.isSuccess && response.data != null && response.data.Any())
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                if (usuariosResponse.isSuccess)
+                {
+                    var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
+                    foreach (var item in response.data)
+                    {
+                        if (usuarioDict.TryGetValue(item.usuarioId, out var nombre))
+                            item.nombreUsuario = nombre;
+                    }
+                }
+            }
+        }
+
 
         public async Task<GetNotificacionResponse> GetById(int id)
         {
@@ -125,7 +148,23 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombreUsuario(response);
+
             return response;
+        }
+
+        private async Task EnriquecerConNombreUsuario(GetNotificacionResponse response)
+        {
+            if (response.isSuccess && response.data != null)
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                if (usuariosResponse.isSuccess)
+                {
+                    var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
+                    if (usuarioDict.TryGetValue(response.data.usuarioId, out var nombre))
+                        response.data.nombreUsuario = nombre;
+                }
+            }
         }
 
         public async Task<ApiResponse> Create(NotificacionCreateModel model)
@@ -227,6 +266,22 @@ namespace SIGEBI.Web.Services
             }
 
             return response;
+        }
+        public async Task<ApiResponse> MarcarLeida(int id)
+        {
+            AddAuthorizationHeader();
+            try
+            {
+                var httpResponse = await _httpClient.PostAsJsonAsync($"Notificacion/MarcarLeida/{id}", new { });
+                var json = await httpResponse.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiResponse>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                    ?? new ApiResponse { isSuccess = false, message = "Error al deserializar." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse { isSuccess = false, message = $"Error: {ex.Message}" };
+            }
         }
     }
 }

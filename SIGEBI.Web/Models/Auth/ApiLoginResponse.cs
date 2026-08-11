@@ -13,6 +13,7 @@
         public string nombreCompleto { get; set; }
         public string email { get; set; }
         public string rol { get; set; }
+        public int usuarioId { get; set; }
         public DateTime expiracion { get; set; }
     }
 }

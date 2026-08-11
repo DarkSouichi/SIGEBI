@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SIGEBI.Application.Dtos.Auth;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Infrastructure.Logger;
@@ -17,6 +18,20 @@ namespace SIGEBI.Api.Controllers
         {
             _authService = authService;
             _logger = logger;
+        }
+
+        [AllowAnonymous]  
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.Register(dto);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
         }
 
         [HttpPost("Login")]

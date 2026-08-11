@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using SIGEBI.Application.Dtos.Auth;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
+using SIGEBI.Domain.Entities.Users;
 using SIGEBI.Infrastructure.Audit;
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
@@ -31,6 +32,51 @@ namespace SIGEBI.Application.Services
             _logger = logger;
             _auditLogger = auditLogger;
             _configuration = configuration;
+        }
+
+        public async Task<OperationResult> Register(RegisterDto dto)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var existingUser = await _usuarioRepository.GetUsuarioByEmail(dto.Email);
+                if (existingUser.IsSuccess && existingUser.Data != null)
+                {
+                    result.Success = false;
+                    result.Message = "El correo electrónico ya está registrado.";
+                    return result;
+                }
+
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+                var nuevoUsuario = new Usuario
+                {
+                    NombreCompleto = dto.NombreCompleto,
+                    Email = dto.Email,
+                    PasswordHash = passwordHash,
+                    EstaActivo = true,
+                    RolId = 2,
+                    CreadoEn = DateTime.Now,
+                    CreadoPor = "Sistema"
+                };
+
+                result = await _usuarioRepository.SaveEntityAsync(nuevoUsuario);
+
+                await _auditLogger.LogAsync(
+                    actor: "Sistema",
+                    accion: "RegistroUsuario",
+                    modulo: "Auth",
+                    resultado: result.IsSuccess ? "Exitoso" : "Fallido",
+                    detalles: $"Email: {dto.Email}"
+                );
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error al registrar el usuario";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
         }
 
         public async Task<OperationResult> Login(LoginDto dto)

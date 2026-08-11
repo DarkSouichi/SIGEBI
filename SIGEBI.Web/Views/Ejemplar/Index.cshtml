@@ -1,13 +1,43 @@
 ﻿@model IEnumerable<SIGEBI.Web.Models.Ejemplar.EjemplarModel>
 @{
     ViewData["Title"] = "Ejemplares";
+    var rol = Context.Session.GetString("Rol");
+    var esAdmin = rol == "Admin";
 }
 
 <h1>Listado de Ejemplares</h1>
 
-<div asp-validation-summary="All" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Ejemplar</a></p>
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <form asp-action="Index" method="get" class="d-flex gap-2">
+        <select name="estado" class="form-control" style="max-width: 200px;">
+            <option value="">-- Todos los estados --</option>
+            @foreach (var est in ViewBag.Estados as Dictionary<int, string> ?? new Dictionary<int, string>())
+            {
+                var selected = ViewBag.EstadoSeleccionado as string == est.Key.ToString() ? "selected" : null;
+                <option value="@est.Key" selected="@selected">@est.Value</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    @if (esAdmin)
+    {
+        <form asp-action="ExportarExcel" method="get" style="display:inline;">
+            <input type="hidden" name="estado" value="@ViewBag.EstadoSeleccionado" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+        </form>
+    }
+</div>
+
+@if (esAdmin)
+{
+    <p><a asp-action="Create" class="btn btn-primary">Agregar Nuevo Ejemplar</a></p>
+}
 
 <table class="table">
     <thead>
@@ -15,7 +45,7 @@
             <th>ID</th>
             <th>Código de Barras</th>
             <th>Estado</th>
-            <th>Recurso ID</th>
+            <th>Recurso</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -26,10 +56,10 @@
                 <td>@item.ejemplarId</td>
                 <td>@item.codigoBarras</td>
                 <td>@item.EstadoTexto</td>
-                <td>@item.recursoId</td>
+                <td>@item.tituloRecurso</td>
                 <td>
                     @Html.ActionLink("Editar", "Edit", new { id = item.ejemplarId }) |
-                    @Html.ActionLink("Detalles", "Details", new { id = item.ejemplarId }) |
+                    @Html.ActionLink("Detalles", "Details", new { id = item.ejemplarId })
                 </td>
             </tr>
         }
