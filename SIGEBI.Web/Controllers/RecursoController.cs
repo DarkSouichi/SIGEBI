@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using OfficeOpenXml;
 using SIGEBI.Web.Models.Recurso;
 using SIGEBI.Web.Services;
@@ -14,8 +15,17 @@ namespace SIGEBI.Web.Controllers
             _recursoApiService = recursoApiService;
         }
 
-        public async Task<IActionResult> Index(string categoria)
+        public async Task<IActionResult> Index(string categoria, string vista)
         {
+            if (string.IsNullOrEmpty(vista))
+            {
+                vista = HttpContext.Session.GetString("VistaRecursos") ?? "lista";
+            }
+            else
+            {
+                HttpContext.Session.SetString("VistaRecursos", vista);
+            }
+
             var result = await _recursoApiService.GetAll();
             if (!result.isSuccess)
             {
@@ -27,6 +37,7 @@ namespace SIGEBI.Web.Controllers
 
             ViewBag.Categorias = recursos.Select(r => r.categoria).Distinct().OrderBy(c => c).ToList();
             ViewBag.CategoriaSeleccionada = categoria;
+            ViewBag.VistaActual = vista; 
 
             if (!string.IsNullOrEmpty(categoria))
             {
@@ -35,6 +46,7 @@ namespace SIGEBI.Web.Controllers
 
             return View(recursos);
         }
+
 
         public async Task<IActionResult> Details(int id)
         {

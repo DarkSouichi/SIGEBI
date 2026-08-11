@@ -595,6 +595,120 @@ p .btn-primary {
             color: #D97706;
         }
 
+/* ===== CUADRÍCULA DE RECURSOS ===== */
+.recurso-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.recurso-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #f1f5f9;
+}
+
+    .recurso-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+    }
+
+.recurso-card-img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: #f8fafc;
+}
+
+.recurso-card-img-placeholder {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    background: #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+    .recurso-card-img-placeholder i {
+        font-size: 2.8rem;
+        margin-bottom: 8px;
+    }
+
+.recurso-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.recurso-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recurso-card-autor {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0 0 8px 0;
+}
+
+.recurso-card-categoria {
+    margin: 0 0 8px 0;
+}
+
+.recurso-card-info {
+    margin-top: auto;
+    margin-bottom: 10px;
+}
+
+.recurso-card-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+    .recurso-card-actions .btn {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+    }
+
+/* Responsive para la cuadrícula */
+@media (max-width: 768px) {
+    .recurso-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .recurso-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .recurso-card-title {
+        font-size: 0.9rem;
+    }
+
+    .recurso-card-autor {
+        font-size: 0.8rem;
+    }
+}
+
 
 .card-item,
 .table-responsive,
