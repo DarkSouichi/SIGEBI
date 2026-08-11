@@ -38,13 +38,15 @@ namespace SIGEBI.Persistence.Context
                 {
                     Id = 1,
                     Nombre = "Admin",
-                    Permisos = "Todos"
+                    Permisos = "Todos",
+                    LimitePrestamos = 10   
                 },
                 new Rol
                 {
                     Id = 2,
                     Nombre = "Usuario",
-                    Permisos = "Lectura"
+                    Permisos = "Lectura",
+                    LimitePrestamos = 3    
                 }
             );
 

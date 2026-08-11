@@ -3,7 +3,7 @@ using SIGEBI.Application.Dtos.Notifications;
 using SIGEBI.Application.Interfaces;
 using SIGEBI.Domain.Base;
 using SIGEBI.Domain.Entities.Notifications;
-using SIGEBI.Infrastructure.Audit;  
+using SIGEBI.Infrastructure.Audit;
 using SIGEBI.Infrastructure.Logger;
 using SIGEBI.Persistence.Interfaces;
 
@@ -19,7 +19,7 @@ namespace SIGEBI.Application.Services
         public NotificacionService(INotificacionRepository notificacionRepository,
                                    ILoggerService<NotificacionService> logger,
                                    IConfiguration configuration,
-                                   IAuditLogger auditLogger) 
+                                   IAuditLogger auditLogger)
         {
             _notificacionRepository = notificacionRepository;
             _logger = logger;
@@ -42,7 +42,8 @@ namespace SIGEBI.Application.Services
                         Canal = n.Canal,
                         EnviadoEn = n.EnviadoEn,
                         ChangeDate = n.CreadoEn,
-                        ChangeUser = n.Id
+                        ChangeUser = n.Id,
+                        Leida = n.Leida 
                     }).OrderByDescending(n => n.ChangeDate).ToList();
             }
             catch (Exception ex)
@@ -69,7 +70,8 @@ namespace SIGEBI.Application.Services
                     Canal = notificacion.Canal,
                     EnviadoEn = notificacion.EnviadoEn,
                     ChangeDate = notificacion.CreadoEn,
-                    ChangeUser = notificacion.Id
+                    ChangeUser = notificacion.Id,
+                    Leida = notificacion.Leida 
                 };
             }
             catch (Exception ex)
@@ -92,7 +94,10 @@ namespace SIGEBI.Application.Services
                     Tipo = dto.Tipo,
                     Mensaje = dto.Mensaje,
                     Canal = dto.Canal,
-                    EnviadoEn = DateTime.Now, 
+                    EnviadoEn = DateTime.Now,
+                    PrestamoId = dto.PrestamoId,
+                    RecursoId = dto.RecursoId,
+                    Leida = dto.Leida,
                     CreadoEn = dto.ChangeDate,
                     CreadoPor = dto.ChangeUser.ToString()
                 });
@@ -142,6 +147,35 @@ namespace SIGEBI.Application.Services
             {
                 result.Success = false;
                 result.Message = "Error actualizando la notificación";
+                _logger.LogError(result.Message, ex);
+            }
+            return result;
+        }
+
+        public async Task<OperationResult> MarcarLeida(int id)
+        {
+            OperationResult result = new OperationResult();
+            try
+            {
+                var notificacion = await _notificacionRepository.GetEntityByIdAsync(id);
+                if (notificacion == null)
+                {
+                    result.Success = false;
+                    result.Message = "Notificación no encontrada.";
+                    return result;
+                }
+
+                notificacion.Leida = true;
+                notificacion.ModificadoEn = DateTime.Now;
+                notificacion.ModificadoPor = "Sistema";
+
+                await _notificacionRepository.UpdateEntityAsync(notificacion);
+                result.Message = "Notificación marcada como leída.";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = "Error al marcar como leída.";
                 _logger.LogError(result.Message, ex);
             }
             return result;

@@ -85,5 +85,15 @@ namespace SIGEBI.Api.Controllers
             else
                 return BadRequest(result);
         }
+
+        [HttpPost("MarcarLeida/{id}")]
+        public async Task<IActionResult> MarcarLeida(int id)
+        {
+            var result = await _notificacionService.MarcarLeida(id);
+            if (result.IsSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
+        }
     }
 }

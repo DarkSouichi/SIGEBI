@@ -9,6 +9,8 @@ public class Recurso : AuditEntity
     public string Autor { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
     public string Categoria { get; set; } = string.Empty;
+    public string? Descripcion { get; set; }
+    public DateTime? FechaLanzamiento { get; set; }
     public ICollection<Ejemplar> Ejemplares { get; set; } = [];
 }
 

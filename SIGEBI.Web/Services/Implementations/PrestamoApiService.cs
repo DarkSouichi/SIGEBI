@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Prestamo;
+using SIGEBI.Web.Models.Usuario;
+using SIGEBI.Web.Models.Ejemplar;
+using SIGEBI.Web.Models.Recurso;
 
 namespace SIGEBI.Web.Services
 {
@@ -9,12 +12,21 @@ namespace SIGEBI.Web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUsuarioApiService _usuarioApiService;
+        private readonly IEjemplarApiService _ejemplarApiService;
+        private readonly IRecursoApiService _recursoApiService;
 
         public PrestamoApiService(IHttpClientFactory httpClientFactory,
-                                  IHttpContextAccessor httpContextAccessor)
+                                  IHttpContextAccessor httpContextAccessor,
+                                  IUsuarioApiService usuarioApiService,
+                                  IEjemplarApiService ejemplarApiService,
+                                  IRecursoApiService recursoApiService) 
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _usuarioApiService = usuarioApiService;
+            _ejemplarApiService = ejemplarApiService;
+            _recursoApiService = recursoApiService; 
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -75,7 +87,55 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConNombres(response);
+
             return response;
+        }
+
+        private async Task EnriquecerConNombres(GetAllPrestamosResponse response)
+        {
+            if (response.isSuccess && response.data != null && response.data.Any())
+            {
+                var usuariosResponse = await _usuarioApiService.GetAll();
+                var usuarioDict = usuariosResponse.isSuccess && usuariosResponse.data != null
+                    ? usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto)
+                    : new Dictionary<int, string>();
+
+                var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                var ejemplarCodigoDict = ejemplaresResponse.isSuccess && ejemplaresResponse.data != null
+                    ? ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras)
+                    : new Dictionary<int, string>();
+
+                var recursosResponse = await _recursoApiService.GetAll();
+                var recursoTituloDict = recursosResponse.isSuccess && recursosResponse.data != null
+                    ? recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo)
+                    : new Dictionary<int, string>();
+
+                var ejemplarTituloDict = new Dictionary<int, string>();
+                if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null &&
+                    recursosResponse.isSuccess && recursosResponse.data != null)
+                {
+                    foreach (var ejemplar in ejemplaresResponse.data)
+                    {
+                        if (recursoTituloDict.TryGetValue(ejemplar.recursoId, out var titulo))
+                        {
+                            ejemplarTituloDict[ejemplar.ejemplarId] = titulo;
+                        }
+                    }
+                }
+
+                foreach (var item in response.data)
+                {
+                    if (usuarioDict.TryGetValue(item.usuarioId, out var nombre))
+                        item.nombreUsuario = nombre;
+
+                    if (ejemplarCodigoDict.TryGetValue(item.ejemplarId, out var codigo))
+                        item.codigoEjemplar = codigo;
+
+                    if (ejemplarTituloDict.TryGetValue(item.ejemplarId, out var titulo))
+                        item.tituloRecurso = titulo;
+                }
+            }
         }
 
         public async Task<GetPrestamoResponse> GetById(int id)
@@ -93,6 +153,35 @@ namespace SIGEBI.Web.Services
                     response = JsonSerializer.Deserialize<GetPrestamoResponse>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                         ?? new GetPrestamoResponse { isSuccess = false, message = "Error al deserializar." };
+
+                    if (response.isSuccess && response.data != null)
+                    {
+                        var usuariosResponse = await _usuarioApiService.GetAll();
+                        var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                        var recursosResponse = await _recursoApiService.GetAll();
+
+                        if (usuariosResponse.isSuccess && usuariosResponse.data != null)
+                        {
+                            var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
+                            if (usuarioDict.TryGetValue(response.data.usuarioId, out var nombre))
+                                response.data.nombreUsuario = nombre;
+                        }
+
+                        if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null)
+                        {
+                            var ejemplarCodigoDict = ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras);
+                            if (ejemplarCodigoDict.TryGetValue(response.data.ejemplarId, out var codigo))
+                                response.data.codigoEjemplar = codigo;
+
+                            var ejemplar = ejemplaresResponse.data.FirstOrDefault(e => e.ejemplarId == response.data.ejemplarId);
+                            if (ejemplar != null && recursosResponse.isSuccess && recursosResponse.data != null)
+                            {
+                                var recursoTituloDict = recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo);
+                                if (recursoTituloDict.TryGetValue(ejemplar.recursoId, out var titulo))
+                                    response.data.tituloRecurso = titulo;
+                            }
+                        }
+                    }
                 }
                 else
                 {

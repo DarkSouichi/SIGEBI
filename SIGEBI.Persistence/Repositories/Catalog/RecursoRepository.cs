@@ -16,6 +16,20 @@ namespace SIGEBI.Persistence.Repositories.Catalog
             _context = context;
         }
 
+        public async Task<List<Recurso>> GetAllWithEjemplaresAsync()
+        {
+            return await _context.Recursos
+                .Include(r => r.Ejemplares)
+                .ToListAsync();
+        }
+
+        public async Task<Recurso?> GetByIdWithEjemplaresAsync(int id)
+        {
+            return await _context.Recursos
+                .Include(r => r.Ejemplares)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
         public async Task<OperationResult> GetEjemplaresByRecursoId(int recursoId)
         {
             OperationResult result = new OperationResult();
@@ -29,7 +43,7 @@ namespace SIGEBI.Persistence.Repositories.Catalog
             catch (Exception)
             {
                 result.Success = false;
-                result.Message = "Ocurrio un error obteniendo los ejemplares del recurso.";
+                result.Message = "Ocurrió un error obteniendo los ejemplares del recurso.";
             }
             return result;
         }
@@ -47,7 +61,7 @@ namespace SIGEBI.Persistence.Repositories.Catalog
             catch (Exception)
             {
                 result.Success = false;
-                result.Message = "Ocurrio un error obteniendo los recursos por categoria.";
+                result.Message = "Ocurrió un error obteniendo los recursos por categoría.";
             }
             return result;
         }
@@ -65,7 +79,7 @@ namespace SIGEBI.Persistence.Repositories.Catalog
             catch (Exception)
             {
                 result.Success = false;
-                result.Message = "Ocurrio un error obteniendo los recursos disponibles.";
+                result.Message = "Ocurrió un error obteniendo los recursos disponibles.";
             }
             return result;
         }

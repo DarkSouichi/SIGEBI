@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Ejemplar;
+using SIGEBI.Web.Models.Recurso;
 
 namespace SIGEBI.Web.Services
 {
@@ -9,12 +10,15 @@ namespace SIGEBI.Web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRecursoApiService _recursoApiService;
 
         public EjemplarApiService(IHttpClientFactory httpClientFactory,
-                                  IHttpContextAccessor httpContextAccessor)
+                                  IHttpContextAccessor httpContextAccessor,
+                                  IRecursoApiService recursoApiService)
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
+            _recursoApiService = recursoApiService;
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -75,7 +79,26 @@ namespace SIGEBI.Web.Services
                 response.message = $"Error inesperado: {ex.Message}";
             }
 
+            await EnriquecerConTituloRecurso(response);
+
             return response;
+        }
+
+        private async Task EnriquecerConTituloRecurso(GetAllEjemplaresResponse response)
+        {
+            if (response.isSuccess && response.data != null && response.data.Any())
+            {
+                var recursosResponse = await _recursoApiService.GetAll();
+                if (recursosResponse.isSuccess && recursosResponse.data != null)
+                {
+                    var recursoDict = recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo);
+                    foreach (var item in response.data)
+                    {
+                        if (recursoDict.TryGetValue(item.recursoId, out var titulo))
+                            item.tituloRecurso = titulo;
+                    }
+                }
+            }
         }
 
         public async Task<GetEjemplarResponse> GetById(int id)
@@ -93,6 +116,17 @@ namespace SIGEBI.Web.Services
                     response = JsonSerializer.Deserialize<GetEjemplarResponse>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                         ?? new GetEjemplarResponse { isSuccess = false, message = "Error al deserializar." };
+
+                    if (response.isSuccess && response.data != null)
+                    {
+                        var recursosResponse = await _recursoApiService.GetAll();
+                        if (recursosResponse.isSuccess && recursosResponse.data != null)
+                        {
+                            var recursoDict = recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo);
+                            if (recursoDict.TryGetValue(response.data.recursoId, out var titulo))
+                                response.data.tituloRecurso = titulo;
+                        }
+                    }
                 }
                 else
                 {

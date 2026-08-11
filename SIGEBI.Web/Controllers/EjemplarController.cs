@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using OfficeOpenXml;
 using SIGEBI.Web.Models.Ejemplar;
 using SIGEBI.Web.Models.Recurso;
 using SIGEBI.Web.Services;
@@ -18,14 +19,32 @@ namespace SIGEBI.Web.Controllers
             _recursoApiService = recursoApiService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string estado)
         {
             var result = await _ejemplarApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<EjemplarModel>());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<EjemplarModel>());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<EjemplarModel>());
+            var ejemplares = result.data ?? new List<EjemplarModel>();
+
+            if (!string.IsNullOrEmpty(estado) && int.TryParse(estado, out var estadoInt))
+            {
+                ejemplares = ejemplares.Where(e => e.estado == estadoInt).ToList();
+            }
+
+            ViewBag.Estados = new Dictionary<int, string>
+            {
+                { 0, "Disponible" },
+                { 1, "Prestado" },
+                { 2, "Reservado" },
+                { 3, "No Disponible" }
+            };
+            ViewBag.EstadoSeleccionado = estado;
+
+            return View(ejemplares);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -154,6 +173,63 @@ namespace SIGEBI.Web.Controllers
             catch (Exception)
             {
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(string estado)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                TempData["Error"] = "No tienes permisos para exportar.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _ejemplarApiService.GetAll();
+            if (!result.isSuccess || result.data == null || !result.data.Any())
+            {
+                TempData["Error"] = "No hay datos para exportar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var ejemplares = result.data;
+
+            if (!string.IsNullOrEmpty(estado) && int.TryParse(estado, out var estadoInt))
+            {
+                ejemplares = ejemplares.Where(e => e.estado == estadoInt).ToList();
+            }
+
+            using var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Ejemplares");
+
+            worksheet.Cells[1, 1].Value = "ID";
+            worksheet.Cells[1, 2].Value = "Código de Barras";
+            worksheet.Cells[1, 3].Value = "Estado";
+            worksheet.Cells[1, 4].Value = "Recurso (Libro)";
+
+            using (var range = worksheet.Cells[1, 1, 1, 4])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            int row = 2;
+            foreach (var item in ejemplares)
+            {
+                worksheet.Cells[row, 1].Value = item.ejemplarId;
+                worksheet.Cells[row, 2].Value = item.codigoBarras;
+                worksheet.Cells[row, 3].Value = item.EstadoTexto;
+                worksheet.Cells[row, 4].Value = item.tituloRecurso;
+                row++;
+            }
+
+            worksheet.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            var fileName = $"Ejemplares_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
     }
 }

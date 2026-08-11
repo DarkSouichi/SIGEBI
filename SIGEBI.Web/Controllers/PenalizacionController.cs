@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using OfficeOpenXml;
 using SIGEBI.Web.Models.Penalizacion;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
@@ -22,15 +23,121 @@ namespace SIGEBI.Web.Controllers
             _prestamoApiService = prestamoApiService;
         }
 
-        public async Task<IActionResult> Index()
+        // ===================== ACCIONES PRINCIPALES =====================
+
+        public async Task<IActionResult> Index(string estado)
         {
             var result = await _penalizacionApiService.GetAll();
-            if (result.isSuccess)
-                return View(result.data ?? new List<PenalizacionModel>());
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<PenalizacionModel>());
+            }
 
-            ModelState.AddModelError(string.Empty, result.message);
-            return View(new List<PenalizacionModel>());
+            var penalizaciones = result.data ?? new List<PenalizacionModel>();
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                penalizaciones = penalizaciones.Where(p => p.estado == estado).ToList();
+            }
+
+            ViewBag.Estados = new List<string> { "Activa", "Resuelta", "Cancelada" };
+            ViewBag.EstadoSeleccionado = estado;
+
+            return View(penalizaciones);
         }
+
+        public async Task<IActionResult> MisPenalizaciones()
+        {
+            var userId = HttpContext.Session.GetInt32("UsuarioId");
+            var esAdmin = HttpContext.Session.GetString("Rol") == "Admin";
+
+            if (esAdmin)
+                return RedirectToAction("Index");
+
+            if (!userId.HasValue)
+            {
+                TempData["Error"] = "Debes iniciar sesión.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var result = await _penalizacionApiService.GetAll();
+            if (!result.isSuccess)
+            {
+                ModelState.AddModelError(string.Empty, result.message);
+                return View(new List<PenalizacionModel>());
+            }
+
+            var penalizaciones = result.data ?? new List<PenalizacionModel>();
+            penalizaciones = penalizaciones.Where(p => p.usuarioId == userId.Value).ToList();
+
+            return View(penalizaciones);
+        }
+
+        // ===================== EXPORTAR A EXCEL =====================
+
+        [HttpGet]
+        public async Task<IActionResult> ExportarExcel(string estado)
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                TempData["Error"] = "No tienes permisos para exportar.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _penalizacionApiService.GetAll();
+            if (!result.isSuccess || result.data == null || !result.data.Any())
+            {
+                TempData["Error"] = "No hay datos para exportar.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var penalizaciones = result.data;
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                penalizaciones = penalizaciones.Where(p => p.estado == estado).ToList();
+            }
+
+            using var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Penalizaciones");
+
+            worksheet.Cells[1, 1].Value = "ID";
+            worksheet.Cells[1, 2].Value = "Usuario";
+            worksheet.Cells[1, 3].Value = "Préstamo";
+            worksheet.Cells[1, 4].Value = "Monto";
+            worksheet.Cells[1, 5].Value = "Estado";
+            worksheet.Cells[1, 6].Value = "Fecha Emisión";
+
+            using (var range = worksheet.Cells[1, 1, 1, 6])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            int row = 2;
+            foreach (var item in penalizaciones)
+            {
+                worksheet.Cells[row, 1].Value = item.penalizacionId;
+                worksheet.Cells[row, 2].Value = item.nombreUsuario;
+                worksheet.Cells[row, 3].Value = item.prestamoInfo;
+                worksheet.Cells[row, 4].Value = item.monto;
+                worksheet.Cells[row, 5].Value = item.estado;
+                worksheet.Cells[row, 6].Value = item.fechaEmision.ToString("dd/MM/yyyy HH:mm");
+                row++;
+            }
+
+            worksheet.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            var fileName = $"Penalizaciones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+     
 
         public async Task<IActionResult> Details(int id)
         {
@@ -41,6 +148,8 @@ namespace SIGEBI.Web.Controllers
             ModelState.AddModelError(string.Empty, result.message);
             return View(new PenalizacionModel());
         }
+
+        // ===================== CRUD (CREAR, EDITAR) =====================
 
         public async Task<IActionResult> Create()
         {
@@ -172,6 +281,8 @@ namespace SIGEBI.Web.Controllers
             }
         }
 
+        // ===================== MÉTODOS PRIVADOS =====================
+
         private async Task CargarListas(object model)
         {
             try
@@ -193,7 +304,7 @@ namespace SIGEBI.Web.Controllers
                     createModel.PrestamosList = prestamos.Select(p => new SelectListItem
                     {
                         Value = p.prestamoId.ToString(),
-                        Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
+                        Text = $"Préstamo #{p.prestamoId} - {p.codigoEjemplar} - {p.estado}"
                     }).ToList();
                 }
                 else if (model is PenalizacionEditModel editModel)
@@ -207,12 +318,13 @@ namespace SIGEBI.Web.Controllers
                     editModel.PrestamosList = prestamos.Select(p => new SelectListItem
                     {
                         Value = p.prestamoId.ToString(),
-                        Text = $"Préstamo #{p.prestamoId} - Usuario: {p.usuarioId} - Estado: {p.estado}"
+                        Text = $"Préstamo #{p.prestamoId} - {p.codigoEjemplar} - {p.estado}"
                     }).ToList();
                 }
             }
             catch
             {
+                // Si falla, no mostrar error para no bloquear la vista
             }
         }
     }

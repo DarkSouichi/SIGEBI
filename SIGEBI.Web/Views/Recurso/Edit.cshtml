@@ -37,6 +37,23 @@
         </select>
         <span asp-validation-for="categoria" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label asp-for="descripcion">Descripción</label>
+        <textarea asp-for="descripcion" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="descripcion" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="fechaLanzamiento">Año de Lanzamiento</label>
+        <select asp-for="fechaLanzamiento" class="form-control">
+            <option value="">-- Seleccione un año --</option>
+            @for (int year = 2100; year >= 1900; year--)
+            {
+                <option value="@year">@year</option>
+            }
+        </select>
+        <span asp-validation-for="fechaLanzamiento" class="text-danger"></span>
+    </div>
     <div class="form-group mt-2">
         <input type="submit" value="Guardar" class="btn btn-primary" />
         <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
