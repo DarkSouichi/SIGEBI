@@ -163,7 +163,7 @@ else
                                 <i class="fas fa-edit"></i>
                             </a>
                         }
-                        @if (item.ejemplaresDisponibles > 0)
+                        @if (!esAdmin && item.ejemplaresDisponibles > 0)
                         {
                             <form asp-controller="Carrito" asp-action="Agregar" method="post" style="display:inline;">
                                 @Html.AntiForgeryToken()

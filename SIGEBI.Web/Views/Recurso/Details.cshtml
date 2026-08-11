@@ -102,13 +102,20 @@
         {
             <a asp-action="Edit" asp-route-id="@Model.recursoId" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
         }
-        @if (isLoggedIn && Model.ejemplaresDisponibles > 0)
+
+        <!-- ✅ Botón carrito: solo si hay ejemplares disponibles Y el usuario NO es admin -->
+        @if (isLoggedIn && !esAdmin && Model.ejemplaresDisponibles > 0)
         {
             <form asp-controller="Carrito" asp-action="Agregar" method="post" style="display:inline;">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="recursoId" value="@Model.recursoId" />
                 <button type="submit" class="btn btn-primary"><i class="fas fa-cart-plus"></i> Agregar al carrito</button>
             </form>
+        }
+
+        <!-- ✅ Botón solicitar préstamo: visible para todos los autenticados (incluyendo admin) -->
+        @if (isLoggedIn && Model.ejemplaresDisponibles > 0)
+        {
             <form asp-controller="Prestamo" asp-action="Solicitar" method="post" style="display:inline;">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="recursoId" value="@Model.recursoId" />
