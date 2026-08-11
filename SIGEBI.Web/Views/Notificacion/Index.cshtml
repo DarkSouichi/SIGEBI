@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* Botón personalizado "Marcar leída" */
     .btn-marcar-leida {
         background: none;
         border: none;
@@ -27,7 +26,27 @@
             margin-right: 4px;
         }
 
-    /* Contenedor con scroll horizontal Y vertical */
+    .estado-leida {
+        background-color: #28a745 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .estado-no-leida {
+        background-color: #dc3545 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+  
     .table-responsive {
         overflow-x: scroll !important;
         overflow-y: auto;
@@ -50,7 +69,7 @@
             z-index: 2;
             background-color: #f8f9fa;
         }
-        /* Estilos de scrollbar personalizados */
+    
         .table-responsive::-webkit-scrollbar {
             height: 14px;
             width: 12px;
@@ -104,7 +123,6 @@
     @Html.AntiForgeryToken()
 }
 
-<!-- Tabla con scroll horizontal y vertical -->
 <div class="table-responsive" id="tablaNotificaciones">
     <table class="table">
         <thead>
@@ -157,9 +175,8 @@
                     <td>@item.enviadoEn.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>@Html.DisplayFor(x => item.canal)</td>
                     <td>
-                        <!-- Badge con colores según estado -->
-                        <span class="badge @(item.leida ? "bg-success" : "bg-danger")" id="badge-@item.notificacionId">
-                            @(item.leida ? "✓ Leída" : "✗ No leída")
+                        <span class="@(item.leida ? "estado-leida" : "estado-no-leida")" id="estado-@item.notificacionId">
+                            @(item.leida ? "Leída" : "No leída")
                         </span>
                     </td>
                     @if (esAdmin)
@@ -203,11 +220,16 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.isSuccess) {
+                        var estadoSpan = document.getElementById(`estado-${id}`);
+                        if (estadoSpan) {
+                            estadoSpan.className = 'estado-leida';
+                            estadoSpan.textContent = 'Leída';
+                        }
                         var badge = document.getElementById(`badge-${id}`);
                         if (badge) {
-                            badge.textContent = '✓ Leída';
-                            badge.classList.remove('bg-danger');
-                            badge.classList.add('bg-success');
+                            badge.textContent = 'Leída';
+                            badge.classList.remove('badge-primary');
+                            badge.classList.add('badge-secondary');
                         }
                         if (element && element.tagName === 'A') {
                             element.style.color = '#64748B';

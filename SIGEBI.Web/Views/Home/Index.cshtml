@@ -10,38 +10,66 @@
 </div>
 
 <div class="card-grid">
-    <!-- Catálogo visible para todos -->
     <a asp-controller="Recurso" asp-action="Index" class="card-item">
+        <i class="fas fa-book"></i>
         <h3>Catálogo</h3>
         <p>Gestión de recursos</p>
     </a>
 
     @if (isLoggedIn)
     {
+        @if (!esAdmin)
+        {
+            <a asp-controller="Prestamo" asp-action="MisPrestamos" class="card-item">
+                <i class="fas fa-book-open"></i>
+                <h3>Mis Préstamos</h3>
+                <p>Consulta tus préstamos</p>
+            </a>
+
+            <a asp-controller="Penalizacion" asp-action="MisPenalizaciones" class="card-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Mis Penalizaciones</h3>
+                <p>Consulta tus penalizaciones</p>
+            </a>
+        }
+
         <a asp-controller="Notificacion" asp-action="Index" class="card-item">
+            <i class="fas fa-bell"></i>
             <h3>Notificaciones</h3>
             <p>Consulta tus notificaciones</p>
         </a>
+
+        <a asp-controller="Carrito" asp-action="Index" class="card-item">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Carrito</h3>
+            <p>Gestiona tu carrito</p>
+        </a>
     }
 
-    <!-- Módulos solo para Admin -->
     @if (esAdmin)
     {
         <a asp-controller="Usuario" asp-action="Index" class="card-item">
+            <i class="fas fa-users"></i>
             <h3>Usuarios</h3>
             <p>Gestión de usuarios</p>
         </a>
+
+        <a asp-controller="Ejemplar" asp-action="Index" class="card-item">
+            <i class="fas fa-copy"></i>
+            <h3>Ejemplares</h3>
+            <p>Gestión de ejemplares</p>
+        </a>
+
         <a asp-controller="Prestamo" asp-action="Index" class="card-item">
+            <i class="fas fa-handshake"></i>
             <h3>Préstamos</h3>
             <p>Gestión de préstamos</p>
         </a>
+
         <a asp-controller="Penalizacion" asp-action="Index" class="card-item">
+            <i class="fas fa-triangle-exclamation"></i>
             <h3>Penalizaciones</h3>
             <p>Gestión de penalizaciones</p>
-        </a>
-        <a asp-controller="Ejemplar" asp-action="Index" class="card-item">
-            <h3>Ejemplares</h3>
-            <p>Gestión de ejemplares</p>
         </a>
     }
 </div>

@@ -24,5 +24,48 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
+function marcarLeida(id, element) {
+    var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    if (!token) {
+        alert('Token CSRF no encontrado. Recarga la página.');
+        return false;
+    }
+
+    fetch(`/Notificacion/MarcarLeida/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': token
+        },
+        body: '{}'
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.isSuccess) {
+                var badge = document.getElementById(`badge-${id}`);
+                if (badge) {
+                    badge.textContent = 'Leída';
+                    badge.className = 'badge estado-leida'; 
+                }
+
+                if (element && element.tagName === 'A') {
+                    element.style.color = '#64748B';
+                    element.style.textDecoration = 'line-through';
+                }
+
+                showToast('Notificación marcada como leída', 'success');
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión. Intente nuevamente.');
+        });
+
+    return false;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Este espacio queda para futuras inicializaciones.
 });

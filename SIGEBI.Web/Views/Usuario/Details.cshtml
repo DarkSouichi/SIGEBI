@@ -3,42 +3,60 @@
     ViewData["Title"] = "Detalles del Usuario";
 }
 
-<h1>Detalles del Usuario</h1>
-
-<div class="details-card">
-    <div class="detail-row">
-        <span class="detail-label">ID</span>
-        <span class="detail-value">@Model.usuarioId</span>
+<div class="details-container">
+    <div class="details-header">
+        <h2><i class="fas fa-user"></i> Detalles del Usuario</h2>
     </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Nombre</span>
-        <span class="detail-value">@Model.nombreCompleto</span>
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Email</span>
-        <span class="detail-value">@Model.email</span>
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Activo</span>
-        <span class="detail-value">
-            <span class="badge @(Model.estaActivo ? "badge-success" : "badge-danger")">
-                @(Model.estaActivo ? "Sí" : "No")
+    <div class="details-body">
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
+            <span class="detail-label">ID</span>
+            <span class="detail-value">@Model.usuarioId</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-user-circle"></i></span>
+            <span class="detail-label">Nombre Completo</span>
+            <span class="detail-value">@Model.nombreCompleto</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-envelope"></i></span>
+            <span class="detail-label">Email</span>
+            <span class="detail-value">@Model.email</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-toggle-on"></i></span>
+            <span class="detail-label">Activo</span>
+            <span class="detail-value">
+                <span class="badge @(Model.estaActivo ? "badge-success" : "badge-danger")">
+                    @(Model.estaActivo ? "Sí" : "No")
+                </span>
             </span>
-        </span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-user-tag"></i></span>
+            <span class="detail-label">Rol</span>
+            <span class="detail-value">
+                @if (Model.rolId == 1)
+                {
+                    <span class="badge badge-primary">Admin</span>
+                }
+                else
+                {
+                    <span class="badge badge-secondary">Usuario</span>
+                }
+            </span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-coins"></i></span>
+            <span class="detail-label">Mora Acumulada</span>
+            <span class="detail-value">@Model.TotalMora.ToString("C")</span>
+        </div>
     </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Rol</span>
-        <span class="detail-value">@Model.rolId</span>
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Mora Acumulada</span>
-        <span class="detail-value">@Model.TotalMora.ToString("C")</span>
+    <div class="details-actions">
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al listado</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.usuarioId" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+        }
     </div>
 </div>
-
-<a asp-action="Index" class="btn btn-secondary">Volver al listado</a>

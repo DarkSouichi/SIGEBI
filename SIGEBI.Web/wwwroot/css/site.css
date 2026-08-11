@@ -180,48 +180,85 @@ main {
     }
 
 .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
-    margin-top: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .card-item {
-    background: #fff;
-    border-radius: 20px;
-    padding: 32px 20px;
-    min-height: 200px;
-    text-align: center;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 24px 20px;
+    text-decoration: none;
+    color: #1E293B;
+    width: 180px;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    border: 1px solid #E2E8F0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
 }
 
-    .card-item:hover {
-        transform: translateY(-6px);
-        border-color: #2563EB;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    .card-item::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #2563EB;
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+        transform-origin: left;
     }
 
-    .card-item .icon {
-        font-size: 3.2rem;
-        margin-bottom: 16px;
+    .card-item:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 16px 40px rgba(37, 99, 235, 0.20);
+        border-color: #2563EB;
+    }
+
+        .card-item:hover::after {
+            transform: scaleX(1);
+        }
+
+    .card-item i {
+        font-size: 2.4rem;
+        color: #2563EB;
+        margin-bottom: 12px;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .card-item:hover i {
+        transform: scale(1.15) rotate(-4deg);
+        color: #1D4ED8;
     }
 
     .card-item h3 {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: #1d1d1f;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        transition: color 0.3s ease;
+    }
+
+    .card-item:hover h3 {
+        color: #1E293B;
     }
 
     .card-item p {
-        color: #86868b;
-        font-size: 0.95rem;
-        margin-top: 8px;
+        font-size: 0.8rem;
+        color: #64748B;
+        margin: 0;
     }
 
 .table-responsive {
@@ -422,41 +459,142 @@ p .btn-primary {
     align-items: center;
 }
 
-.details-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px 30px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    border: 1px solid #E2E8F0;
+```css
+/* ================================
+   CONTENEDOR DE DETALLES
+   ================================ */
+.details-container {
     max-width: 800px;
-    margin: 20px auto;
+    margin: 30px auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #E2E8F0;
+    overflow: hidden;
 }
 
-    .details-card .detail-row {
+/* ================================
+   HEADER
+   ================================ */
+
+.details-header {
+    background: linear-gradient(135deg, #F8FAFC, #E2E8F0);
+    padding: 20px 30px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+    .details-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #0F172A;
         display: flex;
-        padding: 12px 0;
-        border-bottom: 1px solid #F1F5F9;
+        align-items: center;
+        gap: 10px;
     }
 
-        .details-card .detail-row:last-child {
-            border-bottom: none;
+        .details-header h2 i {
+            color: #2563EB;
         }
 
-    .details-card .detail-label {
-        font-weight: bold !important;
-        color: #0F172A !important;
-        width: 160px;
+
+.details-body {
+    padding: 20px 30px 30px;
+}
+
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-item .detail-icon {
+        width: 36px;
+        height: 36px;
+        background: #EFF6FF;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2563EB;
+        font-size: 1rem;
         flex-shrink: 0;
+        margin-right: 16px;
     }
 
-    .details-card .detail-value {
-        color: #1E293B;
-        flex: 1;
+    .detail-item .detail-label {
+        font-weight: 500;
+        color: #475569;
+        width: 140px;
+        flex-shrink: 0;
+        font-size: 0.9rem;
     }
 
-        .details-card .detail-value .badge {
-            font-size: 0.8rem;
+    .detail-item .detail-value {
+        font-weight: 500;
+        color: #0F172A;
+        font-size: 1rem;
+        word-break: break-word;
+    }
+
+        .detail-item .detail-value .badge {
+            font-size: 0.85rem;
+            padding: 4px 14px;
+            border-radius: 30px;
         }
+
+
+.details-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #E2E8F0;
+}
+
+
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 16px;
+}
+
+    .detail-actions .btn-lg {
+        padding: 12px 32px;
+        font-size: 1.1rem;
+        border-radius: 30px;
+        min-width: 180px;
+    }
+
+    .detail-actions .alert-warning {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px 28px;
+        border-radius: 16px;
+        background: #FEF3C7;
+        border-left: 6px solid #D97706;
+        color: #92400E;
+        font-weight: 500;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+        .detail-actions .alert-warning i {
+            font-size: 2.4rem;
+            color: #D97706;
+        }
+
 
 .card-item,
 .table-responsive,

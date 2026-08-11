@@ -1,40 +1,67 @@
 ﻿@model SIGEBI.Web.Models.Prestamo.PrestamoModel
 @{
     ViewData["Title"] = "Detalles del Préstamo";
+    var estadoColor = Model.estado switch
+    {
+        "Pendiente" => "badge-warning",
+        "Activo" => "badge-success",
+        "Devuelto" => "badge-secondary",
+        "Vencido" => "badge-danger",
+        _ => "badge-info"
+    };
 }
 
-<h1>Detalles del Préstamo</h1>
-
-<div class="details-card">
-    <div class="detail-row">
-        <span class="detail-label">ID</span>
-        <span class="detail-value">@Model.prestamoId</span>
+<div class="details-container">
+    <div class="details-header">
+        <h2><i class="fas fa-handshake"></i> Detalles del Préstamo</h2>
     </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Usuario</span>
-        <span class="detail-value">@Model.nombreUsuario</span>  
+    <div class="details-body">
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-id-badge"></i></span>
+            <span class="detail-label">ID</span>
+            <span class="detail-value">@Model.prestamoId</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-user"></i></span>
+            <span class="detail-label">Usuario</span>
+            <span class="detail-value">@Model.nombreUsuario</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-copy"></i></span>
+            <span class="detail-label">Ejemplar</span>
+            <span class="detail-value">@Model.codigoEjemplar</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-calendar-plus"></i></span>
+            <span class="detail-label">Fecha Préstamo</span>
+            <span class="detail-value">@Model.fechaPrestamo.ToString("dd/MM/yyyy HH:mm")</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-calendar-check"></i></span>
+            <span class="detail-label">Fecha Devolución Esperada</span>
+            <span class="detail-value">@Model.fechaDevolucionEsperada.ToString("dd/MM/yyyy HH:mm")</span>
+        </div>
+        @if (Model.fechaDevolucionReal.HasValue)
+        {
+            <div class="detail-item">
+                <span class="detail-icon"><i class="fas fa-calendar-times"></i></span>
+                <span class="detail-label">Fecha Devolución Real</span>
+                <span class="detail-value">@Model.fechaDevolucionReal.Value.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+        }
+        <div class="detail-item">
+            <span class="detail-icon"><i class="fas fa-info-circle"></i></span>
+            <span class="detail-label">Estado</span>
+            <span class="detail-value">
+                <span class="badge @estadoColor">@Model.estado</span>
+            </span>
+        </div>
     </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Ejemplar</span>
-        <span class="detail-value">@Model.codigoEjemplar</span> 
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Fecha Préstamo</span>
-        <span class="detail-value">@Model.fechaPrestamo</span>
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Fecha Devolución Esperada</span>
-        <span class="detail-value">@Model.fechaDevolucionEsperada</span>
-    </div>
-
-    <div class="detail-row">
-        <span class="detail-label">Estado</span>
-        <span class="detail-value">@Model.estado</span>
+    <div class="details-actions">
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al listado</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.prestamoId" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+        }
     </div>
 </div>
-
-<a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
