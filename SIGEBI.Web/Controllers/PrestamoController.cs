@@ -271,6 +271,21 @@ namespace SIGEBI.Web.Controllers
                 return RedirectToAction("Details", "Recurso", new { id = recursoId });
             }
 
+            var prestamosResponse = await _prestamoApiService.GetAll();
+            if (prestamosResponse.isSuccess && prestamosResponse.data != null)
+            {
+                var solicitudExistente = prestamosResponse.data
+                    .Any(p => p.usuarioId == userId.Value
+                           && p.ejemplarId == ejemplar.ejemplarId
+                           && p.estado == "Pendiente");
+
+                if (solicitudExistente)
+                {
+                    TempData["Error"] = "Ya tienes una solicitud pendiente para este ejemplar. Espera a que sea procesada.";
+                    return RedirectToAction("Details", "Recurso", new { id = recursoId });
+                }
+            }
+
             var model = new PrestamoCreateModel
             {
                 usuarioId = userId.Value,

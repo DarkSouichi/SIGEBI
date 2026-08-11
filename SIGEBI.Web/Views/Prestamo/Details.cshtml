@@ -29,7 +29,15 @@
         <div class="detail-item">
             <span class="detail-icon"><i class="fas fa-copy"></i></span>
             <span class="detail-label">Ejemplar</span>
-            <span class="detail-value">@Model.codigoEjemplar</span>
+            <span class="detail-value">
+                @Model.codigoEjemplar
+                @if (!string.IsNullOrEmpty(Model.tituloRecurso))
+                {
+                    <span style="color: #64748B; font-size: 0.9rem;">
+                        (<i class="fas fa-book"></i> @Model.tituloRecurso)
+                    </span>
+                }
+            </span>
         </div>
         <div class="detail-item">
             <span class="detail-icon"><i class="fas fa-calendar-plus"></i></span>

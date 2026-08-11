@@ -4,6 +4,7 @@ using SIGEBI.Web.Models;
 using SIGEBI.Web.Models.Prestamo;
 using SIGEBI.Web.Models.Usuario;
 using SIGEBI.Web.Models.Ejemplar;
+using SIGEBI.Web.Models.Recurso;
 
 namespace SIGEBI.Web.Services
 {
@@ -13,16 +14,19 @@ namespace SIGEBI.Web.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUsuarioApiService _usuarioApiService;
         private readonly IEjemplarApiService _ejemplarApiService;
+        private readonly IRecursoApiService _recursoApiService;
 
         public PrestamoApiService(IHttpClientFactory httpClientFactory,
                                   IHttpContextAccessor httpContextAccessor,
                                   IUsuarioApiService usuarioApiService,
-                                  IEjemplarApiService ejemplarApiService)
+                                  IEjemplarApiService ejemplarApiService,
+                                  IRecursoApiService recursoApiService) 
         {
             _httpClient = httpClientFactory.CreateClient("SIGEBIApi");
             _httpContextAccessor = httpContextAccessor;
             _usuarioApiService = usuarioApiService;
             _ejemplarApiService = ejemplarApiService;
+            _recursoApiService = recursoApiService; 
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
@@ -98,17 +102,38 @@ namespace SIGEBI.Web.Services
                     : new Dictionary<int, string>();
 
                 var ejemplaresResponse = await _ejemplarApiService.GetAll();
-                var ejemplarDict = ejemplaresResponse.isSuccess && ejemplaresResponse.data != null
+                var ejemplarCodigoDict = ejemplaresResponse.isSuccess && ejemplaresResponse.data != null
                     ? ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras)
                     : new Dictionary<int, string>();
+
+                var recursosResponse = await _recursoApiService.GetAll();
+                var recursoTituloDict = recursosResponse.isSuccess && recursosResponse.data != null
+                    ? recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo)
+                    : new Dictionary<int, string>();
+
+                var ejemplarTituloDict = new Dictionary<int, string>();
+                if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null &&
+                    recursosResponse.isSuccess && recursosResponse.data != null)
+                {
+                    foreach (var ejemplar in ejemplaresResponse.data)
+                    {
+                        if (recursoTituloDict.TryGetValue(ejemplar.recursoId, out var titulo))
+                        {
+                            ejemplarTituloDict[ejemplar.ejemplarId] = titulo;
+                        }
+                    }
+                }
 
                 foreach (var item in response.data)
                 {
                     if (usuarioDict.TryGetValue(item.usuarioId, out var nombre))
                         item.nombreUsuario = nombre;
 
-                    if (ejemplarDict.TryGetValue(item.ejemplarId, out var codigo))
+                    if (ejemplarCodigoDict.TryGetValue(item.ejemplarId, out var codigo))
                         item.codigoEjemplar = codigo;
+
+                    if (ejemplarTituloDict.TryGetValue(item.ejemplarId, out var titulo))
+                        item.tituloRecurso = titulo;
                 }
             }
         }
@@ -132,6 +157,9 @@ namespace SIGEBI.Web.Services
                     if (response.isSuccess && response.data != null)
                     {
                         var usuariosResponse = await _usuarioApiService.GetAll();
+                        var ejemplaresResponse = await _ejemplarApiService.GetAll();
+                        var recursosResponse = await _recursoApiService.GetAll();
+
                         if (usuariosResponse.isSuccess && usuariosResponse.data != null)
                         {
                             var usuarioDict = usuariosResponse.data.ToDictionary(u => u.usuarioId, u => u.nombreCompleto);
@@ -139,12 +167,19 @@ namespace SIGEBI.Web.Services
                                 response.data.nombreUsuario = nombre;
                         }
 
-                        var ejemplaresResponse = await _ejemplarApiService.GetAll();
                         if (ejemplaresResponse.isSuccess && ejemplaresResponse.data != null)
                         {
-                            var ejemplarDict = ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras);
-                            if (ejemplarDict.TryGetValue(response.data.ejemplarId, out var codigo))
+                            var ejemplarCodigoDict = ejemplaresResponse.data.ToDictionary(e => e.ejemplarId, e => e.codigoBarras);
+                            if (ejemplarCodigoDict.TryGetValue(response.data.ejemplarId, out var codigo))
                                 response.data.codigoEjemplar = codigo;
+
+                            var ejemplar = ejemplaresResponse.data.FirstOrDefault(e => e.ejemplarId == response.data.ejemplarId);
+                            if (ejemplar != null && recursosResponse.isSuccess && recursosResponse.data != null)
+                            {
+                                var recursoTituloDict = recursosResponse.data.ToDictionary(r => r.recursoId, r => r.titulo);
+                                if (recursoTituloDict.TryGetValue(ejemplar.recursoId, out var titulo))
+                                    response.data.tituloRecurso = titulo;
+                            }
                         }
                     }
                 }

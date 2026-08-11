@@ -18,10 +18,29 @@ namespace SIGEBI.Web.Controllers
             _usuarioApiService = usuarioApiService;
         }
 
+        private async Task ActualizarContadorNotificaciones()
+        {
+            var userId = HttpContext.Session.GetInt32("UsuarioId");
+            if (!userId.HasValue)
+                return;
+
+            var result = await _notificacionApiService.GetAll();
+            if (!result.isSuccess || result.data == null)
+                return;
+
+            var noLeidas = result.data
+                .Where(n => n.usuarioId == userId.Value && !n.leida)
+                .Count();
+
+            HttpContext.Session.SetInt32("NotificacionesNoLeidas", noLeidas);
+        }
+
         public async Task<IActionResult> Index(string tipo)
         {
             var userId = HttpContext.Session.GetInt32("UsuarioId");
             var esAdmin = HttpContext.Session.GetString("Rol") == "Admin";
+
+            await ActualizarContadorNotificaciones();
 
             var result = await _notificacionApiService.GetAll();
             if (!result.isSuccess)
@@ -87,6 +106,7 @@ namespace SIGEBI.Web.Controllers
                     await CargarUsuarios(model);
                     return View(model);
                 }
+                await ActualizarContadorNotificaciones();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -140,6 +160,7 @@ namespace SIGEBI.Web.Controllers
                     await CargarUsuarios(model);
                     return View(model);
                 }
+                await ActualizarContadorNotificaciones();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -156,7 +177,10 @@ namespace SIGEBI.Web.Controllers
         {
             var result = await _notificacionApiService.MarcarLeida(id);
             if (result.isSuccess)
+            {
+                await ActualizarContadorNotificaciones();
                 return Json(new { isSuccess = true, message = result.message });
+            }
             else
                 return Json(new { isSuccess = false, message = result.message });
         }
@@ -185,7 +209,7 @@ namespace SIGEBI.Web.Controllers
             }
             catch (Exception)
             {
-
+                // Si falla, no mostrar error para no bloquear la vista
             }
         }
     }
